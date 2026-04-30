@@ -917,6 +917,146 @@
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     .grid-23 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
     .grid-32 { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+    /* ============ NEXUS AI AGENT ============ */
+    .nexus-card {
+      border-color: rgba(255,107,44,0.2);
+      background: linear-gradient(135deg, rgba(20,24,32,0.8), rgba(255,107,44,0.03));
+      position: relative; overflow: hidden;
+    }
+    .nexus-card::after {
+      content: 'NEXUS';
+      position: absolute; right: -20px; top: 50%;
+      transform: translateY(-50%) rotate(90deg);
+      font-family: 'Orbitron',monospace; font-size: 5rem; font-weight: 900;
+      color: rgba(255,107,44,0.03); letter-spacing: 8px; pointer-events: none;
+      user-select: none;
+    }
+    .nexus-orb {
+      width: 52px; height: 52px; position: relative;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .nexus-orb-inner {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #ff3d00);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Orbitron',monospace; font-weight: 900;
+      font-size: 1.1rem; color: #fff;
+      box-shadow: 0 0 20px rgba(255,107,44,0.5);
+      position: relative; z-index: 2;
+      transition: all 0.3s;
+    }
+    .nexus-ring {
+      position: absolute; inset: 0; border-radius: 50%;
+      border: 2px solid rgba(255,107,44,0.4);
+      animation: nexusRingPulse 2s ease-in-out infinite;
+    }
+    @keyframes nexusRingPulse {
+      0%,100%{transform:scale(1);opacity:0.4}
+      50%{transform:scale(1.3);opacity:0}
+    }
+    .nexus-orb.active .nexus-orb-inner {
+      box-shadow: 0 0 40px rgba(255,107,44,0.9), 0 0 80px rgba(255,107,44,0.4);
+      animation: nexusOrbPulse 1s ease-in-out infinite;
+    }
+    @keyframes nexusOrbPulse {
+      0%,100%{transform:scale(1)} 50%{transform:scale(1.05)}
+    }
+    .nexus-mic-btn {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(255,107,44,0.1);
+      border: 1px solid rgba(255,107,44,0.3);
+      color: var(--accent); font-size: 1rem;
+      cursor: pointer; transition: all 0.3s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nexus-mic-btn:hover { background: rgba(255,107,44,0.2); box-shadow: 0 0 20px rgba(255,107,44,0.3); }
+    .nexus-mic-btn.listening {
+      background: var(--accent); color: #fff;
+      box-shadow: 0 0 30px rgba(255,107,44,0.7);
+      animation: micPulse 1s ease-in-out infinite;
+    }
+    @keyframes micPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+    .nexus-chat {
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      max-height: 220px;
+      overflow-y: auto;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .nexus-msg { display: flex; gap: 10px; align-items: flex-start; }
+    .nexus-msg.nexus-user { flex-direction: row-reverse; }
+    .nexus-msg-avatar {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: var(--accent); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Orbitron',monospace; font-size: 0.65rem; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .nexus-msg.nexus-user .nexus-msg-avatar {
+      background: rgba(255,255,255,0.1); color: var(--text-soft);
+    }
+    .nexus-msg-bubble {
+      max-width: 85%; padding: 10px 14px;
+      border-radius: 4px 12px 12px 12px;
+      background: rgba(255,107,44,0.08);
+      border: 1px solid rgba(255,107,44,0.15);
+      font-size: 0.85rem; line-height: 1.55;
+      color: var(--text-main);
+    }
+    .nexus-msg.nexus-user .nexus-msg-bubble {
+      border-radius: 12px 4px 12px 12px;
+      background: rgba(255,255,255,0.05);
+      border-color: var(--line);
+      color: var(--text-soft);
+    }
+    .nexus-typing {
+      display: flex; gap: 4px; align-items: center; padding: 10px 14px;
+      background: rgba(255,107,44,0.06); border-radius: 4px 12px 12px 12px;
+      border: 1px solid rgba(255,107,44,0.1); width: fit-content;
+    }
+    .nexus-typing span {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); opacity: 0.6;
+      animation: typingDot 1.2s ease-in-out infinite;
+    }
+    .nexus-typing span:nth-child(2){animation-delay:0.2s}
+    .nexus-typing span:nth-child(3){animation-delay:0.4s}
+    @keyframes typingDot { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+    .nexus-wave {
+      display: flex; align-items: center; justify-content: center;
+      gap: 4px; height: 36px; margin-top: 10px; display: none;
+    }
+    .nexus-wave.active { display: flex; }
+    .nexus-wave-bar {
+      width: 4px; border-radius: 2px;
+      background: var(--accent);
+      height: 8px;
+      animation: waveBar 0.8s ease-in-out infinite;
+      opacity: 0.7;
+    }
+    .nexus-wave-bar:nth-child(2){animation-delay:0.1s}
+    .nexus-wave-bar:nth-child(3){animation-delay:0.2s;animation-duration:0.6s}
+    .nexus-wave-bar:nth-child(4){animation-delay:0.3s}
+    .nexus-wave-bar:nth-child(5){animation-delay:0.15s;animation-duration:0.7s}
+    .nexus-wave-bar:nth-child(6){animation-delay:0.25s}
+    .nexus-wave-bar:nth-child(7){animation-delay:0.05s}
+    @keyframes waveBar {
+      0%,100%{height:8px;opacity:0.4}
+      50%{height:28px;opacity:1}
+    }
+    .nexus-quick {
+      font-size: 0.7rem; padding: 5px 12px; border-radius: 20px;
+      border: 1px solid var(--line); color: var(--text-muted);
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+      background: rgba(255,255,255,0.02);
+    }
+    .nexus-quick:hover {
+      border-color: var(--accent-dim); color: var(--accent);
+      background: var(--accent-faint);
+    }
   </style>
 </head>
 <body>
@@ -1167,7 +1307,7 @@
     </div>
   </div>
 
-  <div class="grid-23">
+  <div class="grid-23" style="margin-bottom:22px;">
     <div class="card">
       <div class="card-title"><span class="dot"></span>Score Trend — Last 7 Days</div>
       <div style="height:220px;"><canvas id="weeklyChart"></canvas></div>
@@ -1176,6 +1316,61 @@
       <div class="card-title"><span class="dot"></span>Today's Tasks</div>
       <div id="dashTaskList" style="max-height:220px;overflow-y:auto;margin-bottom:12px;"></div>
       <button class="glow-btn" style="width:100%;font-size:0.6rem;" onclick="switchTab('tasks',document.querySelectorAll('.nav-tab')[1])"><i class="fas fa-plus" style="margin-right:7px;"></i>MANAGE TASKS</button>
+    </div>
+  </div>
+
+  <!-- NEXUS AI AGENT CARD -->
+  <div class="card nexus-card" id="nexusCard">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div class="nexus-orb" id="nexusOrb">
+          <div class="nexus-orb-inner">N</div>
+          <div class="nexus-ring"></div>
+        </div>
+        <div>
+          <div style="font-family:'Orbitron',monospace;font-size:0.9rem;font-weight:700;letter-spacing:3px;color:var(--text-main);">NEXUS <span style="color:var(--accent);">AI</span></div>
+          <div style="font-size:0.62rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;" id="nexusStatusTxt">Say "Arise" to activate · Listening...</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div id="nexusLangBadge" style="font-size:0.55rem;padding:4px 10px;border-radius:20px;border:1px solid var(--accent-dim);color:var(--accent);letter-spacing:2px;text-transform:uppercase;background:var(--accent-faint);">EN · UR</div>
+        <button class="nexus-mic-btn" id="nexusMicBtn" onclick="toggleNexus()">
+          <i class="fas fa-microphone" id="nexusMicIcon"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- CONVERSATION AREA -->
+    <div class="nexus-chat" id="nexusChat">
+      <div class="nexus-msg nexus-agent">
+        <div class="nexus-msg-avatar">N</div>
+        <div class="nexus-msg-bubble">Salam! Main <b>NEXUS</b> hoon — aapka personal AI agent. Say <b>"Arise"</b> to activate me, or type below. Main English aur Urdu dono samajhta hoon! 🚀</div>
+      </div>
+    </div>
+
+    <!-- WAVE VISUALIZER -->
+    <div class="nexus-wave" id="nexusWave">
+      <div class="nexus-wave-bar"></div>
+      <div class="nexus-wave-bar"></div>
+      <div class="nexus-wave-bar"></div>
+      <div class="nexus-wave-bar"></div>
+      <div class="nexus-wave-bar"></div>
+      <div class="nexus-wave-bar"></div>
+      <div class="nexus-wave-bar"></div>
+    </div>
+
+    <!-- TEXT INPUT -->
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <input type="text" id="nexusInput" class="form-input" placeholder='Type or say "Arise" to talk to NEXUS...' style="flex:1;font-size:0.85rem;" onkeydown="if(event.key==='Enter')sendToNexus()" />
+      <button class="save-btn" onclick="sendToNexus()" style="padding:10px 18px;font-size:0.65rem;white-space:nowrap;"><i class="fas fa-paper-plane"></i></button>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+      <span class="nexus-quick" onclick="quickNexus('How am I doing today?')">📊 Today\'s Progress</span>
+      <span class="nexus-quick" onclick="quickNexus('Motivate me right now!')">⚡ Motivate Me</span>
+      <span class="nexus-quick" onclick="quickNexus('Add a task for me')">➕ Add Task</span>
+      <span class="nexus-quick" onclick="quickNexus('What should I focus on?')">🎯 What to Focus?</span>
     </div>
   </div>
 </section>
@@ -2548,6 +2743,8 @@ function initApp(){
   renderScheduleTimeline();setInterval(renderScheduleTimeline,60000);
   renderSkills();renderPastRefls();updateScore();updateWeekStats();
   setTimeout(initWeeklyChart,300);
+  initNexus();
+
   var t=today();
   var refl=S.reflections&&S.reflections[t];
   if(refl){
@@ -2563,9 +2760,329 @@ function initApp(){
   });
 }
 
-// =============================================================
-// BOOT — Check session on load
-// =============================================================
+// ============================================================
+// NEXUS AI AGENT
+// ============================================================
+var NEXUS_API_KEY = ''; // Add your Anthropic API key here when ready
+var nexusActive = false;
+var nexusListening = false;
+var nexusRecognition = null;
+var nexusConversationHistory = [];
+var nexusWakeWordBuffer = '';
+
+// NEXUS System Prompt
+function getNexusSystemPrompt() {
+  var username = (currentUser && currentUser.user_metadata && currentUser.user_metadata.username) || 'Bhai';
+  var ageRange = (currentUser && currentUser.user_metadata && currentUser.user_metadata.age_range) || '18-24';
+  var todayTasks = (S.tasks[today()] || []);
+  var doneTasks = todayTasks.filter(function(t){return t.done;}).length;
+  var totalTasks = todayTasks.length;
+  var score = calcScore(today());
+
+  return 'You are NEXUS, a personal AI productivity agent for ' + username + ' on The Grind HQ app. '
+    + 'User age range: ' + ageRange + '. '
+    + 'Today\'s score: ' + score + '/100. '
+    + 'Tasks completed: ' + doneTasks + '/' + totalTasks + '. '
+    + 'PERSONALITY: You adapt your tone based on context. When user is struggling, be supportive and empathetic. When user needs motivation, be intense and powerful. When adding tasks, be efficient and quick. '
+    + 'LANGUAGE: You speak both English and Urdu naturally. Match whatever language the user uses. Mix them if user mixes them (Hinglish/Urglish is fine). '
+    + 'TASK ADDING: When user wants to add a task, ask: 1) Task name 2) What time 3) How long 4) How many points. Then confirm and add it. '
+    + 'IMPORTANT: Keep responses SHORT and PUNCHY — max 3-4 sentences. No long paragraphs. '
+    + 'WAKE WORD: User activates you by saying "Arise". When activated say something powerful and short. '
+    + 'You know everything about the user\'s day, score, tasks. Reference real data when answering. '
+    + 'Never say you are Claude or mention Anthropic. You are NEXUS, always.';
+}
+
+// Initialize voice recognition
+function initNexusVoice() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    console.log('Speech recognition not supported');
+    return;
+  }
+  var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  nexusRecognition = new SpeechRecognition();
+  nexusRecognition.continuous = true;
+  nexusRecognition.interimResults = true;
+  nexusRecognition.lang = 'en-US';
+
+  nexusRecognition.onresult = function(event) {
+    var transcript = '';
+    for (var i = event.resultIndex; i < event.results.length; i++) {
+      transcript += event.results[i][0].transcript;
+    }
+    var lower = transcript.toLowerCase().trim();
+
+    // Check for wake word "ARISE"
+    if (!nexusActive && (lower.includes('arise') || lower.includes('urise') || lower.includes('a rise'))) {
+      activateNexus();
+      return;
+    }
+
+    // If active and final result
+    if (nexusActive && event.results[event.resultIndex].isFinal) {
+      var userInput = transcript.trim();
+      if (userInput.length > 2) {
+        document.getElementById('nexusInput').value = userInput;
+        sendToNexus();
+      }
+    }
+  };
+
+  nexusRecognition.onerror = function(e) {
+    if (e.error !== 'no-speech') {
+      console.log('Speech error:', e.error);
+    }
+  };
+
+  nexusRecognition.onend = function() {
+    if (nexusListening) {
+      try { nexusRecognition.start(); } catch(e){}
+    }
+  };
+
+  // Start listening for wake word immediately
+  try {
+    nexusRecognition.start();
+    nexusListening = true;
+  } catch(e) {}
+}
+
+function activateNexus() {
+  nexusActive = true;
+  var orb = document.getElementById('nexusOrb');
+  var btn = document.getElementById('nexusMicBtn');
+  var statusTxt = document.getElementById('nexusStatusTxt');
+  var wave = document.getElementById('nexusWave');
+  if(orb) orb.classList.add('active');
+  if(btn) { btn.classList.add('listening'); btn.querySelector('i').className = 'fas fa-microphone-slash'; }
+  if(statusTxt) statusTxt.textContent = '🔴 NEXUS ACTIVE — Listening...';
+  if(wave) wave.classList.add('active');
+
+  var username = (currentUser && currentUser.user_metadata && currentUser.user_metadata.username) || 'Bhai';
+  var score = calcScore(today());
+  var greetings = [
+    'NEXUS online. ' + username + ', your score is ' + score + '. What do you need?',
+    'Arise acknowledged. Ready to execute, ' + username + '. Give me your command.',
+    'NEXUS activated. Score: ' + score + '/100. Speak, ' + username + '.',
+    'Online. What\'s the mission, ' + username + '?'
+  ];
+  var msg = greetings[Math.floor(Math.random() * greetings.length)];
+  addNexusMessage('agent', msg);
+}
+
+function deactivateNexus() {
+  nexusActive = false;
+  var orb = document.getElementById('nexusOrb');
+  var btn = document.getElementById('nexusMicBtn');
+  var statusTxt = document.getElementById('nexusStatusTxt');
+  var wave = document.getElementById('nexusWave');
+  if(orb) orb.classList.remove('active');
+  if(btn) { btn.classList.remove('listening'); btn.querySelector('i').className = 'fas fa-microphone'; }
+  if(statusTxt) statusTxt.textContent = 'Say "Arise" to activate · Listening...';
+  if(wave) wave.classList.remove('active');
+}
+
+function toggleNexus() {
+  if (nexusActive) {
+    deactivateNexus();
+    addNexusMessage('agent', 'Standing by. Say "Arise" when you need me. 🔒');
+  } else {
+    activateNexus();
+  }
+}
+
+function quickNexus(text) {
+  document.getElementById('nexusInput').value = text;
+  nexusActive = true;
+  sendToNexus();
+}
+
+function addNexusMessage(role, text) {
+  var chat = document.getElementById('nexusChat');
+  if (!chat) return;
+  var div = document.createElement('div');
+  div.className = 'nexus-msg nexus-' + (role === 'agent' ? 'agent' : 'user');
+  var avatar = document.createElement('div');
+  avatar.className = 'nexus-msg-avatar';
+  avatar.textContent = role === 'agent' ? 'N' : '👤';
+  var bubble = document.createElement('div');
+  bubble.className = 'nexus-msg-bubble';
+  bubble.innerHTML = text;
+  div.appendChild(avatar);
+  div.appendChild(bubble);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+  nexusConversationHistory.push({ role: role === 'agent' ? 'assistant' : 'user', content: text });
+}
+
+function addNexusTyping() {
+  var chat = document.getElementById('nexusChat');
+  if (!chat) return;
+  var div = document.createElement('div');
+  div.className = 'nexus-msg nexus-agent';
+  div.id = 'nexusTyping';
+  var avatar = document.createElement('div');
+  avatar.className = 'nexus-msg-avatar';
+  avatar.textContent = 'N';
+  var typing = document.createElement('div');
+  typing.className = 'nexus-typing';
+  typing.innerHTML = '<span></span><span></span><span></span>';
+  div.appendChild(avatar);
+  div.appendChild(typing);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function removeNexusTyping() {
+  var t = document.getElementById('nexusTyping');
+  if (t) t.remove();
+}
+
+async function sendToNexus() {
+  var input = document.getElementById('nexusInput');
+  var text = input ? input.value.trim() : '';
+  if (!text) return;
+  input.value = '';
+
+  addNexusMessage('user', text);
+  addNexusTyping();
+
+  // Check if API key is set
+  if (!NEXUS_API_KEY || NEXUS_API_KEY === '') {
+    setTimeout(function() {
+      removeNexusTyping();
+      handleNexusOffline(text);
+    }, 800);
+    return;
+  }
+
+  // Call Claude API
+  try {
+    var messages = nexusConversationHistory.slice(-8).map(function(m) {
+      return { role: m.role, content: m.content };
+    });
+    // Remove last assistant message to avoid confusion
+    var userMessages = messages.filter(function(m, i) {
+      return !(m.role === 'assistant' && i === messages.length - 1);
+    });
+    userMessages.push({ role: 'user', content: text });
+
+    var response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': NEXUS_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 300,
+        system: getNexusSystemPrompt(),
+        messages: userMessages
+      })
+    });
+
+    var data = await response.json();
+    removeNexusTyping();
+
+    if (data.content && data.content[0]) {
+      var reply = data.content[0].text;
+      addNexusMessage('agent', reply);
+
+      // Check if agent wants to add a task
+      if (reply.toLowerCase().includes('task added') || reply.toLowerCase().includes('task ko add kar diya')) {
+        parseAndAddTaskFromNexus(text, reply);
+      }
+    } else {
+      addNexusMessage('agent', 'Connection issue. Try again, ' + ((currentUser && currentUser.user_metadata && currentUser.user_metadata.username) || 'Bhai') + '.');
+    }
+  } catch(err) {
+    removeNexusTyping();
+    handleNexusOffline(text);
+  }
+}
+
+// Offline mode — smart responses without API
+function handleNexusOffline(text) {
+  var username = (currentUser && currentUser.user_metadata && currentUser.user_metadata.username) || 'Bhai';
+  var lower = text.toLowerCase();
+  var score = calcScore(today());
+  var todayTasks = S.tasks[today()] || [];
+  var done = todayTasks.filter(function(t){return t.done;}).length;
+  var total = todayTasks.length;
+  var reply = '';
+
+  if (lower.includes('score') || lower.includes('how am i') || lower.includes('kya hal')) {
+    reply = username + ', your score today is <b>' + score + '/100</b>. Tasks: ' + done + '/' + total + ' done. ' + (score >= 75 ? 'Strong execution! Keep it up! 🔥' : score >= 50 ? 'Room to push harder. You got this! 💪' : 'Low score. Time to grind harder, no excuses! ⚡');
+  } else if (lower.includes('motivat') || lower.includes('motivate') || lower.includes('inspire')) {
+    var quotes = [
+      'You did not come this far to only come this far, ' + username + '. Execute! 🔥',
+      username + ', the pain of discipline is temporary. The pain of regret is permanent. Move!',
+      'Every second you waste is a second your competition uses. GO! ⚡',
+      username + ', your future self is watching every decision you make right now. Choose wisely.',
+      'No one is coming to save you. YOU are the hero of your story. Act like it! 💪'
+    ];
+    reply = quotes[Math.floor(Math.random() * quotes.length)];
+  } else if (lower.includes('add task') || lower.includes('task add') || lower.includes('kaam add')) {
+    reply = 'Tell me the task name, ' + username + '! What do you need to get done? ⚡';
+  } else if (lower.includes('habit') || lower.includes('kya karna')) {
+    reply = username + ', focus on your non-negotiables first. Complete those before anything else. What\'s blocking you?';
+  } else if (lower.includes('tired') || lower.includes('thaka') || lower.includes('rest')) {
+    reply = 'Understandable, ' + username + '. Take 15 minutes — proper rest. Then come back stronger. Rest is part of the grind too. ⏸️';
+  } else if (lower.includes('good') || lower.includes('acha') || lower.includes('great')) {
+    reply = 'Good is not enough, ' + username + '. Go for GREAT. What\'s next on your list? 🎯';
+  } else {
+    var defaults = [
+      username + ', I need an API key to give you full responses. But I\'m here! What\'s your score today?',
+      'Running in offline mode, ' + username + '. Add your Anthropic API key to unlock full NEXUS power! 🔑',
+      'Limited mode active. How can I help with your tasks or motivation today, ' + username + '?'
+    ];
+    reply = defaults[Math.floor(Math.random() * defaults.length)];
+  }
+  addNexusMessage('agent', reply);
+}
+
+// Parse task from conversation and add it
+async function parseAndAddTaskFromNexus(userText, agentReply) {
+  // Basic task parsing — will be enhanced with API
+  var timeMatch = userText.match(/(\d{1,2}):?(\d{2})?\s*(am|pm|AM|PM)?/);
+  var durationMatch = userText.match(/(\d+)\s*(hour|hr|minute|min)/i);
+  if (timeMatch) {
+    var hour = parseInt(timeMatch[1]);
+    var min = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
+    var period = timeMatch[3] ? timeMatch[3].toLowerCase() : '';
+    if (period === 'pm' && hour !== 12) hour += 12;
+    if (period === 'am' && hour === 12) hour = 0;
+    var startTime = String(hour).padStart(2,'0') + ':' + String(min).padStart(2,'0');
+    var duration = durationMatch ? parseInt(durationMatch[1]) * (durationMatch[2].toLowerCase().includes('hour') ? 60 : 1) : 60;
+    // Auto add task
+    var taskName = userText.replace(/at\s+\d+.*$/i,'').replace(/add\s+task\s*/i,'').trim() || 'Task from NEXUS';
+    if (taskName.length > 3) {
+      var t = today();
+      var end = addMinutesToTime(startTime, duration);
+      try {
+        var { data, error } = await supabase.from('tasks').insert({
+          user_id: currentUser.id, name: taskName,
+          start_time: startTime, end_time: end,
+          duration: duration, pts: 10, icon: '🤖',
+          category: 'work', done: false, task_date: t
+        }).select().single();
+        if (!error) {
+          if (!S.tasks[t]) S.tasks[t] = [];
+          S.tasks[t].push({id:data.id,name:data.name,start:startTime,end:end,duration:duration,pts:10,icon:'🤖',cat:'work',done:false});
+          renderTaskList(); renderDashTaskList(); renderTaskTimeline(); updateScore();
+          showToast('NEXUS added: ' + taskName);
+        }
+      } catch(e) {}
+    }
+  }
+}
+
+// Start NEXUS when app loads
+function initNexus() {
+  setTimeout(initNexusVoice, 1500);
+}
+
 async function boot(){
   // Wait until Supabase is ready (max 8 seconds)
   let waited = 0;
