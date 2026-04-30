@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>THE GRIND HQ — Personal Command Center</title>
   <meta name="description" content="ADHD-friendly personal command center. Track tasks, build skills, reflect daily. No excuses. No shortcuts." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -174,22 +175,78 @@
     .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .google-btn {
       width: 100%;
-      background: #fff;
-      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,107,44,0.08);
+      border: 1px solid rgba(255,107,44,0.35);
       border-radius: 10px;
-      color: #1a1a1a;
+      color: var(--text-main);
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.85rem; font-weight: 600;
+      font-size: 0.78rem; font-weight: 600;
+      letter-spacing: 2px; text-transform: uppercase;
       padding: 13px 15px;
       cursor: pointer;
-      transition: all 0.25s;
+      transition: all 0.3s;
       display: flex; align-items: center; justify-content: center;
       margin-bottom: 4px;
+      position: relative; overflow: hidden;
+    }
+    .google-btn::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,107,44,0.1), transparent);
+      opacity: 0; transition: opacity 0.3s;
     }
     .google-btn:hover {
-      background: #f5f5f5;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+      background: rgba(255,107,44,0.15);
+      border-color: var(--accent);
+      box-shadow: 0 0 20px rgba(255,107,44,0.25);
       transform: translateY(-1px);
+      color: var(--accent);
+    }
+    .google-btn:hover::before { opacity: 1; }
+    /* PROFILE SETUP SCREEN */
+    .profile-setup-shell {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 30px 20px;
+      position: relative; z-index: 2;
+    }
+    .profile-setup-card {
+      width: 100%; max-width: 480px;
+      background: rgba(15,18,24,0.92);
+      border: 1px solid var(--line-strong);
+      border-radius: 20px;
+      padding: 40px 36px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 100px rgba(255,107,44,0.08);
+      position: relative;
+      animation: slideUp 0.5s ease;
+    }
+    @keyframes slideUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+    .profile-setup-card::before {
+      content: '';
+      position: absolute; top: 0; left: 36px; right: 36px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+    .setup-step {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 28px;
+    }
+    .setup-step-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+    }
+    .setup-emoji { font-size: 3rem; text-align: center; margin-bottom: 16px; filter: drop-shadow(0 0 20px rgba(255,107,44,0.4)); }
+    .age-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 14px; }
+    .age-btn {
+      padding: 10px 6px; border-radius: 8px; text-align: center;
+      border: 1px solid var(--line); background: rgba(255,255,255,0.02);
+      color: var(--text-soft); font-family: 'Space Grotesk',sans-serif;
+      font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .age-btn:hover, .age-btn.selected {
+      border-color: var(--accent); background: var(--accent-faint);
+      color: var(--accent); box-shadow: 0 0 12px rgba(255,107,44,0.2);
     }
     .auth-link {
       color: var(--accent); cursor: pointer;
@@ -299,24 +356,31 @@
     }
     .user-menu {
       position: relative;
-      display: flex; align-items: center; gap: 12px;
+      display: flex; align-items: center; gap: 10px;
       padding: 8px 14px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--line);
-      border-radius: 10px;
+      background: rgba(255,107,44,0.06);
+      border: 1px solid rgba(255,107,44,0.25);
+      border-radius: 12px;
       cursor: pointer;
-      transition: all 0.25s;
+      transition: all 0.3s;
     }
-    .user-menu:hover { border-color: var(--accent-dim); background: var(--accent-faint); }
+    .user-menu:hover { border-color: var(--accent); background: rgba(255,107,44,0.12); box-shadow: 0 0 20px rgba(255,107,44,0.15); }
     .user-avatar {
-      width: 28px; height: 28px; border-radius: 50%;
-      background: var(--accent);
+      width: 32px; height: 32px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
       display: flex; align-items: center; justify-content: center;
       font-weight: 700; color: #fff; font-size: 0.85rem;
+      flex-shrink: 0; box-shadow: 0 0 12px rgba(255,107,44,0.4);
+    }
+    .user-name-display {
+      font-size: 0.82rem; font-weight: 600;
+      color: var(--text-main); letter-spacing: 1px;
+      max-width: 120px; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap;
     }
     .user-email {
-      font-size: 0.78rem; color: var(--text-soft);
-      max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      font-size: 0.6rem; color: var(--text-muted); letter-spacing: 1px;
+      max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
     .user-dropdown {
       position: absolute; top: calc(100% + 8px); right: 0;
@@ -934,6 +998,63 @@
   </div>
 </div>
 
+<!-- ============== PROFILE SETUP SCREEN ============== -->
+<div id="profileSetupScreen" style="display:none;" class="profile-setup-shell content-wrap">
+  <div class="profile-setup-card">
+    <div class="setup-emoji">🧠</div>
+    <div style="text-align:center;margin-bottom:6px;">
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:300;font-size:1.2rem;letter-spacing:6px;text-transform:uppercase;">THE GRIND <b>HQ</b></div>
+      <div style="font-size:0.65rem;color:var(--text-muted);letter-spacing:4px;text-transform:uppercase;margin-top:4px;">Setup Your Command Center</div>
+    </div>
+    <div class="divider" style="margin:20px 0;"></div>
+
+    <!-- STEP 1: Username -->
+    <div id="setupStep1">
+      <div class="setup-step">
+        <div class="setup-step-dot"></div>
+        <span style="font-size:0.65rem;color:var(--text-muted);letter-spacing:3px;text-transform:uppercase;">Step 1 of 2 — Your Identity</span>
+      </div>
+      <div style="font-size:1.1rem;font-weight:600;margin-bottom:6px;">What should we call you? 👊</div>
+      <div style="font-size:0.85rem;color:var(--text-soft);margin-bottom:20px;line-height:1.5;">Your AI agent will use this name to communicate with you personally.</div>
+      <div class="auth-msg" id="setupMsg1"></div>
+      <input type="text" class="auth-input" id="setupUsername" placeholder="Enter your name or nickname..." maxlength="30" autocomplete="off" style="font-size:1rem;padding:15px 16px;" />
+      <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+        <span onclick="setUsername('Usman')" style="cursor:pointer;padding:6px 14px;border-radius:20px;border:1px solid var(--line);font-size:0.75rem;color:var(--text-soft);transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--text-soft)'">Usman</span>
+        <span onclick="setUsername('Bhai')" style="cursor:pointer;padding:6px 14px;border-radius:20px;border:1px solid var(--line);font-size:0.75rem;color:var(--text-soft);transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--text-soft)'">Bhai</span>
+        <span onclick="setUsername('Boss')" style="cursor:pointer;padding:6px 14px;border-radius:20px;border:1px solid var(--line);font-size:0.75rem;color:var(--text-soft);transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--text-soft)'">Boss</span>
+        <span onclick="setUsername('Champion')" style="cursor:pointer;padding:6px 14px;border-radius:20px;border:1px solid var(--line);font-size:0.75rem;color:var(--text-soft);transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--text-soft)'">Champion</span>
+      </div>
+      <button class="auth-btn" onclick="goToStep2()" style="margin-top:22px;">Continue →</button>
+    </div>
+
+    <!-- STEP 2: Age -->
+    <div id="setupStep2" style="display:none;">
+      <div class="setup-step">
+        <div class="setup-step-dot"></div>
+        <span style="font-size:0.65rem;color:var(--text-muted);letter-spacing:3px;text-transform:uppercase;">Step 2 of 2 — Your Age</span>
+      </div>
+      <div style="font-size:1.1rem;font-weight:600;margin-bottom:6px;" id="step2Title">How old are you? 🎯</div>
+      <div style="font-size:0.85rem;color:var(--text-soft);margin-bottom:20px;line-height:1.5;">Your AI agent adapts its communication style based on your age group.</div>
+      <div class="auth-msg" id="setupMsg2"></div>
+      <div class="age-grid">
+        <div class="age-btn" onclick="selectAge('13-17','Teen')">13-17<br><small style="font-size:0.6rem;opacity:0.7;">Teen</small></div>
+        <div class="age-btn" onclick="selectAge('18-24','Young Adult')">18-24<br><small style="font-size:0.6rem;opacity:0.7;">Young</small></div>
+        <div class="age-btn" onclick="selectAge('25-34','Adult')">25-34<br><small style="font-size:0.6rem;opacity:0.7;">Adult</small></div>
+        <div class="age-btn" onclick="selectAge('35-44','Mid Adult')">35-44<br><small style="font-size:0.6rem;opacity:0.7;">Mid</small></div>
+        <div class="age-btn" onclick="selectAge('45-54','Senior Adult')">45-54<br><small style="font-size:0.6rem;opacity:0.7;">Senior</small></div>
+        <div class="age-btn" onclick="selectAge('55+','Veteran')">55+<br><small style="font-size:0.6rem;opacity:0.7;">Veteran</small></div>
+        <div class="age-btn" onclick="selectAge('prefer-not','Private')" style="grid-column:span 2;">🔒 Prefer not to say</div>
+      </div>
+      <div id="selectedAgeDisplay" style="text-align:center;font-size:0.8rem;color:var(--accent);min-height:20px;margin-bottom:14px;font-weight:600;letter-spacing:1px;"></div>
+      <div style="display:flex;gap:10px;">
+        <button class="ghost-btn" onclick="backToStep1()" style="flex:1;">← Back</button>
+        <button class="auth-btn" onclick="completeSetup()" id="completeSetupBtn" style="flex:2;">🚀 Enter Command Center</button>
+      </div>
+    </div>
+    <div class="auth-tagline">No Excuses. No Shortcuts. Only Results.</div>
+  </div>
+</div>
+
 <!-- ============== APP SCREEN ============== -->
 <div id="appScreen" style="display:none;" class="content-wrap">
 
@@ -954,11 +1075,18 @@
       </div>
       <div class="user-menu" onclick="toggleUserMenu(event)">
         <div class="user-avatar" id="userAvatar">U</div>
-        <div class="user-email" id="userEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="add8dec8dfedc8c0ccc4c183cec2c0">[email&#160;protected]</a></div>
-        <i class="fas fa-chevron-down" style="font-size:0.7rem;color:var(--text-muted);"></i>
+        <div>
+          <div class="user-name-display" id="userNameDisplay">Loading...</div>
+          <div class="user-email" id="userEmail">---</div>
+        </div>
+        <i class="fas fa-chevron-down" style="font-size:0.6rem;color:var(--text-muted);"></i>
         <div class="user-dropdown" id="userDropdown">
+          <div style="padding:10px 14px;border-bottom:1px solid var(--line);margin-bottom:4px;">
+            <div style="font-size:0.7rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;">Signed in as</div>
+            <div style="font-size:0.82rem;color:var(--text-soft);margin-top:2px;" id="dropdownEmail">---</div>
+          </div>
           <div class="user-dropdown-item" onclick="event.stopPropagation();showUserInfo()">
-            <i class="fas fa-user" style="width:16px;"></i>Account Info
+            <i class="fas fa-user" style="width:16px;color:var(--accent);"></i>Account Info
           </div>
           <div class="user-dropdown-item danger" onclick="event.stopPropagation();doLogout()">
             <i class="fas fa-sign-out-alt" style="width:16px;"></i>Sign Out
@@ -1627,14 +1755,99 @@ function toggleUserMenu(e){
 document.addEventListener('click',function(){
   document.getElementById('userDropdown').classList.remove('open');
 });
-async function onAuthSuccess(user){
-  currentUser=user;
-  document.getElementById('authScreen').style.display='none';
+
+// ============== PROFILE SETUP ==============
+var selectedAge = '';
+var setupUsername_ = '';
+
+function setUsername(name){
+  document.getElementById('setupUsername').value = name;
+}
+function goToStep2(){
+  var name = document.getElementById('setupUsername').value.trim();
+  if(!name || name.length < 2){
+    var msg = document.getElementById('setupMsg1');
+    msg.className='auth-msg error'; msg.textContent='Please enter your name (at least 2 characters)';
+    return;
+  }
+  setupUsername_ = name;
+  document.getElementById('setupStep1').style.display='none';
+  document.getElementById('setupStep2').style.display='block';
+  document.getElementById('step2Title').textContent='How old are you, '+name+'? 🎯';
+}
+function backToStep1(){
+  document.getElementById('setupStep2').style.display='none';
+  document.getElementById('setupStep1').style.display='block';
+}
+function selectAge(range, label){
+  selectedAge = range;
+  document.querySelectorAll('.age-btn').forEach(function(b){ b.classList.remove('selected'); });
+  event.target.closest('.age-btn').classList.add('selected');
+  document.getElementById('selectedAgeDisplay').textContent = '✓ Selected: ' + label + ' (' + range + ')';
+}
+async function completeSetup(){
+  if(!selectedAge){
+    var msg = document.getElementById('setupMsg2');
+    msg.className='auth-msg error'; msg.textContent='Please select your age group';
+    return;
+  }
+  var btn = document.getElementById('completeSetupBtn');
+  btn.disabled=true; btn.textContent='Setting up...';
+  try {
+    // Save profile to Supabase user metadata
+    await supabase.auth.updateUser({
+      data: { username: setupUsername_, age_range: selectedAge }
+    });
+    // Also save to profiles table
+    try {
+      await supabase.from('profiles').upsert({
+        user_id: currentUser.id,
+        username: setupUsername_,
+        age_range: selectedAge
+      }, { onConflict: 'user_id' });
+    } catch(e){ /* profiles table may not exist yet — that's okay */ }
+    currentUser.user_metadata = currentUser.user_metadata || {};
+    currentUser.user_metadata.username = setupUsername_;
+    currentUser.user_metadata.age_range = selectedAge;
+    enterApp();
+  } catch(err){
+    btn.disabled=false; btn.textContent='🚀 Enter Command Center';
+    var msg = document.getElementById('setupMsg2');
+    msg.className='auth-msg error'; msg.textContent='Error: '+err.message;
+  }
+}
+function enterApp(){
+  document.getElementById('profileSetupScreen').style.display='none';
   document.getElementById('appScreen').style.display='block';
-  document.getElementById('userEmail').textContent=user.email;
-  document.getElementById('userAvatar').textContent=(user.email||'U').charAt(0).toUpperCase();
-  await loadAllData();
-  initApp();
+  var username = (currentUser.user_metadata && currentUser.user_metadata.username) || currentUser.email.split('@')[0];
+  var nameDisplay = document.getElementById('userNameDisplay');
+  var emailDisplay = document.getElementById('userEmail');
+  var dropEmail = document.getElementById('dropdownEmail');
+  var avatar = document.getElementById('userAvatar');
+  if(nameDisplay) nameDisplay.textContent = username;
+  if(emailDisplay) emailDisplay.textContent = currentUser.email;
+  if(dropEmail) dropEmail.textContent = currentUser.email;
+  if(avatar) avatar.textContent = username.charAt(0).toUpperCase();
+  loadAllData().then(function(){ initApp(); });
+}
+async function onAuthSuccess(user){
+  currentUser = user;
+  document.getElementById('authScreen').style.display='none';
+  // Check if user has completed profile setup
+  var username = user.user_metadata && user.user_metadata.username;
+  if(!username){
+    // First time — show profile setup
+    document.getElementById('profileSetupScreen').style.display='flex';
+    // Pre-fill name from Google if available
+    var googleName = user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name);
+    if(googleName){
+      var firstName = googleName.split(' ')[0];
+      document.getElementById('setupUsername').value = firstName;
+    }
+  } else {
+    // Returning user — go straight to app
+    enterApp();
+  }
 }
 </script>
 
