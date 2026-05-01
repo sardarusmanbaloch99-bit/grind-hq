@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>THE GRIND HQ — Personal Command Center v2</title>
+  <title>THE GRIND HQ — Personal Command Center</title>
   <meta name="description" content="ADHD-friendly personal command center. Track tasks, build skills, reflect daily. No excuses. No shortcuts." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>" />
   <script src="https://cdn.tailwindcss.com"></script>
@@ -2793,9 +2793,19 @@ function getNexusSystemPrompt() {
 }
 
 // Initialize voice recognition
+// ===== UPGRADED MIC SYSTEM =====
+var nexusSilenceTimer = null;
+var nexusFinalTranscript = '';
+var nexusInterimTranscript = '';
+var nexusRestartTimer = null;
+var nexusPendingConfirmation = null;
+var nexusMicEnabled = false;
+
 function initNexusVoice() {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    console.log('Speech recognition not supported');
+    console.log('Speech recognition not supported in this browser');
+    var statusTxt = document.getElementById('nexusStatusTxt');
+    if(statusTxt) statusTxt.textContent = '⚠️ Voice not supported — use Chrome/Edge';
     return;
   }
   var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -2803,59 +2813,149 @@ function initNexusVoice() {
   nexusRecognition.continuous = true;
   nexusRecognition.interimResults = true;
   nexusRecognition.lang = 'en-US';
+  nexusRecognition.maxAlternatives = 1;
 
   nexusRecognition.onresult = function(event) {
-    var transcript = '';
+    var interim = '';
+    var finalText = '';
+    
     for (var i = event.resultIndex; i < event.results.length; i++) {
-      transcript += event.results[i][0].transcript;
+      var transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalText += transcript + ' ';
+      } else {
+        interim += transcript;
+      }
     }
-    var lower = transcript.toLowerCase().trim();
 
-    // Check for wake word "ARISE"
-    if (!nexusActive && (lower.includes('arise') || lower.includes('urise') || lower.includes('a rise'))) {
+    // WAKE WORD DETECTION (works in any state)
+    var fullText = (finalText + interim).toLowerCase().trim();
+    if (!nexusActive && /\b(arise|arose|rise|a rise|aris|areas)\b/i.test(fullText)) {
       activateNexus();
+      // Clear the wake word from buffer
+      nexusFinalTranscript = '';
       return;
     }
 
-    // If active and final result
-    if (nexusActive && event.results[event.resultIndex].isFinal) {
-      var userInput = transcript.trim();
-      if (userInput.length > 2) {
-        document.getElementById('nexusInput').value = userInput;
-        sendToNexus();
+    // ACTIVE MODE — show live transcription in input box
+    if (nexusActive) {
+      var inputBox = document.getElementById('nexusInput');
+      if (finalText) {
+        nexusFinalTranscript += finalText;
+      }
+      
+      // Show live preview in input box
+      if (inputBox) {
+        inputBox.value = (nexusFinalTranscript + interim).trim();
+        inputBox.style.color = interim ? 'var(--text-soft)' : 'var(--text-main)';
+      }
+
+      // Reset silence timer — auto-send after 2 sec of silence
+      if (nexusSilenceTimer) clearTimeout(nexusSilenceTimer);
+      
+      if (nexusFinalTranscript.trim().length > 2) {
+        nexusSilenceTimer = setTimeout(function() {
+          confirmAndSendNexus();
+        }, 2000); // 2 second silence = auto-send
       }
     }
   };
 
   nexusRecognition.onerror = function(e) {
-    if (e.error !== 'no-speech') {
-      console.log('Speech error:', e.error);
+    console.log('Speech error:', e.error);
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      var statusTxt = document.getElementById('nexusStatusTxt');
+      if(statusTxt) statusTxt.textContent = '🚫 Mic blocked — allow mic in browser settings';
+      nexusListening = false;
+      nexusMicEnabled = false;
+      return;
     }
+    // For other errors, restart will happen in onend
   };
 
   nexusRecognition.onend = function() {
+    // Auto-restart for continuous listening
     if (nexusListening) {
-      try { nexusRecognition.start(); } catch(e){}
+      if (nexusRestartTimer) clearTimeout(nexusRestartTimer);
+      nexusRestartTimer = setTimeout(function() {
+        try { 
+          nexusRecognition.start(); 
+        } catch(e) {
+          console.log('Restart failed:', e);
+        }
+      }, 250);
     }
   };
+}
 
-  // Start listening for wake word immediately
+// Start mic listening (called when user clicks mic button)
+function startNexusMic() {
+  if (!nexusRecognition) {
+    initNexusVoice();
+  }
+  if (!nexusRecognition) return false;
+  
   try {
     nexusRecognition.start();
     nexusListening = true;
-  } catch(e) {}
+    nexusMicEnabled = true;
+    var statusTxt = document.getElementById('nexusStatusTxt');
+    if(statusTxt) statusTxt.textContent = '🎤 Listening — say "Arise" to activate';
+    return true;
+  } catch(e) {
+    // Already started — that's fine
+    nexusListening = true;
+    nexusMicEnabled = true;
+    return true;
+  }
+}
+
+// Stop mic listening
+function stopNexusMic() {
+  nexusListening = false;
+  nexusMicEnabled = false;
+  if (nexusRecognition) {
+    try { nexusRecognition.stop(); } catch(e){}
+  }
+  if (nexusSilenceTimer) clearTimeout(nexusSilenceTimer);
+  if (nexusRestartTimer) clearTimeout(nexusRestartTimer);
+}
+
+// Auto-send after silence with what user said
+function confirmAndSendNexus() {
+  var text = nexusFinalTranscript.trim();
+  if (text.length < 2) return;
+  
+  var inputBox = document.getElementById('nexusInput');
+  if (inputBox) {
+    inputBox.value = text;
+    inputBox.style.color = 'var(--text-main)';
+  }
+  
+  // Reset for next input
+  nexusFinalTranscript = '';
+  
+  // Send to NEXUS
+  sendToNexus();
 }
 
 function activateNexus() {
   nexusActive = true;
+  nexusFinalTranscript = '';
+  
   var orb = document.getElementById('nexusOrb');
   var btn = document.getElementById('nexusMicBtn');
   var statusTxt = document.getElementById('nexusStatusTxt');
   var wave = document.getElementById('nexusWave');
   if(orb) orb.classList.add('active');
   if(btn) { btn.classList.add('listening'); btn.querySelector('i').className = 'fas fa-microphone-slash'; }
-  if(statusTxt) statusTxt.textContent = '🔴 NEXUS ACTIVE — Listening...';
+  if(statusTxt) statusTxt.textContent = '🔴 NEXUS ACTIVE — Speak now (auto-sends after 2s silence)';
   if(wave) wave.classList.add('active');
+
+  // Make sure mic is on
+  if (!nexusListening) {
+    startNexusMic();
+  }
 
   var username = (currentUser && currentUser.user_metadata && currentUser.user_metadata.username) || 'Bhai';
   var score = calcScore(today());
@@ -2871,22 +2971,48 @@ function activateNexus() {
 
 function deactivateNexus() {
   nexusActive = false;
+  nexusFinalTranscript = '';
+  if (nexusSilenceTimer) clearTimeout(nexusSilenceTimer);
+  
   var orb = document.getElementById('nexusOrb');
   var btn = document.getElementById('nexusMicBtn');
   var statusTxt = document.getElementById('nexusStatusTxt');
   var wave = document.getElementById('nexusWave');
   if(orb) orb.classList.remove('active');
-  if(btn) { btn.classList.remove('listening'); btn.querySelector('i').className = 'fas fa-microphone'; }
-  if(statusTxt) statusTxt.textContent = 'Say "Arise" to activate · Listening...';
+  if(btn) { 
+    btn.classList.remove('listening'); 
+    btn.querySelector('i').className = nexusMicEnabled ? 'fas fa-microphone' : 'fas fa-microphone-slash'; 
+  }
+  if(statusTxt) {
+    statusTxt.textContent = nexusMicEnabled ? '🎤 Listening — say "Arise" to activate' : 'Click mic to start · Type below';
+  }
   if(wave) wave.classList.remove('active');
 }
 
+// Mic button: toggles entire mic system on/off
 function toggleNexus() {
-  if (nexusActive) {
-    deactivateNexus();
-    addNexusMessage('agent', 'Standing by. Say "Arise" when you need me. 🔒');
+  if (!nexusMicEnabled) {
+    // Turn ON mic
+    var started = startNexusMic();
+    if (started) {
+      var btn = document.getElementById('nexusMicBtn');
+      if(btn) btn.querySelector('i').className = 'fas fa-microphone';
+      addNexusMessage('agent', 'Mic on. Say "Arise" anytime to activate me. 🎤');
+    }
   } else {
-    activateNexus();
+    // Turn OFF mic
+    if (nexusActive) {
+      deactivateNexus();
+    }
+    stopNexusMic();
+    var btn = document.getElementById('nexusMicBtn');
+    var statusTxt = document.getElementById('nexusStatusTxt');
+    if(btn) {
+      btn.classList.remove('listening');
+      btn.querySelector('i').className = 'fas fa-microphone-slash';
+    }
+    if(statusTxt) statusTxt.textContent = 'Click mic to start · Type below';
+    addNexusMessage('agent', 'Mic off. Click mic again or just type. 🔇');
   }
 }
 
@@ -3077,7 +3203,11 @@ async function parseAndAddTaskFromNexus(userText, agentReply) {
 
 // Start NEXUS when app loads
 function initNexus() {
-  setTimeout(initNexusVoice, 1500);
+  setTimeout(function() {
+    initNexusVoice();
+    var statusTxt = document.getElementById('nexusStatusTxt');
+    if(statusTxt) statusTxt.textContent = 'Click mic to start · Type below';
+  }, 1500);
 }
 
 async function boot(){
