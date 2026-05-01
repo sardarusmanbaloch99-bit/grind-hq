@@ -1333,8 +1333,12 @@
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
+        <div id="voiceMinutesBadge" style="font-size:0.6rem;padding:5px 11px;border-radius:20px;border:1px solid var(--accent-dim);color:var(--accent);letter-spacing:1.5px;background:var(--accent-faint);display:flex;align-items:center;gap:6px;cursor:pointer;" onclick="showRechargeModal()" title="Voice minutes — click to recharge">
+          <i class="fas fa-microphone-alt" style="font-size:0.7rem;"></i>
+          <span id="voiceMinutesTxt">100 MIN</span>
+        </div>
         <div id="nexusLangBadge" style="font-size:0.55rem;padding:4px 10px;border-radius:20px;border:1px solid var(--accent-dim);color:var(--accent);letter-spacing:2px;text-transform:uppercase;background:var(--accent-faint);">EN · UR</div>
-        <button class="nexus-mic-btn" id="nexusMicBtn" onclick="toggleNexus()">
+        <button class="nexus-mic-btn" id="nexusMicBtn" onclick="toggleNexusRecording()" title="Click to record voice (say 'done' or click again to send)">
           <i class="fas fa-microphone" id="nexusMicIcon"></i>
         </button>
       </div>
@@ -2792,231 +2796,492 @@ function getNexusSystemPrompt() {
     + 'Never say you are Claude or mention Anthropic. You are NEXUS, always.';
 }
 
-// Initialize voice recognition
-// ===== UPGRADED MIC SYSTEM =====
-var nexusSilenceTimer = null;
-var nexusFinalTranscript = '';
-var nexusInterimTranscript = '';
-var nexusRestartTimer = null;
-var nexusPendingConfirmation = null;
-var nexusMicEnabled = false;
+// ===== WHISPER VOICE RECORDING SYSTEM =====
+var nexusMediaRecorder = null;
+var nexusAudioChunks = [];
+var nexusIsRecording = false;
+var nexusRecordingStartTime = 0;
+var nexusVoiceStream = null;
+var nexusBgRecognition = null;
+var nexusBgListening = false;
+var nexusVoiceMinutesLeft = 100;
+var nexusVoiceMinutesLimit = 100;
+var nexusDoneDetector = null;
+var nexusRecordingTimer = null;
+var nexusMaxRecordingTime = 60; // 60 seconds max per recording
 
-function initNexusVoice() {
+// ===== LOAD VOICE USAGE FROM SUPABASE =====
+async function loadVoiceUsage() {
+  if (!supabase || !currentUser) return;
+  try {
+    const { data, error } = await supabase
+      .from('voice_usage')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .maybeSingle();
+    
+    if (!data) {
+      // First time — create row
+      await supabase.from('voice_usage').insert({
+        user_id: currentUser.id,
+        minutes_used: 0,
+        minutes_limit: 100
+      });
+      nexusVoiceMinutesLeft = 100;
+      nexusVoiceMinutesLimit = 100;
+    } else {
+      // Check if we need to reset (new month)
+      const lastReset = new Date(data.last_reset);
+      const now = new Date();
+      if (lastReset.getMonth() !== now.getMonth() || lastReset.getFullYear() !== now.getFullYear()) {
+        // New month — reset usage but keep limit (in case they recharged)
+        await supabase.from('voice_usage')
+          .update({ minutes_used: 0, last_reset: now.toISOString().split('T')[0] })
+          .eq('user_id', currentUser.id);
+        nexusVoiceMinutesLeft = data.minutes_limit;
+        nexusVoiceMinutesLimit = data.minutes_limit;
+      } else {
+        nexusVoiceMinutesLeft = Math.max(0, data.minutes_limit - data.minutes_used);
+        nexusVoiceMinutesLimit = data.minutes_limit;
+      }
+    }
+    updateVoiceMinutesDisplay();
+  } catch(e) {
+    console.error('Voice usage load error:', e);
+  }
+}
+
+// ===== UPDATE MINUTES USED =====
+async function deductVoiceMinutes(secondsUsed) {
+  if (!supabase || !currentUser) return;
+  const minutesUsed = Math.ceil(secondsUsed / 60);
+  try {
+    const { data } = await supabase
+      .from('voice_usage')
+      .select('minutes_used')
+      .eq('user_id', currentUser.id)
+      .single();
+    
+    const newUsed = (data?.minutes_used || 0) + minutesUsed;
+    await supabase.from('voice_usage')
+      .update({ minutes_used: newUsed })
+      .eq('user_id', currentUser.id);
+    
+    nexusVoiceMinutesLeft = Math.max(0, nexusVoiceMinutesLimit - newUsed);
+    updateVoiceMinutesDisplay();
+  } catch(e) {
+    console.error('Deduct error:', e);
+  }
+}
+
+// ===== UPDATE UI =====
+function updateVoiceMinutesDisplay() {
+  var txt = document.getElementById('voiceMinutesTxt');
+  var modalTxt = document.getElementById('modalMinutesLeft');
+  var bar = document.getElementById('modalMinutesBar');
+  var badge = document.getElementById('voiceMinutesBadge');
+  
+  if (txt) txt.textContent = nexusVoiceMinutesLeft + ' MIN';
+  if (modalTxt) modalTxt.textContent = nexusVoiceMinutesLeft + ' min';
+  if (bar) {
+    var pct = (nexusVoiceMinutesLeft / nexusVoiceMinutesLimit) * 100;
+    bar.style.width = pct + '%';
+    if (pct < 20) bar.style.background = 'linear-gradient(90deg,#FF4560,#FF8B4D)';
+  }
+  if (badge && nexusVoiceMinutesLeft <= 0) {
+    badge.style.borderColor = '#FF4560';
+    badge.style.color = '#FF4560';
+    badge.style.background = 'rgba(255,69,96,0.1)';
+  }
+}
+
+// ===== RECHARGE MODAL =====
+function showRechargeModal() {
+  updateVoiceMinutesDisplay();
+  var modal = document.getElementById('rechargeModal');
+  if (modal) modal.style.display = 'flex';
+}
+function closeRechargeModal() {
+  var modal = document.getElementById('rechargeModal');
+  if (modal) modal.style.display = 'none';
+}
+function initiateRecharge() {
+  // TODO: Lemon Squeezy integration
+  alert('Payment integration coming soon!\n\n100 minutes for $0.99 — pay via card.\n\nFor now, this is a demo. Lemon Squeezy will be added next!');
+  closeRechargeModal();
+}
+
+// ===== BACKGROUND WAKE-WORD DETECTION (FREE Browser API) =====
+function initWakeWordListener() {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    console.log('Speech recognition not supported in this browser');
     var statusTxt = document.getElementById('nexusStatusTxt');
-    if(statusTxt) statusTxt.textContent = '⚠️ Voice not supported — use Chrome/Edge';
+    if(statusTxt) statusTxt.textContent = '⚠️ Use Chrome/Edge for voice features';
     return;
   }
-  var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  nexusRecognition = new SpeechRecognition();
-  nexusRecognition.continuous = true;
-  nexusRecognition.interimResults = true;
-  nexusRecognition.lang = 'en-US';
-  nexusRecognition.maxAlternatives = 1;
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  nexusBgRecognition = new SR();
+  nexusBgRecognition.continuous = true;
+  nexusBgRecognition.interimResults = true;
+  nexusBgRecognition.lang = 'en-US';
 
-  nexusRecognition.onresult = function(event) {
-    var interim = '';
-    var finalText = '';
+  nexusBgRecognition.onresult = function(event) {
+    if (nexusIsRecording) return; // don't trigger while recording
     
+    var combined = '';
     for (var i = event.resultIndex; i < event.results.length; i++) {
-      var transcript = event.results[i][0].transcript;
-      if (event.results[i].isFinal) {
-        finalText += transcript + ' ';
-      } else {
-        interim += transcript;
-      }
+      combined += event.results[i][0].transcript + ' ';
     }
-
-    // WAKE WORD DETECTION (works in any state)
-    var fullText = (finalText + interim).toLowerCase().trim();
-    if (!nexusActive && /\b(arise|arose|rise|a rise|aris|areas)\b/i.test(fullText)) {
-      activateNexus();
-      // Clear the wake word from buffer
-      nexusFinalTranscript = '';
-      return;
-    }
-
-    // ACTIVE MODE — show live transcription in input box
-    if (nexusActive) {
-      var inputBox = document.getElementById('nexusInput');
-      if (finalText) {
-        nexusFinalTranscript += finalText;
-      }
-      
-      // Show live preview in input box
-      if (inputBox) {
-        inputBox.value = (nexusFinalTranscript + interim).trim();
-        inputBox.style.color = interim ? 'var(--text-soft)' : 'var(--text-main)';
-      }
-
-      // Reset silence timer — auto-send after 2 sec of silence
-      if (nexusSilenceTimer) clearTimeout(nexusSilenceTimer);
-      
-      if (nexusFinalTranscript.trim().length > 2) {
-        nexusSilenceTimer = setTimeout(function() {
-          confirmAndSendNexus();
-        }, 2000); // 2 second silence = auto-send
-      }
+    var lower = combined.toLowerCase().trim();
+    
+    // Detect "arise" — many variants
+    if (/\b(arise|arose|arrive|a rise|aris|areas|advise)\b/i.test(lower)) {
+      console.log('Wake word detected:', lower);
+      // Stop bg listener and start recording
+      try { nexusBgRecognition.stop(); } catch(e){}
+      setTimeout(function(){ startRecording(); }, 200);
     }
   };
 
-  nexusRecognition.onerror = function(e) {
-    console.log('Speech error:', e.error);
-    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+  nexusBgRecognition.onerror = function(e) {
+    if (e.error === 'not-allowed') {
       var statusTxt = document.getElementById('nexusStatusTxt');
-      if(statusTxt) statusTxt.textContent = '🚫 Mic blocked — allow mic in browser settings';
-      nexusListening = false;
-      nexusMicEnabled = false;
-      return;
+      if(statusTxt) statusTxt.textContent = '🚫 Allow microphone access';
+      nexusBgListening = false;
     }
-    // For other errors, restart will happen in onend
   };
 
-  nexusRecognition.onend = function() {
-    // Auto-restart for continuous listening
-    if (nexusListening) {
-      if (nexusRestartTimer) clearTimeout(nexusRestartTimer);
-      nexusRestartTimer = setTimeout(function() {
-        try { 
-          nexusRecognition.start(); 
-        } catch(e) {
-          console.log('Restart failed:', e);
-        }
-      }, 250);
+  nexusBgRecognition.onend = function() {
+    if (nexusBgListening && !nexusIsRecording) {
+      setTimeout(function() {
+        try { nexusBgRecognition.start(); } catch(e){}
+      }, 200);
     }
   };
 }
 
-// Start mic listening (called when user clicks mic button)
-function startNexusMic() {
-  if (!nexusRecognition) {
-    initNexusVoice();
+// Start background listening for "Arise"
+function startWakeWordListener() {
+  if (!nexusBgRecognition) initWakeWordListener();
+  if (!nexusBgRecognition) return;
+  try {
+    nexusBgRecognition.start();
+    nexusBgListening = true;
+    var statusTxt = document.getElementById('nexusStatusTxt');
+    if(statusTxt) statusTxt.textContent = '🎤 Listening for "Arise"...';
+  } catch(e) {
+    nexusBgListening = true; // already running
   }
-  if (!nexusRecognition) return false;
+}
+
+function stopWakeWordListener() {
+  nexusBgListening = false;
+  if (nexusBgRecognition) {
+    try { nexusBgRecognition.stop(); } catch(e){}
+  }
+}
+
+// ===== RECORD AUDIO USING MEDIARECORDER (for Whisper) =====
+async function startRecording() {
+  if (nexusIsRecording) return;
+  
+  // Check minutes
+  if (nexusVoiceMinutesLeft <= 0) {
+    addNexusMessage('agent', '⚠️ Out of voice minutes! Recharge for $0.99 to get 100 more minutes. 💳');
+    showRechargeModal();
+    return;
+  }
+  
+  // Stop bg listener while recording
+  stopWakeWordListener();
   
   try {
-    nexusRecognition.start();
-    nexusListening = true;
-    nexusMicEnabled = true;
-    var statusTxt = document.getElementById('nexusStatusTxt');
-    if(statusTxt) statusTxt.textContent = '🎤 Listening — say "Arise" to activate';
-    return true;
-  } catch(e) {
-    // Already started — that's fine
-    nexusListening = true;
-    nexusMicEnabled = true;
-    return true;
-  }
-}
+    // Get mic access
+    nexusVoiceStream = await navigator.mediaDevices.getUserMedia({ 
+      audio: { 
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      } 
+    });
+    
+    // Pick best supported format
+    var mimeType = 'audio/webm';
+    if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mimeType = 'audio/webm;codecs=opus';
+    else if (MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
+    
+    nexusMediaRecorder = new MediaRecorder(nexusVoiceStream, { mimeType: mimeType });
+    nexusAudioChunks = [];
+    nexusRecordingStartTime = Date.now();
+    nexusIsRecording = true;
 
-// Stop mic listening
-function stopNexusMic() {
-  nexusListening = false;
-  nexusMicEnabled = false;
-  if (nexusRecognition) {
-    try { nexusRecognition.stop(); } catch(e){}
-  }
-  if (nexusSilenceTimer) clearTimeout(nexusSilenceTimer);
-  if (nexusRestartTimer) clearTimeout(nexusRestartTimer);
-}
-
-// Auto-send after silence with what user said
-function confirmAndSendNexus() {
-  var text = nexusFinalTranscript.trim();
-  if (text.length < 2) return;
-  
-  var inputBox = document.getElementById('nexusInput');
-  if (inputBox) {
-    inputBox.value = text;
-    inputBox.style.color = 'var(--text-main)';
-  }
-  
-  // Reset for next input
-  nexusFinalTranscript = '';
-  
-  // Send to NEXUS
-  sendToNexus();
-}
-
-function activateNexus() {
-  nexusActive = true;
-  nexusFinalTranscript = '';
-  
-  var orb = document.getElementById('nexusOrb');
-  var btn = document.getElementById('nexusMicBtn');
-  var statusTxt = document.getElementById('nexusStatusTxt');
-  var wave = document.getElementById('nexusWave');
-  if(orb) orb.classList.add('active');
-  if(btn) { btn.classList.add('listening'); btn.querySelector('i').className = 'fas fa-microphone-slash'; }
-  if(statusTxt) statusTxt.textContent = '🔴 NEXUS ACTIVE — Speak now (auto-sends after 2s silence)';
-  if(wave) wave.classList.add('active');
-
-  // Make sure mic is on
-  if (!nexusListening) {
-    startNexusMic();
-  }
-
-  var username = (currentUser && currentUser.user_metadata && currentUser.user_metadata.username) || 'Bhai';
-  var score = calcScore(today());
-  var greetings = [
-    'NEXUS online. ' + username + ', your score is ' + score + '. What do you need?',
-    'Arise acknowledged. Ready to execute, ' + username + '. Give me your command.',
-    'NEXUS activated. Score: ' + score + '/100. Speak, ' + username + '.',
-    'Online. What\'s the mission, ' + username + '?'
-  ];
-  var msg = greetings[Math.floor(Math.random() * greetings.length)];
-  addNexusMessage('agent', msg);
-}
-
-function deactivateNexus() {
-  nexusActive = false;
-  nexusFinalTranscript = '';
-  if (nexusSilenceTimer) clearTimeout(nexusSilenceTimer);
-  
-  var orb = document.getElementById('nexusOrb');
-  var btn = document.getElementById('nexusMicBtn');
-  var statusTxt = document.getElementById('nexusStatusTxt');
-  var wave = document.getElementById('nexusWave');
-  if(orb) orb.classList.remove('active');
-  if(btn) { 
-    btn.classList.remove('listening'); 
-    btn.querySelector('i').className = nexusMicEnabled ? 'fas fa-microphone' : 'fas fa-microphone-slash'; 
-  }
-  if(statusTxt) {
-    statusTxt.textContent = nexusMicEnabled ? '🎤 Listening — say "Arise" to activate' : 'Click mic to start · Type below';
-  }
-  if(wave) wave.classList.remove('active');
-}
-
-// Mic button: toggles entire mic system on/off
-function toggleNexus() {
-  if (!nexusMicEnabled) {
-    // Turn ON mic
-    var started = startNexusMic();
-    if (started) {
-      var btn = document.getElementById('nexusMicBtn');
-      if(btn) btn.querySelector('i').className = 'fas fa-microphone';
-      addNexusMessage('agent', 'Mic on. Say "Arise" anytime to activate me. 🎤');
-    }
-  } else {
-    // Turn OFF mic
-    if (nexusActive) {
-      deactivateNexus();
-    }
-    stopNexusMic();
+    nexusMediaRecorder.ondataavailable = function(e) {
+      if (e.data.size > 0) nexusAudioChunks.push(e.data);
+    };
+    
+    nexusMediaRecorder.onstop = async function() {
+      var blob = new Blob(nexusAudioChunks, { type: mimeType });
+      var duration = (Date.now() - nexusRecordingStartTime) / 1000;
+      await processRecording(blob, mimeType, duration);
+    };
+    
+    nexusMediaRecorder.start();
+    
+    // UI updates
+    nexusActive = true;
+    var orb = document.getElementById('nexusOrb');
     var btn = document.getElementById('nexusMicBtn');
     var statusTxt = document.getElementById('nexusStatusTxt');
-    if(btn) {
-      btn.classList.remove('listening');
-      btn.querySelector('i').className = 'fas fa-microphone-slash';
+    var wave = document.getElementById('nexusWave');
+    var inputBox = document.getElementById('nexusInput');
+    
+    if(orb) orb.classList.add('active');
+    if(btn) { 
+      btn.classList.add('listening'); 
+      btn.querySelector('i').className = 'fas fa-stop';
     }
-    if(statusTxt) statusTxt.textContent = 'Click mic to start · Type below';
-    addNexusMessage('agent', 'Mic off. Click mic again or just type. 🔇');
+    if(statusTxt) statusTxt.textContent = '🔴 RECORDING — Say "done" or click stop';
+    if(wave) wave.classList.add('active');
+    if(inputBox) inputBox.placeholder = '🎙️ Listening — speak clearly, say "done" when finished...';
+    
+    // Start "done" word detection while recording
+    startDoneDetector();
+    
+    // Auto-stop after max time
+    nexusRecordingTimer = setTimeout(function() {
+      if (nexusIsRecording) {
+        addNexusMessage('agent', '⏱️ Max recording time reached (60s) — processing...');
+        stopRecording();
+      }
+    }, nexusMaxRecordingTime * 1000);
+    
+  } catch(err) {
+    console.error('Recording error:', err);
+    addNexusMessage('agent', '❌ Mic access denied. Please allow microphone in browser settings.');
+    nexusIsRecording = false;
+  }
+}
+
+// "Done" word detector runs alongside recording
+function startDoneDetector() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return;
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  nexusDoneDetector = new SR();
+  nexusDoneDetector.continuous = true;
+  nexusDoneDetector.interimResults = true;
+  nexusDoneDetector.lang = 'en-US';
+  
+  nexusDoneDetector.onresult = function(event) {
+    if (!nexusIsRecording) return;
+    var combined = '';
+    for (var i = event.resultIndex; i < event.results.length; i++) {
+      combined += event.results[i][0].transcript + ' ';
+    }
+    var lower = combined.toLowerCase().trim();
+    
+    // Live preview in input
+    var inputBox = document.getElementById('nexusInput');
+    if (inputBox) {
+      inputBox.value = lower;
+      inputBox.style.color = 'var(--text-soft)';
+    }
+    
+    // Detect "done" at end of speech
+    if (/\b(done|that's it|that is it|finish|finished|send it|over)\b\s*\.?\s*$/i.test(lower)) {
+      console.log('Done detected, stopping...');
+      stopRecording();
+    }
+  };
+  
+  nexusDoneDetector.onerror = function(e){ console.log('Done detector error:', e.error); };
+  nexusDoneDetector.onend = function() {
+    if (nexusIsRecording) {
+      try { nexusDoneDetector.start(); } catch(e){}
+    }
+  };
+  
+  try { nexusDoneDetector.start(); } catch(e){}
+}
+
+function stopRecording() {
+  if (!nexusIsRecording) return;
+  nexusIsRecording = false;
+  
+  if (nexusRecordingTimer) {
+    clearTimeout(nexusRecordingTimer);
+    nexusRecordingTimer = null;
+  }
+  
+  // Stop done detector
+  if (nexusDoneDetector) {
+    try { nexusDoneDetector.stop(); } catch(e){}
+    nexusDoneDetector = null;
+  }
+  
+  // Stop recording
+  if (nexusMediaRecorder && nexusMediaRecorder.state !== 'inactive') {
+    nexusMediaRecorder.stop();
+  }
+  
+  // Release mic
+  if (nexusVoiceStream) {
+    nexusVoiceStream.getTracks().forEach(function(t){ t.stop(); });
+    nexusVoiceStream = null;
+  }
+  
+  // UI
+  var btn = document.getElementById('nexusMicBtn');
+  var statusTxt = document.getElementById('nexusStatusTxt');
+  if(btn) {
+    btn.classList.remove('listening');
+    btn.querySelector('i').className = 'fas fa-spinner fa-spin';
+  }
+  if(statusTxt) statusTxt.textContent = '⚙️ Processing your voice...';
+}
+
+// Send recording to Whisper, get text, send to NEXUS
+async function processRecording(blob, mimeType, duration) {
+  try {
+    // Convert blob to base64
+    var base64 = await blobToBase64(blob);
+    
+    // Call Whisper API
+    var response = await fetch('/api/whisper', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ audio: base64, mimeType: mimeType })
+    });
+    
+    var data = await response.json();
+    
+    if (data.error) {
+      addNexusMessage('agent', '❌ Voice processing failed: ' + data.error);
+      resetMicUI();
+      return;
+    }
+    
+    var text = (data.text || '').trim();
+    
+    // Remove "done" or end markers from end
+    text = text.replace(/\b(done|that's it|that is it|finish|finished|send it|over)\b\s*\.?\s*$/i, '').trim();
+    
+    if (!text || text.length < 2) {
+      addNexusMessage('agent', '🤔 Couldn\'t hear that clearly. Try again?');
+      resetMicUI();
+      return;
+    }
+    
+    // Show what user said in input
+    var inputBox = document.getElementById('nexusInput');
+    if (inputBox) {
+      inputBox.value = text;
+      inputBox.style.color = 'var(--text-main)';
+    }
+    
+    // Deduct minutes
+    await deductVoiceMinutes(duration);
+    
+    // Send to NEXUS with voice flag (so we speak back)
+    sendToNexus(true);
+    
+    resetMicUI();
+    
+  } catch(err) {
+    console.error('Process error:', err);
+    addNexusMessage('agent', '❌ Connection error. Try again.');
+    resetMicUI();
+  }
+}
+
+function resetMicUI() {
+  var btn = document.getElementById('nexusMicBtn');
+  var statusTxt = document.getElementById('nexusStatusTxt');
+  var orb = document.getElementById('nexusOrb');
+  var wave = document.getElementById('nexusWave');
+  var inputBox = document.getElementById('nexusInput');
+  
+  if(btn) {
+    btn.classList.remove('listening');
+    btn.querySelector('i').className = 'fas fa-microphone';
+  }
+  if(statusTxt) statusTxt.textContent = nexusBgListening ? '🎤 Listening for "Arise"...' : 'Click mic or say "Arise"';
+  if(orb) orb.classList.remove('active');
+  if(wave) wave.classList.remove('active');
+  if(inputBox) {
+    inputBox.style.color = 'var(--text-main)';
+    inputBox.placeholder = 'Type or click mic / say "Arise" to talk to NEXUS...';
+  }
+  
+  nexusActive = false;
+  
+  // Restart wake word listener
+  if (nexusBgListening) {
+    setTimeout(startWakeWordListener, 500);
+  }
+}
+
+// Helper: blob to base64
+function blobToBase64(blob) {
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onloadend = function() {
+      var b64 = reader.result.split(',')[1];
+      resolve(b64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+// Mic button toggle
+function toggleNexusRecording() {
+  if (nexusIsRecording) {
+    stopRecording();
+  } else {
+    if (!nexusBgListening) {
+      // First click — enable bg wake word listener AND start recording
+      startWakeWordListener();
+    }
+    startRecording();
+  }
+}
+
+// Old function compatibility
+function activateNexus() { startRecording(); }
+function deactivateNexus() { stopRecording(); }
+function toggleNexus() { toggleNexusRecording(); }
+
+// ===== TEXT-TO-SPEECH (NEXUS speaks back) =====
+async function speakNexusReply(text) {
+  if (!text) return;
+  // Strip emojis and markdown for cleaner speech
+  var cleanText = text.replace(/[*_~`]/g, '').replace(/[\u{1F300}-\u{1FAFF}]/gu, '').trim();
+  if (!cleanText) return;
+  
+  try {
+    var response = await fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: cleanText, voice: 'onyx' })
+    });
+    
+    if (!response.ok) return;
+    
+    var audioBlob = await response.blob();
+    var audioUrl = URL.createObjectURL(audioBlob);
+    var audio = new Audio(audioUrl);
+    audio.play();
+  } catch(e) {
+    console.log('TTS error:', e);
   }
 }
 
 function quickNexus(text) {
+  document.getElementById('nexusInput').value = text;
+  nexusActive = true;
+  sendToNexus();
+}
+
+
   document.getElementById('nexusInput').value = text;
   nexusActive = true;
   sendToNexus();
@@ -3063,7 +3328,7 @@ function removeNexusTyping() {
   if (t) t.remove();
 }
 
-async function sendToNexus() {
+async function sendToNexus(speakReply) {
   var input = document.getElementById('nexusInput');
   var text = input ? input.value.trim() : '';
   if (!text) return;
@@ -3111,6 +3376,11 @@ async function sendToNexus() {
     if (data.content && data.content[0]) {
       var reply = data.content[0].text;
       addNexusMessage('agent', reply);
+      
+      // Speak reply if voice mode
+      if (speakReply === true) {
+        speakNexusReply(reply);
+      }
 
       // Check if agent wants to add a task
       if (reply.toLowerCase().includes('task added') || reply.toLowerCase().includes('task ko add kar diya')) {
@@ -3204,9 +3474,10 @@ async function parseAndAddTaskFromNexus(userText, agentReply) {
 // Start NEXUS when app loads
 function initNexus() {
   setTimeout(function() {
-    initNexusVoice();
+    initWakeWordListener();
+    loadVoiceUsage();
     var statusTxt = document.getElementById('nexusStatusTxt');
-    if(statusTxt) statusTxt.textContent = 'Click mic to start · Type below';
+    if(statusTxt) statusTxt.textContent = 'Click mic or say "Arise" to start';
   }, 1500);
 }
 
@@ -3250,5 +3521,49 @@ document.addEventListener('DOMContentLoaded',boot);
 
 </script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<!-- VOICE RECHARGE MODAL -->
+<div id="rechargeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(10px);">
+  <div style="background:linear-gradient(180deg,#0F1218 0%,#0A0C10 100%);border:1px solid var(--accent-dim);border-radius:18px;max-width:440px;width:90%;padding:32px;box-shadow:0 0 60px rgba(255,107,44,0.15);">
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="width:72px;height:72px;border-radius:50%;background:radial-gradient(circle,var(--accent) 0%,transparent 70%);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+        <i class="fas fa-microphone-alt" style="font-size:32px;color:#fff;"></i>
+      </div>
+      <div style="font-family:'Orbitron',monospace;font-size:1.2rem;font-weight:700;letter-spacing:2px;color:var(--text-main);margin-bottom:6px;">VOICE MINUTES</div>
+      <div style="font-size:0.75rem;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;">Power your conversations with NEXUS</div>
+    </div>
+
+    <div style="background:rgba(255,107,44,0.05);border:1px solid var(--accent-dim);border-radius:12px;padding:18px;margin-bottom:18px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-size:0.7rem;color:var(--text-soft);letter-spacing:1px;text-transform:uppercase;">Remaining</span>
+        <span id="modalMinutesLeft" style="font-family:'Orbitron',monospace;font-size:1.4rem;color:var(--accent);font-weight:700;">100 min</span>
+      </div>
+      <div style="height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;">
+        <div id="modalMinutesBar" style="height:100%;width:100%;background:linear-gradient(90deg,var(--accent),var(--accent-soft));border-radius:3px;transition:width 0.3s;"></div>
+      </div>
+      <div style="font-size:0.65rem;color:var(--text-muted);margin-top:8px;">Resets on the 1st of every month</div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,rgba(255,107,44,0.1),rgba(255,107,44,0.02));border:1px solid var(--accent);border-radius:14px;padding:20px;margin-bottom:18px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+        <div>
+          <div style="font-family:'Orbitron',monospace;font-size:1rem;color:var(--text-main);font-weight:700;letter-spacing:1.5px;">VOICE BOOST</div>
+          <div style="font-size:0.7rem;color:var(--text-soft);margin-top:4px;">100 extra minutes</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:'Orbitron',monospace;font-size:1.6rem;color:var(--accent);font-weight:900;">$0.99</div>
+          <div style="font-size:0.6rem;color:var(--text-muted);">one-time</div>
+        </div>
+      </div>
+      <button onclick="initiateRecharge()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent-soft));border:none;border-radius:10px;color:#fff;font-family:'Orbitron',monospace;font-weight:700;letter-spacing:2px;font-size:0.85rem;cursor:pointer;text-transform:uppercase;box-shadow:0 8px 24px rgba(255,107,44,0.3);">
+        ⚡ Recharge Now
+      </button>
+    </div>
+
+    <button onclick="closeRechargeModal()" style="width:100%;padding:12px;background:transparent;border:1px solid var(--line);border-radius:10px;color:var(--text-soft);font-size:0.8rem;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase;">
+      Close
+    </button>
+  </div>
+</div>
+
 </body>
 </html>
