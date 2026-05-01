@@ -3281,12 +3281,6 @@ function quickNexus(text) {
   sendToNexus();
 }
 
-
-  document.getElementById('nexusInput').value = text;
-  nexusActive = true;
-  sendToNexus();
-}
-
 function addNexusMessage(role, text) {
   var chat = document.getElementById('nexusChat');
   if (!chat) return;
