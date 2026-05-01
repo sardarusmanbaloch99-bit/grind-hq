@@ -2966,13 +2966,10 @@ async function sendToNexus() {
     });
     userMessages.push({ role: 'user', content: text });
 
-    var response = await fetch('https://api.anthropic.com/v1/messages', {
+    var response = await fetch('/api/nexus', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': NEXUS_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
