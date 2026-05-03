@@ -674,34 +674,61 @@
     }
 
     /* SCORE RING */
-    .score-ring { position: relative; width: 200px; height: 200px; margin: 0 auto; }
+    .score-ring { 
+      position: relative; width: 210px; height: 210px; margin: 0 auto 8px;
+      filter: drop-shadow(0 0 20px rgba(255,107,44,0.12));
+    }
     .score-ring svg { transform: rotate(-90deg); }
+    .score-ring::before {
+      content: '';
+      position: absolute; inset: 15px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(77,159,255,0.04) 0%, rgba(255,107,44,0.02) 50%, transparent 70%);
+      animation: ringPulse 4s ease-in-out infinite;
+    }
+    @keyframes ringPulse {
+      0%,100% { opacity: 0.5; transform: scale(0.98); }
+      50% { opacity: 1; transform: scale(1.02); }
+    }
     .score-num {
       position: absolute; top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 3rem; font-weight: 300; text-align: center;
-      color: var(--text-main);
+      font-size: 3rem; font-weight: 200; text-align: center;
+      color: var(--text-main); font-family: 'Orbitron', monospace; letter-spacing: -2px;
     }
     .score-num small {
-      display:block; font-size: 0.55rem; letter-spacing: 4px;
-      color: var(--text-muted); margin-top: 4px; font-weight: 500;
+      display:block; font-size: 0.5rem; letter-spacing: 4px;
+      color: var(--text-muted); margin-top: 6px; font-weight: 600;
+      font-family: 'Inter', sans-serif; letter-spacing: 3px;
     }
 
-    /* STAT CHIPS */
+    /* STAT CHIPS — Glass Premium */
     .stat-chip {
       display: flex; flex-direction: column; align-items: flex-start;
-      padding: 16px;
-      border-radius: 12px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.02);
+      padding: 18px 16px; border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+      backdrop-filter: blur(20px); position: relative; overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+    }
+    .stat-chip::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    }
+    .stat-chip:hover {
+      border-color: rgba(77,159,255,0.2);
+      background: linear-gradient(135deg, rgba(77,159,255,0.06) 0%, rgba(255,255,255,0.01) 100%);
+      transform: translateY(-2px);
     }
     .stat-num {
-      font-size: 2rem; font-weight: 300;
-      color: var(--text-main); letter-spacing: -1px;
+      font-size: 2rem; font-weight: 200;
+      font-family: 'Orbitron', monospace;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #fff 0%, rgba(180,210,255,0.9) 100%);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
     }
     .stat-lbl {
-      font-size: 0.55rem; color: var(--text-muted);
-      font-weight: 600; margin-top: 4px;
+      font-size: 0.5rem; color: var(--text-muted);
+      font-weight: 600; margin-top: 6px;
       letter-spacing: 3px; text-transform: uppercase;
     }
 
@@ -901,8 +928,17 @@
     .page-section { display: none; }
     .page-section.active { display: block; animation: fadeIn 0.4s ease; }
     @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-    .prog-bar { height: 6px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; border: 1px solid var(--line); }
-    .prog-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; background: var(--accent); }
+    .prog-bar { 
+      height: 5px; background: rgba(255,255,255,0.04); 
+      border-radius: 6px; overflow: hidden; border: none;
+      position: relative;
+    }
+    .prog-fill { 
+      height: 100%; border-radius: 6px; 
+      transition: width 1s cubic-bezier(0.16,1,0.3,1);
+      background: linear-gradient(90deg, var(--neural) 0%, var(--accent) 100%);
+      box-shadow: 0 0 8px rgba(255,107,44,0.3);
+    }
     .toast {
       position: fixed; bottom: 28px; right: 28px;
       background: var(--accent); color: #fff;
@@ -1331,7 +1367,7 @@
   <div class="profile-setup-card">
     <div class="setup-emoji">🧠</div>
     <div style="text-align:center;margin-bottom:6px;">
-      <div style="font-family:'Space Grotesk',sans-serif;font-weight:300;font-size:1.2rem;letter-spacing:6px;text-transform:uppercase;">THE GRIND <b>HQ</b></div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:300;font-size:1.2rem;letter-spacing:6px;text-transform:uppercase;">THE <b>GRIND</b></div>
       <div style="font-size:0.65rem;color:var(--text-muted);letter-spacing:4px;text-transform:uppercase;margin-top:4px;">Setup Your Command Center</div>
     </div>
     <div class="divider" style="margin:20px 0;"></div>
@@ -1456,9 +1492,18 @@
     <div class="card">
       <div class="card-title"><span class="dot"></span>Today's Performance</div>
       <div class="score-ring">
-        <svg width="200" height="200" viewBox="0 0 200 200">
-          <circle cx="100" cy="100" r="85" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="8"/>
-          <circle id="scoreArc" cx="100" cy="100" r="85" fill="none" stroke="var(--accent)" stroke-width="8" stroke-linecap="round" stroke-dasharray="534" stroke-dashoffset="534" style="transition:stroke-dashoffset 1s ease;"/>
+        <svg width="210" height="210" viewBox="0 0 210 210">
+          <circle cx="105" cy="105" r="97" fill="none" stroke="rgba(77,159,255,0.05)" stroke-width="1"/>
+          <circle cx="105" cy="105" r="88" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="10"/>
+          <circle id="scoreArcBlue" cx="105" cy="105" r="88" fill="none" stroke="rgba(77,159,255,0.2)" stroke-width="2" stroke-linecap="round" stroke-dasharray="553" stroke-dashoffset="553" style="transition:stroke-dashoffset 1.5s ease 0.2s;"/>
+          <circle id="scoreArc" cx="105" cy="105" r="88" fill="none" stroke="url(#scoreGrad)" stroke-width="10" stroke-linecap="round" stroke-dasharray="553" stroke-dashoffset="553" style="transition:stroke-dashoffset 1s ease;"/>
+          <defs>
+            <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#4D9FFF"/>
+              <stop offset="60%" stop-color="#FF8B4D"/>
+              <stop offset="100%" stop-color="#FF6B2C"/>
+            </linearGradient>
+          </defs>
         </svg>
         <div class="score-num">
           <span id="scoreDisp">0</span>
@@ -2445,8 +2490,11 @@ function getTier(s){
 }
 function updateScore(){
   var s=calcScore(),t=getTier(s);
-  var circ=534,off=circ-(s/100)*circ;
-  ['scoreArc','scoreArc2'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.strokeDashoffset=off;});
+  var circ=553,off=circ-(s/100)*circ;
+  var el=document.getElementById('scoreArc');if(el)el.style.strokeDashoffset=off;
+  var elb=document.getElementById('scoreArcBlue');if(elb)elb.style.strokeDashoffset=off;
+  var circ2=534,off2=circ2-(s/100)*circ2;
+  var el2=document.getElementById('scoreArc2');if(el2)el2.style.strokeDashoffset=off2;
   ['scoreDisp','scoreDisp2'].forEach(function(id){var el=document.getElementById(id);if(el){el.textContent=s;}});
   var lbl=document.getElementById('scoreTierLbl');if(lbl)lbl.textContent=t.label;
   var lbl2=document.getElementById('scoreBadgeMini');if(lbl2)lbl2.textContent=t.label;
