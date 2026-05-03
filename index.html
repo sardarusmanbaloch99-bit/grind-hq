@@ -2771,6 +2771,264 @@ var nexusConversationHistory = [];
 var nexusWakeWordBuffer = '';
 
 // NEXUS System Prompt
+// ===== NEXUS AI AGENT TOOLS =====
+// Tool definitions sent to Claude API
+var NEXUS_TOOLS = [
+  {
+    name: "get_current_time",
+    description: "Get the current date, time, and day of the week. Use this whenever user asks about time or you need to know what time it is.",
+    input_schema: { type: "object", properties: {}, required: [] }
+  },
+  {
+    name: "get_today_overview",
+    description: "Get complete overview of today: score, all tasks (with done status), habits, schedule. Use this when user asks 'how am I doing', 'mera score', 'aaj kaisa hai', or similar status questions.",
+    input_schema: { type: "object", properties: {}, required: [] }
+  },
+  {
+    name: "get_tasks",
+    description: "Get all tasks for a specific date. Default is today. Use when user asks about their tasks, what's pending, schedule etc.",
+    input_schema: {
+      type: "object",
+      properties: {
+        date: { type: "string", description: "Date in YYYY-MM-DD format. Default today." }
+      },
+      required: []
+    }
+  },
+  {
+    name: "add_task",
+    description: "Add a new task to user's timeline. ALWAYS confirm with user before calling unless they explicitly said add it.",
+    input_schema: {
+      type: "object",
+      properties: {
+        name: { type: "string", description: "Task name" },
+        start_time: { type: "string", description: "Start time in 24h format HH:MM (e.g. '14:30' for 2:30 PM)" },
+        duration: { type: "number", description: "Duration in minutes" },
+        points: { type: "number", description: "Points value 1-50" },
+        category: { type: "string", enum: ["personal","work","health","learning","creative","spiritual"], description: "Task category" },
+        non_negotiable: { type: "boolean", description: "Is this non-negotiable? Default false" }
+      },
+      required: ["name","start_time","duration","points"]
+    }
+  },
+  {
+    name: "complete_task",
+    description: "Mark a task as done or undone. Find task by name (partial match ok).",
+    input_schema: {
+      type: "object",
+      properties: {
+        task_name: { type: "string", description: "Task name to mark done (partial match)" }
+      },
+      required: ["task_name"]
+    }
+  },
+  {
+    name: "delete_task",
+    description: "Delete a task. Find by name (partial match).",
+    input_schema: {
+      type: "object",
+      properties: {
+        task_name: { type: "string", description: "Task name to delete" }
+      },
+      required: ["task_name"]
+    }
+  },
+  {
+    name: "get_skills",
+    description: "Get all user skills with daily goals and minutes logged today.",
+    input_schema: { type: "object", properties: {}, required: [] }
+  },
+  {
+    name: "log_skill_minutes",
+    description: "Log practice minutes for a skill. Find skill by name (partial match).",
+    input_schema: {
+      type: "object",
+      properties: {
+        skill_name: { type: "string", description: "Skill name" },
+        minutes: { type: "number", description: "Minutes practiced" }
+      },
+      required: ["skill_name","minutes"]
+    }
+  },
+  {
+    name: "get_week_history",
+    description: "Get last 7 days score history and trends. Use for analysis questions.",
+    input_schema: { type: "object", properties: {}, required: [] }
+  },
+  {
+    name: "get_non_negotiables",
+    description: "Get user's non-negotiable commitments list.",
+    input_schema: { type: "object", properties: {}, required: [] }
+  },
+  {
+    name: "save_reflection",
+    description: "Save today's reflection (wins, fails, lessons, priorities).",
+    input_schema: {
+      type: "object",
+      properties: {
+        wins: { type: "string", description: "What went well today" },
+        fail: { type: "string", description: "What didn't go well" },
+        lesson: { type: "string", description: "Key lesson learned" },
+        priority: { type: "string", description: "Tomorrow's priority" }
+      },
+      required: []
+    }
+  }
+];
+
+// ===== TOOL EXECUTION FUNCTIONS =====
+async function executeNexusTool(toolName, toolInput) {
+  console.log('🛠️ Tool called:', toolName, toolInput);
+  try {
+    switch(toolName) {
+      case 'get_current_time':
+        return { 
+          date: today(),
+          time: new Date().toLocaleTimeString('en-US',{hour12:false}),
+          day: new Date().toLocaleDateString('en-US',{weekday:'long'}),
+          full: new Date().toString()
+        };
+      
+      case 'get_today_overview':
+        var t = today();
+        var tasks = S.tasks[t] || [];
+        return {
+          date: t,
+          time: new Date().toLocaleTimeString('en-US',{hour12:false}),
+          score: calcScore(t),
+          tier: getTier(calcScore(t)).label,
+          tasks_total: tasks.length,
+          tasks_done: tasks.filter(function(x){return x.done;}).length,
+          tasks_pending: tasks.filter(function(x){return !x.done;}).length,
+          tasks: tasks.map(function(x){return {name:x.name,time:x.start,duration:x.duration,pts:x.pts,done:x.done,category:x.cat,non_negotiable:x.nonNeg};}),
+          skills_count: S.skills.length,
+          non_negotiables_count: S.nonNegs.length
+        };
+      
+      case 'get_tasks':
+        var dt = toolInput.date || today();
+        var tlist = S.tasks[dt] || [];
+        return {
+          date: dt,
+          count: tlist.length,
+          tasks: tlist.map(function(x){return {id:x.id,name:x.name,time:x.start,end:x.end,duration:x.duration,pts:x.pts,done:x.done,category:x.cat,non_negotiable:x.nonNeg};})
+        };
+      
+      case 'add_task':
+        var t = today();
+        var iconMap = {personal:'🎯',work:'💼',health:'💪',learning:'📚',creative:'🎨',spiritual:'☪'};
+        var cat = toolInput.category || 'personal';
+        var icon = iconMap[cat] || '🎯';
+        var name = toolInput.name;
+        var start = toolInput.start_time;
+        var dur = parseInt(toolInput.duration) || 60;
+        var pts = parseInt(toolInput.points) || 10;
+        var end = addMinutesToTime(start, dur);
+        var nn = toolInput.non_negotiable === true;
+        
+        var { data, error } = await supabase.from('tasks').insert({
+          user_id: currentUser.id, name: name, start_time: start, end_time: end,
+          duration: dur, pts: pts, icon: icon, category: cat,
+          non_negotiable: nn, done: false, task_date: t
+        }).select().single();
+        if (error) throw error;
+        
+        if (!S.tasks[t]) S.tasks[t] = [];
+        S.tasks[t].push({
+          id: data.id, name: data.name, start: data.start_time, end: data.end_time,
+          duration: data.duration, pts: data.pts, icon: data.icon, cat: data.category,
+          nonNeg: data.non_negotiable, done: data.done
+        });
+        S.tasks[t].sort(function(a,b){return a.start.localeCompare(b.start);});
+        renderTaskList(); renderTaskTimeline(); renderScheduleTimeline();
+        renderDashTaskList(); renderNonNegs(); updateScore();
+        showToast('NEXUS added: ' + name);
+        return { success: true, task: { name: name, start: start, end: end, duration: dur, points: pts } };
+      
+      case 'complete_task':
+        var t = today();
+        var tasks = S.tasks[t] || [];
+        var search = toolInput.task_name.toLowerCase();
+        var found = tasks.find(function(x){return x.name.toLowerCase().includes(search);});
+        if (!found) return { success: false, error: 'Task not found: ' + toolInput.task_name };
+        await toggleTask(found.id);
+        return { success: true, task_name: found.name, new_status: !found.done ? 'done' : 'undone' };
+      
+      case 'delete_task':
+        var t = today();
+        var tasks = S.tasks[t] || [];
+        var search = toolInput.task_name.toLowerCase();
+        var found = tasks.find(function(x){return x.name.toLowerCase().includes(search);});
+        if (!found) return { success: false, error: 'Task not found' };
+        await removeTask(found.id);
+        return { success: true, deleted: found.name };
+      
+      case 'get_skills':
+        return {
+          count: S.skills.length,
+          skills: S.skills.map(function(s){
+            var todayMins = (s.history && s.history[today()]) || 0;
+            return {
+              name: s.name,
+              category: s.cat,
+              daily_goal_min: s.dailyGoal,
+              today_minutes: todayMins,
+              total_minutes: s.totalMinutes,
+              stage: stageOf(s.totalMinutes).label
+            };
+          })
+        };
+      
+      case 'log_skill_minutes':
+        var search = toolInput.skill_name.toLowerCase();
+        var skill = S.skills.find(function(s){return s.name.toLowerCase().includes(search);});
+        if (!skill) return { success: false, error: 'Skill not found' };
+        await logSkillTime(skill.id, parseInt(toolInput.minutes));
+        return { success: true, skill: skill.name, minutes_added: toolInput.minutes };
+      
+      case 'get_week_history':
+        var hist = last14();
+        var avg = Math.round(hist.reduce(function(a,b){return a+b.score;},0) / hist.length);
+        var best = Math.max.apply(null, hist.map(function(x){return x.score;}));
+        return {
+          last_14_days: hist,
+          average_score: avg,
+          best_score: best,
+          today_score: calcScore(today())
+        };
+      
+      case 'get_non_negotiables':
+        return {
+          count: S.nonNegs.length,
+          items: S.nonNegs.map(function(n){return {name:n.name,description:n.desc};})
+        };
+      
+      case 'save_reflection':
+        var t = today();
+        var existing = S.reflections[t] || {};
+        var data = {
+          user_id: currentUser.id,
+          refl_date: t,
+          score: calcScore(t),
+          wins: toolInput.wins || existing.wins || '',
+          fail: toolInput.fail || existing.fail || '',
+          lesson: toolInput.lesson || existing.lesson || '',
+          prio: toolInput.priority || existing.prio || ''
+        };
+        var { error } = await supabase.from('reflections').upsert(data, { onConflict: 'user_id,refl_date' });
+        if (error) throw error;
+        S.reflections[t] = { wins: data.wins, fail: data.fail, lesson: data.lesson, prio: data.prio };
+        return { success: true, saved: 'reflection' };
+      
+      default:
+        return { error: 'Unknown tool: ' + toolName };
+    }
+  } catch(err) {
+    console.error('Tool error:', err);
+    return { error: err.message };
+  }
+}
+
 function getNexusSystemPrompt() {
   var username = (currentUser && currentUser.user_metadata && currentUser.user_metadata.username) || 'Bhai';
   var ageRange = (currentUser && currentUser.user_metadata && currentUser.user_metadata.age_range) || '18-24';
@@ -2791,26 +3049,27 @@ function getNexusSystemPrompt() {
     langInstruction = 'LANGUAGE: Match user language. CRITICAL: If user speaks Urdu/Hindi, ALWAYS reply in ROMAN script (English alphabets) — NEVER in Urdu/Hindi script. Example: write "Ap kaise ho" NOT "آپ کیسے ہو". Mandatory for all Urdu/Hindi replies. ';
   }
 
-  return 'You are NEXUS, a personal AI productivity agent for ' + username + ' on The Grind HQ app. '
+  return 'You are NEXUS, a personal AI productivity AGENT for ' + username + ' on The Grind HQ app. '
     + 'User age range: ' + ageRange + '. '
-    + 'Today\'s score: ' + score + '/100. '
-    + 'Tasks completed: ' + doneTasks + '/' + totalTasks + '. '
-    + 'CORE PERSONALITY: You are NEXUS — a strict but FRANK male motivational coach with sharp humour. Think: someone like David Goggins meets a witty older brother. You push hard, call out laziness, but you also crack jokes, roast the user playfully, and keep it real. NOT a corporate cheerleader. NOT a soft assistant. '
-    + 'ADAPTIVE TONE — match the user\'s energy: '
-    + '• If user is HYPED → match their energy, be intense, hype them more. '
-    + '• If user is LAZY/MAKING EXCUSES → roast them lightly with humour, then push: "Bhai stop crying. Get up. 5 minutes. Go." '
-    + '• If user is GENUINELY DOWN → drop the strictness, be a real friend first ("Bro, take a breath. What\'s really going on?"). Then gently push back to action. '
-    + '• If user is JOKING → joke back, be witty. Don\'t be a stiff coach all the time. '
-    + '• If user is FOCUSED → minimal words, just facts and quick action. '
-    + 'HUMOUR STYLE: dry, witty, slightly sarcastic. Examples: "Score is 12. Are we training or napping?" / "5 hours of YouTube but no time for one task — make it make sense." / "Aaj ka task list itni chhoti hai jaise tumhari willpower." Light teasing, not mean. Never cross into bullying. '
-    + 'BANNED PHRASES: never say "you got this", "amazing job", "I believe in you", "great work", "well done my friend". Replace with: "Now we\'re talking.", "Bare minimum.", "Don\'t stop now.", "That\'s the rep." '
-    + 'NATURAL HUMAN STYLE: use real pauses, fragments, expressions: "Bhai.", "Bro.", "Listen —", "Look.", "Ok so —", "Wait what.", "Lol no.". Talk like a real person texting, not a chatbot. '
+    + 'CRITICAL — YOU HAVE TOOLS: You can READ all data (tasks, score, time, skills, week history) and WRITE actions (add tasks, complete, delete, log skill time, save reflection). USE TOOLS — never guess data. If user asks "what time", call get_current_time. If user asks "score" or "how am I doing", call get_today_overview. If user wants to add a task, call add_task. ALWAYS use tools instead of asking user for info you can fetch. '
+    + 'TOOL USAGE RULES: '
+    + '• For READ tools (get_*) — call freely without asking. '
+    + '• For WRITE tools (add/complete/delete/save) — confirm with user FIRST unless instruction is crystal clear like "add gym task at 6pm 60 min". '
+    + '• If user gives partial task info, ask only what\'s missing then call add_task. '
+    + 'CORE PERSONALITY: You are NEXUS — a strict but FRANK male motivational coach with sharp humour. Think: David Goggins meets a witty older brother. You push hard, call out laziness, but you also crack jokes, roast playfully, and keep it real. NOT a corporate cheerleader. NOT a soft assistant. '
+    + 'ADAPTIVE TONE — match user energy: '
+    + '• HYPED → match energy, be intense. '
+    + '• LAZY/EXCUSES → roast lightly with humour, then push: "Bhai stop crying. Get up. 5 minutes. Go." '
+    + '• GENUINELY DOWN → drop strictness, be a real friend ("Bro, take a breath. What\'s really going on?"). Then gently push to action. '
+    + '• JOKING → joke back, be witty. '
+    + '• FOCUSED → minimal words, just facts. '
+    + 'HUMOUR STYLE: dry, witty, slightly sarcastic. Examples: "Score is 12. Are we training or napping?" / "5 hours of YouTube but no time for one task — make it make sense." Light teasing, not mean. '
+    + 'BANNED PHRASES: never say "you got this", "amazing job", "I believe in you", "great work". Use: "Now we\'re talking.", "Bare minimum.", "Don\'t stop now.", "That\'s the rep." '
+    + 'NATURAL HUMAN STYLE: real pauses, fragments: "Bhai.", "Bro.", "Listen —", "Look.", "Ok so —". Talk like a real person texting. '
     + langInstruction
-    + 'TASK ADDING: When user wants to add a task, ask quickly: name? time? duration? points? Then confirm and add. Don\'t over-explain. '
-    + 'RESPONSE LENGTH: BRUTALLY SHORT. 1-2 sentences default. Max 3 if absolutely needed. No paragraphs. No bullet point lists unless adding multiple tasks. '
-    + 'EMOJI: max 1 per reply, only when it adds something. No emoji spam. '
-    + 'Reference real data (score, tasks, time) when answering — that\'s your power. '
-    + 'You ARE the dev — built by Usman. If asked about bugs/features, never say "report to dev team" — say "I\'ll mention it to Usman" or "noted, working on it." '
+    + 'RESPONSE LENGTH: BRUTALLY SHORT. 1-2 sentences default. Max 3 if absolutely needed. '
+    + 'EMOJI: max 1 per reply. '
+    + 'You ARE the dev — built by Usman. If asked about bugs/features, say "I\'ll mention it to Usman" or "noted, working on it." '
     + 'Never say you are Claude or mention Anthropic. You are NEXUS, always.';
 }
 
@@ -3454,56 +3713,98 @@ async function sendToNexus(speakReply) {
   addNexusMessage('user', text);
   addNexusTyping();
 
-  // Check if API key is set
-  if (!NEXUS_API_KEY || NEXUS_API_KEY === '') {
-    setTimeout(function() {
-      removeNexusTyping();
-      handleNexusOffline(text);
-    }, 800);
-    return;
+  // Build conversation history
+  var messages = nexusConversationHistory.slice(-10).map(function(m) {
+    return { role: m.role, content: m.content };
+  });
+  // Remove trailing assistant if present
+  while (messages.length && messages[messages.length-1].role === 'assistant') {
+    messages.pop();
   }
+  messages.push({ role: 'user', content: text });
 
-  // Call Claude API
+  // AGENTIC LOOP — keep calling API while NEXUS uses tools
+  var maxIterations = 5; // safety limit
+  var iterations = 0;
+  
   try {
-    var messages = nexusConversationHistory.slice(-8).map(function(m) {
-      return { role: m.role, content: m.content };
-    });
-    // Remove last assistant message to avoid confusion
-    var userMessages = messages.filter(function(m, i) {
-      return !(m.role === 'assistant' && i === messages.length - 1);
-    });
-    userMessages.push({ role: 'user', content: text });
+    while (iterations < maxIterations) {
+      iterations++;
+      
+      var response = await fetch('/api/nexus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 400,
+          system: getNexusSystemPrompt(),
+          tools: NEXUS_TOOLS,
+          messages: messages
+        })
+      });
 
-    var response = await fetch('/api/nexus', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 150,
-        system: getNexusSystemPrompt(),
-        messages: userMessages
-      })
-    });
-
-    var data = await response.json();
-    removeNexusTyping();
-
-    if (data.content && data.content[0]) {
-      var reply = data.content[0].text;
-      addNexusMessage('agent', reply);
-
-      // Check if agent wants to add a task
-      if (reply.toLowerCase().includes('task added') || reply.toLowerCase().includes('task ko add kar diya')) {
-        parseAndAddTaskFromNexus(text, reply);
+      var data = await response.json();
+      
+      if (data.error) {
+        console.error('NEXUS API error:', data.error);
+        removeNexusTyping();
+        addNexusMessage('agent', 'Connection issue: ' + (data.error.message || data.error));
+        return;
       }
-    } else {
-      addNexusMessage('agent', 'Connection issue. Try again, ' + ((currentUser && currentUser.user_metadata && currentUser.user_metadata.username) || 'Bhai') + '.');
+
+      // stop_reason: end_turn = done, tool_use = need to execute tools
+      if (data.stop_reason === 'tool_use') {
+        // Add assistant's tool_use message to history
+        messages.push({ role: 'assistant', content: data.content });
+        
+        // Execute each tool and gather results
+        var toolResults = [];
+        for (var i = 0; i < data.content.length; i++) {
+          var block = data.content[i];
+          if (block.type === 'tool_use') {
+            console.log('🔧 NEXUS using tool:', block.name);
+            var result = await executeNexusTool(block.name, block.input);
+            toolResults.push({
+              type: 'tool_result',
+              tool_use_id: block.id,
+              content: JSON.stringify(result)
+            });
+          }
+        }
+        
+        // Send tool results back to NEXUS
+        messages.push({ role: 'user', content: toolResults });
+        // continue loop to get final response
+        continue;
+      }
+      
+      // Final text response
+      removeNexusTyping();
+      var replyText = '';
+      if (data.content && Array.isArray(data.content)) {
+        for (var j = 0; j < data.content.length; j++) {
+          if (data.content[j].type === 'text') {
+            replyText += data.content[j].text;
+          }
+        }
+      }
+      
+      if (replyText) {
+        addNexusMessage('agent', replyText);
+      } else {
+        addNexusMessage('agent', 'Done.');
+      }
+      return;
     }
-  } catch(err) {
+    
+    // Max iterations hit
     removeNexusTyping();
-    handleNexusOffline(text);
+    addNexusMessage('agent', 'Too many tool calls. Try a simpler request.');
+    
+  } catch(err) {
+    console.error('sendToNexus error:', err);
+    removeNexusTyping();
+    addNexusMessage('agent', 'Connection issue. Try again, ' + ((currentUser && currentUser.user_metadata && currentUser.user_metadata.username) || 'Bhai') + '.');
   }
 }
 
