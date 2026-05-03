@@ -13,60 +13,111 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Raleway:wght@200;300;400;500;600;700&family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg-deep:       #050608;
-      --bg-mid:        #0A0C10;
-      --bg-elev:       #11141B;
-      --bg-card:       rgba(20, 24, 32, 0.55);
-      --line:          rgba(255,255,255,0.08);
-      --line-strong:   rgba(255,255,255,0.18);
+      /* === APPLE VISION + NEURAL BRAIN PALETTE === */
+      --bg-deep:       #030408;
+      --bg-mid:        #060810;
+      --bg-elev:       #0E1220;
+      --bg-card:       rgba(20, 28, 48, 0.45);
+      --bg-glass:      rgba(255, 255, 255, 0.04);
+      --bg-glass-hover: rgba(255, 255, 255, 0.08);
+      --line:          rgba(255,255,255,0.06);
+      --line-strong:   rgba(255,255,255,0.14);
+      
+      /* Primary brand */
       --accent:        #FF6B2C;
       --accent-soft:   #FF8B4D;
-      --accent-dim:    rgba(255,107,44,0.45);
-      --accent-faint:  rgba(255,107,44,0.10);
-      --text-main:     #F1F3F8;
-      --text-soft:     #A8AEBA;
-      --text-muted:    #5A6273;
-      --text-dim:      #353B47;
-      --success:       #4ADE80;
-      --error:         #FF4560;
+      --accent-dim:    rgba(255,107,44,0.40);
+      --accent-faint:  rgba(255,107,44,0.08);
+      --accent-glow:   rgba(255,107,44,0.30);
+      
+      /* Neural blue (AI smart vibe) */
+      --neural:        #4D9FFF;
+      --neural-soft:   #6FB5FF;
+      --neural-dim:    rgba(77,159,255,0.35);
+      --neural-faint:  rgba(77,159,255,0.06);
+      --neural-glow:   rgba(77,159,255,0.25);
+      
+      /* Apple-style depth tints */
+      --depth-1:       rgba(255, 255, 255, 0.03);
+      --depth-2:       rgba(255, 255, 255, 0.06);
+      --depth-3:       rgba(255, 255, 255, 0.10);
+      
+      --text-main:     #F5F7FA;
+      --text-soft:     #B8BFCC;
+      --text-muted:    #6B7385;
+      --text-dim:      #3A4055;
+      --success:       #34D399;
+      --error:         #FF5A6E;
+      
+      /* Glass blur values */
+      --blur-sm:       blur(12px);
+      --blur-md:       blur(20px);
+      --blur-lg:       blur(40px);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { background: var(--bg-deep); color: var(--text-main); }
     body {
-      font-family: 'Space Grotesk', 'Raleway', sans-serif;
+      font-family: 'Inter', 'SF Pro Display', 'Space Grotesk', system-ui, sans-serif;
       min-height: 100vh;
       overflow-x: hidden;
-      letter-spacing: 0.2px;
+      letter-spacing: 0.1px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    /* ANIMATED BRAIN BACKGROUND */
+    /* === NEURAL NETWORK ANIMATED BACKGROUND === */
     .bg-stage {
       position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
       background:
-        radial-gradient(ellipse 60% 50% at 50% 50%, rgba(255,107,44,0.05) 0%, transparent 60%),
-        radial-gradient(ellipse 100% 80% at 50% 110%, rgba(255,107,44,0.04) 0%, transparent 60%),
-        linear-gradient(180deg, #050608 0%, #07080C 60%, #050608 100%);
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(77,159,255,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 70% 50% at 80% 90%, rgba(255,107,44,0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 100% 80% at 50% 50%, rgba(20,30,60,0.3) 0%, transparent 70%),
+        linear-gradient(180deg, #030408 0%, #060810 60%, #030408 100%);
     }
+    /* Neural nodes layer */
     .bg-stage::before {
       content: ''; position: absolute; inset: -50%;
       background-image:
-        radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.5), transparent),
-        radial-gradient(1px 1px at 80% 70%, rgba(255,255,255,0.35), transparent),
-        radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,0.4), transparent),
-        radial-gradient(1px 1px at 70% 20%, rgba(255,255,255,0.3), transparent),
-        radial-gradient(1.5px 1.5px at 15% 65%, rgba(255,107,44,0.5), transparent),
-        radial-gradient(1px 1px at 90% 40%, rgba(255,255,255,0.45), transparent),
-        radial-gradient(1px 1px at 55% 50%, rgba(255,255,255,0.3), transparent),
-        radial-gradient(1px 1px at 25% 12%, rgba(255,255,255,0.4), transparent);
-      background-size: 600px 600px;
-      animation: starDrift 90s linear infinite;
-      opacity: 0.55;
+        radial-gradient(2px 2px at 18% 32%, rgba(77,159,255,0.6), transparent),
+        radial-gradient(1.5px 1.5px at 78% 65%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(2px 2px at 42% 78%, rgba(77,159,255,0.5), transparent),
+        radial-gradient(1px 1px at 68% 22%, rgba(255,255,255,0.35), transparent),
+        radial-gradient(2.5px 2.5px at 12% 68%, rgba(255,107,44,0.45), transparent),
+        radial-gradient(1.5px 1.5px at 88% 38%, rgba(77,159,255,0.45), transparent),
+        radial-gradient(1px 1px at 52% 48%, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1.5px 1.5px at 28% 14%, rgba(77,159,255,0.4), transparent),
+        radial-gradient(2px 2px at 92% 82%, rgba(255,107,44,0.35), transparent),
+        radial-gradient(1px 1px at 35% 55%, rgba(255,255,255,0.3), transparent);
+      background-size: 800px 800px;
+      animation: neuralDrift 120s linear infinite;
+      opacity: 0.65;
+      filter: blur(0.3px);
     }
-    @keyframes starDrift { from { transform: translate(0,0); } to { transform: translate(-300px, -180px); } }
+    @keyframes neuralDrift { 
+      from { transform: translate(0,0) rotate(0deg); } 
+      to { transform: translate(-400px, -240px) rotate(2deg); } 
+    }
+    /* Subtle grid overlay (Apple-style depth) */
     .bg-stage::after {
       content: ''; position: absolute; inset: 0;
-      background-image: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px);
-      background-size: 100% 5px; mix-blend-mode: overlay; pointer-events: none;
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+      background-size: 80px 80px;
+      mix-blend-mode: overlay; 
+      pointer-events: none;
+      opacity: 0.5;
+    }
+    /* Premium scrollbar */
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+    ::-webkit-scrollbar-thumb { 
+      background: linear-gradient(180deg, var(--accent-dim), var(--neural-dim));
+      border-radius: 10px;
+      border: 2px solid var(--bg-deep);
+    }
+    ::-webkit-scrollbar-thumb:hover { 
+      background: linear-gradient(180deg, var(--accent), var(--neural));
     }
     .brain-wrap {
       position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -317,31 +368,48 @@
 
     /* HEADER */
     .main-header {
-      background: linear-gradient(180deg, rgba(5,6,8,0.92) 0%, rgba(5,6,8,0.55) 100%);
-      border-bottom: 1px solid var(--line);
-      backdrop-filter: blur(14px);
-      padding: 18px 36px;
+      background: linear-gradient(180deg, rgba(3,4,8,0.85) 0%, rgba(3,4,8,0.4) 100%);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      padding: 16px 36px;
       position: sticky;
       top: 0;
       z-index: 50;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 30px 60px -30px rgba(0,0,0,0.5);
     }
     .logo-mark {
-      width: 36px; height: 36px; flex-shrink: 0;
-      background-image: radial-gradient(circle, var(--text-main) 1.2px, transparent 1.6px);
-      background-size: 7px 7px;
-      mask: radial-gradient(circle at center, #000 60%, transparent 70%);
-      -webkit-mask: radial-gradient(circle at center, #000 60%, transparent 70%);
-      opacity: 0.95;
+      width: 38px; height: 38px; flex-shrink: 0;
+      background: 
+        radial-gradient(circle at 30% 30%, rgba(77,159,255,0.4), transparent 50%),
+        radial-gradient(circle at 70% 70%, rgba(255,107,44,0.4), transparent 50%);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 
+        0 0 20px rgba(77,159,255,0.2),
+        0 0 1px rgba(255,255,255,0.2) inset;
+      position: relative;
+      overflow: hidden;
+    }
+    .logo-mark::before {
+      content: 'TG';
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Orbitron', monospace;
+      font-weight: 800; font-size: 0.72rem;
+      color: var(--text-main);
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 10px rgba(255,255,255,0.4);
     }
     .header-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 300;
-      font-size: 1.5rem;
+      font-family: 'Inter', 'Space Grotesk', sans-serif;
+      font-weight: 200;
+      font-size: 1.4rem;
       color: var(--text-main);
-      letter-spacing: 8px;
+      letter-spacing: 6px;
       text-transform: uppercase;
     }
-    .header-title b { font-weight: 700; }
+    .header-title b { font-weight: 600; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-soft) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
     .header-sub {
       font-size: 0.62rem;
       color: var(--text-muted);
@@ -471,32 +539,53 @@
 
     /* CARDS */
     .card {
-      background: var(--bg-card);
-      border: 1px solid var(--line);
-      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
       padding: 24px;
-      transition: border-color 0.3s, transform 0.3s;
-      backdrop-filter: blur(14px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
       position: relative;
       overflow: hidden;
+      box-shadow: 
+        0 1px 0 0 rgba(255,255,255,0.04) inset,
+        0 0 0 1px rgba(255,255,255,0.02) inset,
+        0 30px 60px -15px rgba(0,0,0,0.5);
     }
     .card::before {
       content: '';
       position: absolute; top: 0; left: 24px; right: 24px;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+      pointer-events: none;
     }
-    .card:hover { border-color: var(--line-strong); }
+    .card::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 30% 0%, rgba(77,159,255,0.04), transparent 50%);
+      pointer-events: none;
+    }
+    .card:hover { 
+      border-color: rgba(255,255,255,0.14); 
+      transform: translateY(-2px);
+      box-shadow: 
+        0 1px 0 0 rgba(255,255,255,0.08) inset,
+        0 0 0 1px rgba(77,159,255,0.06) inset,
+        0 40px 80px -15px rgba(0,0,0,0.6),
+        0 0 60px -20px rgba(77,159,255,0.15);
+    }
     .card-title {
-      font-size: 0.65rem; font-weight: 600; letter-spacing: 4px;
+      font-size: 0.62rem; font-weight: 600; letter-spacing: 3px;
       text-transform: uppercase;
-      margin-bottom: 18px;
+      margin-bottom: 20px;
       color: var(--text-soft);
       display: flex; align-items: center; gap: 10px;
+      position: relative;
     }
     .card-title .dot {
       width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
-      box-shadow: 0 0 8px var(--accent);
+      box-shadow: 0 0 12px var(--accent), 0 0 4px rgba(255,107,44,0.5) inset;
       flex-shrink: 0;
     }
 
