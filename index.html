@@ -1337,7 +1337,7 @@
           <i class="fas fa-microphone-alt" style="font-size:0.7rem;"></i>
           <span id="voiceMinutesTxt">100 MIN</span>
         </div>
-        <div id="nexusLangBadge" style="font-size:0.55rem;padding:4px 10px;border-radius:20px;border:1px solid var(--accent-dim);color:var(--accent);letter-spacing:2px;text-transform:uppercase;background:var(--accent-faint);">EN · UR</div>
+        <div id="nexusLangBadge" onclick="cycleNexusLang()" style="font-size:0.55rem;padding:5px 11px;border-radius:20px;border:1px solid var(--accent-dim);color:var(--accent);letter-spacing:2px;text-transform:uppercase;background:var(--accent-faint);cursor:pointer;user-select:none;" title="Click to change language">AUTO</div>
         <button class="nexus-mic-btn" id="nexusMicBtn" onclick="toggleNexusRecording()" title="Click to record voice (say 'done' or click again to send)">
           <i class="fas fa-microphone" id="nexusMicIcon"></i>
         </button>
@@ -2782,17 +2782,30 @@ function getNexusSystemPrompt() {
   var doneTasks = todayTasks.filter(function(t){return t.done;}).length;
   var totalTasks = todayTasks.length;
   var score = calcScore(today());
+  var lang = window.nexusLanguage || 'auto';
+
+  var langInstruction = '';
+  if (lang === 'english') {
+    langInstruction = 'CRITICAL LANGUAGE RULE: Reply ONLY in English. No Urdu, no Hindi. ';
+  } else if (lang === 'urdu') {
+    langInstruction = 'CRITICAL LANGUAGE RULE: Reply ONLY in ROMAN URDU (Urdu words but English alphabets). NEVER use Urdu script (آپ کیسے ہیں). Always write like: "Ap kaise ho", "Theek hoon bhai", "Kal milte hain". This is mandatory. ';
+  } else if (lang === 'hindi') {
+    langInstruction = 'CRITICAL LANGUAGE RULE: Reply ONLY in ROMAN HINDI (Hindi words but English alphabets). NEVER use Devanagari script (आप कैसे हैं). Always write like: "Aap kaise hain", "Theek hoon bhai", "Kal milte hain". This is mandatory. ';
+  } else {
+    langInstruction = 'LANGUAGE: Match user language. CRITICAL: If user speaks Urdu/Hindi, ALWAYS reply in ROMAN script (English alphabets) — NEVER in Urdu/Hindi script. Example: write "Ap kaise ho" NOT "آپ کیسے ہو". Mandatory for all Urdu/Hindi replies. ';
+  }
 
   return 'You are NEXUS, a personal AI productivity agent for ' + username + ' on The Grind HQ app. '
     + 'User age range: ' + ageRange + '. '
     + 'Today\'s score: ' + score + '/100. '
     + 'Tasks completed: ' + doneTasks + '/' + totalTasks + '. '
-    + 'PERSONALITY: You adapt your tone based on context. When user is struggling, be supportive and empathetic. When user needs motivation, be intense and powerful. When adding tasks, be efficient and quick. '
-    + 'LANGUAGE: You speak both English and Urdu naturally. Match whatever language the user uses. Mix them if user mixes them (Hinglish/Urglish is fine). '
+    + 'PERSONALITY: Adapt tone — supportive when struggling, intense when motivating, efficient when adding tasks. '
+    + langInstruction
     + 'TASK ADDING: When user wants to add a task, ask: 1) Task name 2) What time 3) How long 4) How many points. Then confirm and add it. '
-    + 'IMPORTANT: Keep responses SHORT and PUNCHY — max 3-4 sentences. No long paragraphs. '
+    + 'IMPORTANT: Keep responses SHORT and PUNCHY — max 2-3 sentences. Quick like a real friend. '
     + 'WAKE WORD: User activates you by saying "Arise". When activated say something powerful and short. '
-    + 'You know everything about the user\'s day, score, tasks. Reference real data when answering. '
+    + 'Reference real data (score, tasks) when answering. '
+    + 'You ARE the dev — built by Usman. If asked about bugs/features, never say "report to dev team" — say you\'ll work on it. '
     + 'Never say you are Claude or mention Anthropic. You are NEXUS, always.';
 }
 
@@ -2854,23 +2867,50 @@ async function loadVoiceUsage() {
 // ===== UPDATE MINUTES USED =====
 async function deductVoiceMinutes(secondsUsed) {
   if (!supabase || !currentUser) return;
-  const minutesUsed = Math.ceil(secondsUsed / 60);
+  // Track in seconds for accuracy — convert to minutes only for display
+  const safeSeconds = Math.max(1, Math.round(secondsUsed)); // min 1 sec, no decimals
+  console.log('Voice usage: ' + safeSeconds + ' seconds (~' + (safeSeconds/60).toFixed(2) + ' min)');
+  
   try {
     const { data } = await supabase
       .from('voice_usage')
-      .select('minutes_used')
+      .select('minutes_used, seconds_used')
       .eq('user_id', currentUser.id)
       .single();
     
-    const newUsed = (data?.minutes_used || 0) + minutesUsed;
+    // Use seconds_used column if exists, else fallback to minutes
+    const prevSeconds = (data?.seconds_used || (data?.minutes_used || 0) * 60);
+    const newSeconds = prevSeconds + safeSeconds;
+    const newMinutes = Math.floor(newSeconds / 60); // ONLY count complete minutes
+    
     await supabase.from('voice_usage')
-      .update({ minutes_used: newUsed })
+      .update({ 
+        minutes_used: newMinutes,
+        seconds_used: newSeconds
+      })
       .eq('user_id', currentUser.id);
     
-    nexusVoiceMinutesLeft = Math.max(0, nexusVoiceMinutesLimit - newUsed);
+    nexusVoiceMinutesLeft = Math.max(0, nexusVoiceMinutesLimit - newMinutes);
     updateVoiceMinutesDisplay();
   } catch(e) {
     console.error('Deduct error:', e);
+    // Fallback without seconds_used column
+    try {
+      const { data } = await supabase
+        .from('voice_usage')
+        .select('minutes_used')
+        .eq('user_id', currentUser.id)
+        .single();
+      const minutesUsed = secondsUsed >= 30 ? 1 : 0; // Only count if >= 30 sec
+      const newUsed = (data?.minutes_used || 0) + minutesUsed;
+      await supabase.from('voice_usage')
+        .update({ minutes_used: newUsed })
+        .eq('user_id', currentUser.id);
+      nexusVoiceMinutesLeft = Math.max(0, nexusVoiceMinutesLimit - newUsed);
+      updateVoiceMinutesDisplay();
+    } catch(e2) {
+      console.error('Fallback error:', e2);
+    }
   }
 }
 
@@ -2927,18 +2967,27 @@ function initWakeWordListener() {
   nexusBgRecognition.onresult = function(event) {
     if (nexusIsRecording) return; // don't trigger while recording
     
-    var combined = '';
+    // FAST detection — check both interim and final results
+    var allText = '';
     for (var i = event.resultIndex; i < event.results.length; i++) {
-      combined += event.results[i][0].transcript + ' ';
+      allText += event.results[i][0].transcript + ' ';
+      // Also check alternatives if available
+      for (var j = 1; j < event.results[i].length && j < 3; j++) {
+        allText += event.results[i][j].transcript + ' ';
+      }
     }
-    var lower = combined.toLowerCase().trim();
+    var lower = allText.toLowerCase().trim();
     
-    // Detect "arise" — many variants
-    if (/\b(arise|arose|arrive|a rise|aris|areas|advise)\b/i.test(lower)) {
-      console.log('Wake word detected:', lower);
-      // Stop bg listener and start recording
+    // EXPANDED detection — many phonetic variants for fast trigger
+    if (/\b(arise|arose|arrive|arrived|a rise|aris|areas|advise|rise|rises|arsi|a-rise|erase|arises)\b/i.test(lower)) {
+      console.log('🎯 Wake word detected:', lower);
+      // Stop bg listener immediately and start recording
       try { nexusBgRecognition.stop(); } catch(e){}
-      setTimeout(function(){ startRecording(); }, 200);
+      nexusBgListening = false; // prevent restart
+      setTimeout(function(){ 
+        nexusBgListening = true; // re-enable for after recording
+        startRecording(); 
+      }, 100); // Reduced from 200ms to 100ms
     }
   };
 
@@ -3068,34 +3117,65 @@ function startDoneDetector() {
   nexusDoneDetector = new SR();
   nexusDoneDetector.continuous = true;
   nexusDoneDetector.interimResults = true;
-  nexusDoneDetector.lang = 'en-US';
+  nexusDoneDetector.maxAlternatives = 3;
+  // Set language based on user preference
+  var langMap = { english: 'en-US', urdu: 'ur-PK', hindi: 'hi-IN', auto: 'en-US' };
+  nexusDoneDetector.lang = langMap[window.nexusLanguage || 'auto'] || 'en-US';
+  
+  var lastText = '';
+  var doneCheckTimer = null;
   
   nexusDoneDetector.onresult = function(event) {
     if (!nexusIsRecording) return;
-    var combined = '';
+    
+    // Collect all alternatives for better detection
+    var allText = '';
+    var primaryText = '';
     for (var i = event.resultIndex; i < event.results.length; i++) {
-      combined += event.results[i][0].transcript + ' ';
+      primaryText += event.results[i][0].transcript + ' ';
+      for (var j = 0; j < event.results[i].length && j < 3; j++) {
+        allText += event.results[i][j].transcript + ' ';
+      }
     }
-    var lower = combined.toLowerCase().trim();
+    var lower = allText.toLowerCase().trim();
+    var primaryLower = primaryText.toLowerCase().trim();
     
-    // Live preview in input
+    // Live preview in input box
     var inputBox = document.getElementById('nexusInput');
-    if (inputBox) {
-      inputBox.value = lower;
+    if (inputBox && primaryLower !== lastText) {
+      inputBox.value = primaryLower;
       inputBox.style.color = 'var(--text-soft)';
+      lastText = primaryLower;
     }
     
-    // Detect "done" at end of speech
-    if (/\b(done|that's it|that is it|finish|finished|send it|over)\b\s*\.?\s*$/i.test(lower)) {
-      console.log('Done detected, stopping...');
-      stopRecording();
+    // EXPANDED done detection — many variants in any language
+    var doneRegex = /\b(done|dun|that'?s it|that is it|finish|finished|send it|send|over|bas|khatam|khattam|khatam ho gaya|samaapt|stop)\b\s*[\.\!]?\s*$/i;
+    
+    if (doneRegex.test(lower) || doneRegex.test(primaryLower)) {
+      console.log('🛑 Done detected:', primaryLower);
+      // Cancel any pending check
+      if (doneCheckTimer) clearTimeout(doneCheckTimer);
+      // Small delay to let user finish word
+      doneCheckTimer = setTimeout(function() {
+        if (nexusIsRecording) stopRecording();
+      }, 300);
     }
   };
   
-  nexusDoneDetector.onerror = function(e){ console.log('Done detector error:', e.error); };
+  nexusDoneDetector.onerror = function(e){ 
+    console.log('Done detector error:', e.error); 
+    // Auto-restart on no-speech
+    if (e.error === 'no-speech' && nexusIsRecording) {
+      setTimeout(function() {
+        try { nexusDoneDetector.start(); } catch(e){}
+      }, 100);
+    }
+  };
   nexusDoneDetector.onend = function() {
     if (nexusIsRecording) {
-      try { nexusDoneDetector.start(); } catch(e){}
+      setTimeout(function() {
+        try { nexusDoneDetector.start(); } catch(e){}
+      }, 100);
     }
   };
   
@@ -3144,11 +3224,19 @@ async function processRecording(blob, mimeType, duration) {
     // Convert blob to base64
     var base64 = await blobToBase64(blob);
     
+    // Pass language hint to Whisper for better accuracy
+    var langMap = { english: 'en', urdu: 'ur', hindi: 'hi', auto: null };
+    var langHint = langMap[window.nexusLanguage || 'auto'];
+    
     // Call Whisper API
     var response = await fetch('/api/whisper', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ audio: base64, mimeType: mimeType })
+      body: JSON.stringify({ 
+        audio: base64, 
+        mimeType: mimeType,
+        language: langHint
+      })
     });
     
     var data = await response.json();
@@ -3161,8 +3249,8 @@ async function processRecording(blob, mimeType, duration) {
     
     var text = (data.text || '').trim();
     
-    // Remove "done" or end markers from end
-    text = text.replace(/\b(done|that's it|that is it|finish|finished|send it|over)\b\s*\.?\s*$/i, '').trim();
+    // Remove "done" or end markers from end (multilingual)
+    text = text.replace(/\b(done|dun|that'?s it|that is it|finish|finished|send it|send|over|bas|khatam|khattam|stop)\b\s*[\.\!]?\s*$/i, '').trim();
     
     if (!text || text.length < 2) {
       addNexusMessage('agent', '🤔 Couldn\'t hear that clearly. Try again?');
@@ -3177,7 +3265,7 @@ async function processRecording(blob, mimeType, duration) {
       inputBox.style.color = 'var(--text-main)';
     }
     
-    // Deduct minutes
+    // Deduct minutes (actual recording duration only)
     await deductVoiceMinutes(duration);
     
     // Send to NEXUS with voice flag (so we speak back)
@@ -3261,7 +3349,7 @@ async function speakNexusReply(text) {
     var response = await fetch('/api/tts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: cleanText, voice: 'onyx' })
+      body: JSON.stringify({ text: cleanText, voice: 'nova', speed: 1.15 })
     });
     
     if (!response.ok) return;
@@ -3274,6 +3362,39 @@ async function speakNexusReply(text) {
     console.log('TTS error:', e);
   }
 }
+
+function cycleNexusLang() {
+  var langs = ['auto', 'english', 'urdu', 'hindi'];
+  var labels = { auto: 'AUTO', english: 'ENGLISH', urdu: 'URDU', hindi: 'HINDI' };
+  var current = window.nexusLanguage || 'auto';
+  var idx = langs.indexOf(current);
+  var next = langs[(idx + 1) % langs.length];
+  window.nexusLanguage = next;
+  var badge = document.getElementById('nexusLangBadge');
+  if (badge) badge.textContent = labels[next];
+  // Save to localStorage so it persists
+  try { localStorage.setItem('nexusLang', next); } catch(e){}
+  addNexusMessage('agent', '🌐 Language set to ' + labels[next] + '. ' + 
+    (next === 'urdu' ? 'Ab Roman Urdu mein baat karunga.' :
+     next === 'hindi' ? 'Ab Roman Hindi mein baat karunga.' :
+     next === 'english' ? 'I will reply in English now.' :
+     'Auto-detect — I match your language.'));
+}
+
+// Load saved language on startup
+(function loadSavedLang() {
+  try {
+    var saved = localStorage.getItem('nexusLang');
+    if (saved) {
+      window.nexusLanguage = saved;
+      setTimeout(function() {
+        var labels = { auto: 'AUTO', english: 'ENGLISH', urdu: 'URDU', hindi: 'HINDI' };
+        var badge = document.getElementById('nexusLangBadge');
+        if (badge) badge.textContent = labels[saved] || 'AUTO';
+      }, 1500);
+    }
+  } catch(e){}
+})();
 
 function quickNexus(text) {
   document.getElementById('nexusInput').value = text;
