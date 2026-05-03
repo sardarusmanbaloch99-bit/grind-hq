@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { text, voice } = req.body;
+    const { text, voice, speed } = req.body;
     if (!text) return res.status(400).json({ error: 'No text provided' });
 
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
@@ -19,9 +19,9 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'tts-1',
-        voice: voice || 'onyx',
+        voice: voice || 'nova',
         input: text.substring(0, 4000),
-        speed: 1.0
+        speed: speed || 1.15
       })
     });
 
