@@ -3343,7 +3343,6 @@ function toggleNexus() { toggleNexusRecording(); }
 // ===== TEXT-TO-SPEECH (NEXUS speaks back) =====
 async function speakNexusReply(text) {
   if (!text) return;
-  // Strip emojis and markdown for cleaner speech
   var cleanText = text.replace(/[*_~`]/g, '').replace(/[\u{1F300}-\u{1FAFF}]/gu, '').trim();
   if (!cleanText) return;
   
@@ -3351,20 +3350,24 @@ async function speakNexusReply(text) {
     var response = await fetch('/api/tts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: cleanText, voice: 'ember', speed: 1.05 })
+      body: JSON.stringify({ text: cleanText, voice: 'onyx', speed: 1.1 })
     });
     
-    if (!response.ok) return;
+    if (!response.ok) {
+      console.log('TTS HTTP error:', response.status);
+      return;
+    }
     
     var audioBlob = await response.blob();
     var audioUrl = URL.createObjectURL(audioBlob);
     var audio = new Audio(audioUrl);
-    audio.preload = 'auto';
-    // Play immediately when ready, not after full load
-    audio.addEventListener('canplay', function() {
-      audio.play().catch(function(e){ console.log('Audio play error:', e); });
-    }, { once: true });
-    audio.load();
+    // Play IMMEDIATELY — browser handles buffering
+    var playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(function(err) {
+        console.log('Audio play error:', err);
+      });
+    }
   } catch(e) {
     console.log('TTS error:', e);
   }
