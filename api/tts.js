@@ -18,10 +18,10 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'tts-1',
-        voice: voice || 'nova',
+        model: 'tts-1-hd',
+        voice: voice || 'onyx',
         input: text.substring(0, 4000),
-        speed: speed || 1.15
+        speed: speed || 1.0
       })
     });
 
