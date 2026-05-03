@@ -1329,7 +1329,7 @@
         </div>
         <div>
           <div style="font-family:'Orbitron',monospace;font-size:0.9rem;font-weight:700;letter-spacing:3px;color:var(--text-main);">NEXUS <span style="color:var(--accent);">AI</span></div>
-          <div style="font-size:0.62rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;" id="nexusStatusTxt">Say "Arise" to activate · Listening...</div>
+          <div style="font-size:0.62rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;" id="nexusStatusTxt">Say "Wake Up" to activate · Listening...</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
@@ -1348,7 +1348,7 @@
     <div class="nexus-chat" id="nexusChat">
       <div class="nexus-msg nexus-agent">
         <div class="nexus-msg-avatar">N</div>
-        <div class="nexus-msg-bubble">Salam! Main <b>NEXUS</b> hoon — aapka personal AI agent. Say <b>"Arise"</b> to activate me, or type below. Main English aur Urdu dono samajhta hoon! 🚀</div>
+        <div class="nexus-msg-bubble">Salam! Main <b>NEXUS</b> hoon — aapka personal AI agent. Say <b>"Wake Up"</b> to activate me, or type below. Main English aur Urdu dono samajhta hoon! 🚀</div>
       </div>
     </div>
 
@@ -1365,7 +1365,7 @@
 
     <!-- TEXT INPUT -->
     <div style="display:flex;gap:10px;margin-top:14px;">
-      <input type="text" id="nexusInput" class="form-input" placeholder='Type or say "Arise" to talk to NEXUS...' style="flex:1;font-size:0.85rem;" onkeydown="if(event.key==='Enter')sendToNexus()" />
+      <input type="text" id="nexusInput" class="form-input" placeholder='Type or say "Wake Up" to talk to NEXUS...' style="flex:1;font-size:0.85rem;" onkeydown="if(event.key==='Enter')sendToNexus()" />
       <button class="save-btn" onclick="sendToNexus()" style="padding:10px 18px;font-size:0.65rem;white-space:nowrap;"><i class="fas fa-paper-plane"></i></button>
     </div>
 
@@ -2803,7 +2803,7 @@ function getNexusSystemPrompt() {
     + langInstruction
     + 'TASK ADDING: When user wants to add a task, ask: 1) Task name 2) What time 3) How long 4) How many points. Then confirm and add it. '
     + 'IMPORTANT: Keep responses BRUTALLY SHORT — 1-2 sentences max. No fluff. No emojis spam (max 1 per reply). Talk like a real person who has zero time for nonsense. '
-    + 'WAKE WORD: User activates you saying "Arise". Reply with 1 short strict line — like "What.", "Speak.", "Make it quick.", "Im here. Talk." — never "How can I help you today!" type fluff. '
+    + 'WAKE WORD: User activates you saying "Wake Up". Reply with 1 short strict line — like "What.", "Speak.", "Make it quick.", "Im here. Talk." — never "How can I help you today!" type fluff. '
     + 'Reference real data (score, tasks) when answering. '
     + 'You ARE the dev — built by Usman. If asked about bugs/features, never say "report to dev team" — say you\'ll work on it. '
     + 'Never say you are Claude or mention Anthropic. You are NEXUS, always.';
@@ -2978,8 +2978,8 @@ function initWakeWordListener() {
     }
     var lower = allText.toLowerCase().trim();
     
-    // EXPANDED detection — many phonetic variants for fast trigger
-    if (/\b(arise|arose|arrive|arrived|a rise|aris|areas|advise|rise|rises|arsi|a-rise|erase|arises)\b/i.test(lower)) {
+    // EXPANDED detection — "Wake Up" with many phonetic variants
+    if (/\b(wake up|wakeup|wake-up|weak up|weakup|wakey|wake|woke up|wokeup)\b/i.test(lower)) {
       console.log('🎯 Wake word detected:', lower);
       // Stop bg listener immediately and start recording
       try { nexusBgRecognition.stop(); } catch(e){}
@@ -3008,7 +3008,7 @@ function initWakeWordListener() {
   };
 }
 
-// Start background listening for "Arise"
+// Start background listening for "Wake Up"
 function startWakeWordListener() {
   if (!nexusBgRecognition) initWakeWordListener();
   if (!nexusBgRecognition) return;
@@ -3016,7 +3016,7 @@ function startWakeWordListener() {
     nexusBgRecognition.start();
     nexusBgListening = true;
     var statusTxt = document.getElementById('nexusStatusTxt');
-    if(statusTxt) statusTxt.textContent = '🎤 Listening for "Arise"...';
+    if(statusTxt) statusTxt.textContent = '🎤 Listening for "Wake Up"...';
   } catch(e) {
     nexusBgListening = true; // already running
   }
@@ -3140,11 +3140,12 @@ function startDoneDetector() {
     var lower = allText.toLowerCase().trim();
     var primaryLower = primaryText.toLowerCase().trim();
     
-    // Live preview in input box
+    // Live preview in input box — VISIBLE bright color
     var inputBox = document.getElementById('nexusInput');
     if (inputBox && primaryLower !== lastText) {
       inputBox.value = primaryLower;
-      inputBox.style.color = 'var(--text-soft)';
+      inputBox.style.color = 'var(--accent)';
+      inputBox.style.fontWeight = '500';
       lastText = primaryLower;
     }
     
@@ -3291,12 +3292,13 @@ function resetMicUI() {
     btn.classList.remove('listening');
     btn.querySelector('i').className = 'fas fa-microphone';
   }
-  if(statusTxt) statusTxt.textContent = nexusBgListening ? '🎤 Listening for "Arise"...' : 'Click mic or say "Arise"';
+  if(statusTxt) statusTxt.textContent = nexusBgListening ? '🎤 Listening for "Wake Up"...' : 'Click mic or say "Wake Up"';
   if(orb) orb.classList.remove('active');
   if(wave) wave.classList.remove('active');
   if(inputBox) {
     inputBox.style.color = 'var(--text-main)';
-    inputBox.placeholder = 'Type or click mic / say "Arise" to talk to NEXUS...';
+    inputBox.style.fontWeight = '400';
+    inputBox.placeholder = 'Type or click mic / say "Wake Up" to talk to NEXUS...';
   }
   
   nexusActive = false;
@@ -3349,7 +3351,7 @@ async function speakNexusReply(text) {
     var response = await fetch('/api/tts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: cleanText, voice: 'onyx', speed: 1.0 })
+      body: JSON.stringify({ text: cleanText, voice: 'ember', speed: 1.05 })
     });
     
     if (!response.ok) return;
@@ -3357,7 +3359,12 @@ async function speakNexusReply(text) {
     var audioBlob = await response.blob();
     var audioUrl = URL.createObjectURL(audioBlob);
     var audio = new Audio(audioUrl);
-    audio.play();
+    audio.preload = 'auto';
+    // Play immediately when ready, not after full load
+    audio.addEventListener('canplay', function() {
+      audio.play().catch(function(e){ console.log('Audio play error:', e); });
+    }, { once: true });
+    audio.load();
   } catch(e) {
     console.log('TTS error:', e);
   }
@@ -3479,7 +3486,7 @@ async function sendToNexus(speakReply) {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 300,
+        max_tokens: 150,
         system: getNexusSystemPrompt(),
         messages: userMessages
       })
@@ -3490,12 +3497,14 @@ async function sendToNexus(speakReply) {
 
     if (data.content && data.content[0]) {
       var reply = data.content[0].text;
-      addNexusMessage('agent', reply);
       
-      // Speak reply if voice mode
+      // PARALLEL: Start TTS BEFORE adding message to chat (saves 100-200ms)
+      var ttsPromise = null;
       if (speakReply === true) {
-        speakNexusReply(reply);
+        ttsPromise = speakNexusReply(reply);
       }
+      
+      addNexusMessage('agent', reply);
 
       // Check if agent wants to add a task
       if (reply.toLowerCase().includes('task added') || reply.toLowerCase().includes('task ko add kar diya')) {
@@ -3592,7 +3601,7 @@ function initNexus() {
     initWakeWordListener();
     loadVoiceUsage();
     var statusTxt = document.getElementById('nexusStatusTxt');
-    if(statusTxt) statusTxt.textContent = 'Click mic or say "Arise" to start';
+    if(statusTxt) statusTxt.textContent = 'Click mic or say "Wake Up" to start';
   }, 1500);
 }
 
