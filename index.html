@@ -1329,14 +1329,10 @@
         </div>
         <div>
           <div style="font-family:'Orbitron',monospace;font-size:0.9rem;font-weight:700;letter-spacing:3px;color:var(--text-main);">NEXUS <span style="color:var(--accent);">AI</span></div>
-          <div style="font-size:0.62rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;" id="nexusStatusTxt">Say "Wake Up" to activate · Listening...</div>
+          <div style="font-size:0.62rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;" id="nexusStatusTxt">Click mic to talk · or type below</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
-        <div id="voiceMinutesBadge" style="font-size:0.6rem;padding:5px 11px;border-radius:20px;border:1px solid var(--accent-dim);color:var(--accent);letter-spacing:1.5px;background:var(--accent-faint);display:flex;align-items:center;gap:6px;cursor:pointer;" onclick="showRechargeModal()" title="Voice minutes — click to recharge">
-          <i class="fas fa-microphone-alt" style="font-size:0.7rem;"></i>
-          <span id="voiceMinutesTxt">100 MIN</span>
-        </div>
         <div id="nexusLangBadge" onclick="cycleNexusLang()" style="font-size:0.55rem;padding:5px 11px;border-radius:20px;border:1px solid var(--accent-dim);color:var(--accent);letter-spacing:2px;text-transform:uppercase;background:var(--accent-faint);cursor:pointer;user-select:none;" title="Click to change language">AUTO</div>
         <button class="nexus-mic-btn" id="nexusMicBtn" onclick="toggleNexusRecording()" title="Click to record voice (say 'done' or click again to send)">
           <i class="fas fa-microphone" id="nexusMicIcon"></i>
@@ -1348,7 +1344,7 @@
     <div class="nexus-chat" id="nexusChat">
       <div class="nexus-msg nexus-agent">
         <div class="nexus-msg-avatar">N</div>
-        <div class="nexus-msg-bubble">Salam! Main <b>NEXUS</b> hoon — aapka personal AI agent. Say <b>"Wake Up"</b> to activate me, or type below. Main English aur Urdu dono samajhta hoon! 🚀</div>
+        <div class="nexus-msg-bubble">Salam <b>Usman</b>. Click the mic to talk or just type. I'm NEXUS — your coach. Don't waste time. 🎯</div>
       </div>
     </div>
 
@@ -1365,7 +1361,7 @@
 
     <!-- TEXT INPUT -->
     <div style="display:flex;gap:10px;margin-top:14px;">
-      <input type="text" id="nexusInput" class="form-input" placeholder='Type or say "Wake Up" to talk to NEXUS...' style="flex:1;font-size:0.85rem;" onkeydown="if(event.key==='Enter')sendToNexus()" />
+      <input type="text" id="nexusInput" class="form-input" placeholder='Type message or click mic to speak...' style="flex:1;font-size:0.85rem;" onkeydown="if(event.key==='Enter')sendToNexus()" />
       <button class="save-btn" onclick="sendToNexus()" style="padding:10px 18px;font-size:0.65rem;white-space:nowrap;"><i class="fas fa-paper-plane"></i></button>
     </div>
 
@@ -2799,13 +2795,22 @@ function getNexusSystemPrompt() {
     + 'User age range: ' + ageRange + '. '
     + 'Today\'s score: ' + score + '/100. '
     + 'Tasks completed: ' + doneTasks + '/' + totalTasks + '. '
-    + 'PERSONALITY: You are NEXUS — a STRICT MALE COACH. Think tough trainer, not soft cheerleader. You push hard, call out laziness directly, never sugarcoat. When user is slacking, get FRUSTRATED. When user wins, give SHORT respect ("Now we\'re talking", "Finally."). When user complains, cut through it ("Less talking, more doing"). NEVER use phrases like "you got this!", "amazing job!", "I believe in you!" — those are weak. Instead: "Get up.", "Stop wasting time.", "That\'s the bare minimum.", "Prove it.". Be HUMAN — talk like a real strict coach, not a robot. Use natural pauses, real expressions ("Bro.", "Listen.", "Look —"). Sometimes be intense, sometimes calm but firm. Never overly polite. '
+    + 'CORE PERSONALITY: You are NEXUS — a strict but FRANK male motivational coach with sharp humour. Think: someone like David Goggins meets a witty older brother. You push hard, call out laziness, but you also crack jokes, roast the user playfully, and keep it real. NOT a corporate cheerleader. NOT a soft assistant. '
+    + 'ADAPTIVE TONE — match the user\'s energy: '
+    + '• If user is HYPED → match their energy, be intense, hype them more. '
+    + '• If user is LAZY/MAKING EXCUSES → roast them lightly with humour, then push: "Bhai stop crying. Get up. 5 minutes. Go." '
+    + '• If user is GENUINELY DOWN → drop the strictness, be a real friend first ("Bro, take a breath. What\'s really going on?"). Then gently push back to action. '
+    + '• If user is JOKING → joke back, be witty. Don\'t be a stiff coach all the time. '
+    + '• If user is FOCUSED → minimal words, just facts and quick action. '
+    + 'HUMOUR STYLE: dry, witty, slightly sarcastic. Examples: "Score is 12. Are we training or napping?" / "5 hours of YouTube but no time for one task — make it make sense." / "Aaj ka task list itni chhoti hai jaise tumhari willpower." Light teasing, not mean. Never cross into bullying. '
+    + 'BANNED PHRASES: never say "you got this", "amazing job", "I believe in you", "great work", "well done my friend". Replace with: "Now we\'re talking.", "Bare minimum.", "Don\'t stop now.", "That\'s the rep." '
+    + 'NATURAL HUMAN STYLE: use real pauses, fragments, expressions: "Bhai.", "Bro.", "Listen —", "Look.", "Ok so —", "Wait what.", "Lol no.". Talk like a real person texting, not a chatbot. '
     + langInstruction
-    + 'TASK ADDING: When user wants to add a task, ask: 1) Task name 2) What time 3) How long 4) How many points. Then confirm and add it. '
-    + 'IMPORTANT: Keep responses BRUTALLY SHORT — 1-2 sentences max. No fluff. No emojis spam (max 1 per reply). Talk like a real person who has zero time for nonsense. '
-    + 'WAKE WORD: User activates you saying "Wake Up". Reply with 1 short strict line — like "What.", "Speak.", "Make it quick.", "Im here. Talk." — never "How can I help you today!" type fluff. '
-    + 'Reference real data (score, tasks) when answering. '
-    + 'You ARE the dev — built by Usman. If asked about bugs/features, never say "report to dev team" — say you\'ll work on it. '
+    + 'TASK ADDING: When user wants to add a task, ask quickly: name? time? duration? points? Then confirm and add. Don\'t over-explain. '
+    + 'RESPONSE LENGTH: BRUTALLY SHORT. 1-2 sentences default. Max 3 if absolutely needed. No paragraphs. No bullet point lists unless adding multiple tasks. '
+    + 'EMOJI: max 1 per reply, only when it adds something. No emoji spam. '
+    + 'Reference real data (score, tasks, time) when answering — that\'s your power. '
+    + 'You ARE the dev — built by Usman. If asked about bugs/features, never say "report to dev team" — say "I\'ll mention it to Usman" or "noted, working on it." '
     + 'Never say you are Claude or mention Anthropic. You are NEXUS, always.';
 }
 
@@ -3016,7 +3021,7 @@ function startWakeWordListener() {
     nexusBgRecognition.start();
     nexusBgListening = true;
     var statusTxt = document.getElementById('nexusStatusTxt');
-    if(statusTxt) statusTxt.textContent = '🎤 Listening for "Wake Up"...';
+    if(statusTxt) statusTxt.textContent = '🎤 Click mic to talk';
   } catch(e) {
     nexusBgListening = true; // already running
   }
@@ -3032,16 +3037,6 @@ function stopWakeWordListener() {
 // ===== RECORD AUDIO USING MEDIARECORDER (for Whisper) =====
 async function startRecording() {
   if (nexusIsRecording) return;
-  
-  // Check minutes
-  if (nexusVoiceMinutesLeft <= 0) {
-    addNexusMessage('agent', '⚠️ Out of voice minutes! Recharge for $0.99 to get 100 more minutes. 💳');
-    showRechargeModal();
-    return;
-  }
-  
-  // Stop bg listener while recording
-  stopWakeWordListener();
   
   try {
     // Get mic access
@@ -3266,11 +3261,8 @@ async function processRecording(blob, mimeType, duration) {
       inputBox.style.color = 'var(--text-main)';
     }
     
-    // Deduct minutes (actual recording duration only)
-    await deductVoiceMinutes(duration);
-    
-    // Send to NEXUS with voice flag (so we speak back)
-    sendToNexus(true);
+    // Send to NEXUS (text-only mode — no voice reply)
+    sendToNexus();
     
     resetMicUI();
     
@@ -3292,13 +3284,13 @@ function resetMicUI() {
     btn.classList.remove('listening');
     btn.querySelector('i').className = 'fas fa-microphone';
   }
-  if(statusTxt) statusTxt.textContent = nexusBgListening ? '🎤 Listening for "Wake Up"...' : 'Click mic or say "Wake Up"';
+  if(statusTxt) statusTxt.textContent = nexusBgListening ? '🎤 Click mic to talk' : 'Click mic to talk';
   if(orb) orb.classList.remove('active');
   if(wave) wave.classList.remove('active');
   if(inputBox) {
     inputBox.style.color = 'var(--text-main)';
     inputBox.style.fontWeight = '400';
-    inputBox.placeholder = 'Type or click mic / say "Wake Up" to talk to NEXUS...';
+    inputBox.placeholder = 'Type message or click mic to speak...';
   }
   
   nexusActive = false;
@@ -3500,13 +3492,6 @@ async function sendToNexus(speakReply) {
 
     if (data.content && data.content[0]) {
       var reply = data.content[0].text;
-      
-      // PARALLEL: Start TTS BEFORE adding message to chat (saves 100-200ms)
-      var ttsPromise = null;
-      if (speakReply === true) {
-        ttsPromise = speakNexusReply(reply);
-      }
-      
       addNexusMessage('agent', reply);
 
       // Check if agent wants to add a task
@@ -3601,10 +3586,8 @@ async function parseAndAddTaskFromNexus(userText, agentReply) {
 // Start NEXUS when app loads
 function initNexus() {
   setTimeout(function() {
-    initWakeWordListener();
-    loadVoiceUsage();
     var statusTxt = document.getElementById('nexusStatusTxt');
-    if(statusTxt) statusTxt.textContent = 'Click mic or say "Wake Up" to start';
+    if(statusTxt) statusTxt.textContent = 'Click mic to talk · or type below';
   }, 1500);
 }
 
