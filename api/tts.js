@@ -19,9 +19,9 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'tts-1-hd',
-        voice: voice || 'onyx',
+        voice: voice || 'ember',
         input: text.substring(0, 4000),
-        speed: speed || 1.0
+        speed: speed || 1.05
       })
     });
 
