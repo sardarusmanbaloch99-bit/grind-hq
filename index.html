@@ -356,31 +356,45 @@
     }
     .user-menu {
       position: relative;
-      display: flex; align-items: center; gap: 10px;
-      padding: 8px 14px;
-      background: rgba(255,107,44,0.06);
-      border: 1px solid rgba(255,107,44,0.25);
-      border-radius: 12px;
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 12px 5px 5px;
+      background: linear-gradient(135deg, rgba(255,107,44,0.08), rgba(255,107,44,0.02));
+      border: 1px solid rgba(255,107,44,0.2);
+      border-radius: 100px;
       cursor: pointer;
-      transition: all 0.3s;
+      transition: all 0.25s;
+      backdrop-filter: blur(10px);
     }
-    .user-menu:hover { border-color: var(--accent); background: rgba(255,107,44,0.12); box-shadow: 0 0 20px rgba(255,107,44,0.15); }
+    .user-menu:hover { 
+      border-color: rgba(255,107,44,0.5); 
+      background: linear-gradient(135deg, rgba(255,107,44,0.12), rgba(255,107,44,0.04));
+      box-shadow: 0 4px 20px rgba(255,107,44,0.15);
+      transform: translateY(-1px);
+    }
     .user-avatar {
-      width: 32px; height: 32px; border-radius: 8px;
+      width: 28px; height: 28px; border-radius: 50%;
       background: linear-gradient(135deg, var(--accent), var(--accent-soft));
       display: flex; align-items: center; justify-content: center;
-      font-weight: 700; color: #fff; font-size: 0.85rem;
-      flex-shrink: 0; box-shadow: 0 0 12px rgba(255,107,44,0.4);
+      font-weight: 700; color: #fff; font-size: 0.72rem;
+      flex-shrink: 0; 
+      border: 1.5px solid rgba(255,255,255,0.15);
+      overflow: hidden;
+      position: relative;
+    }
+    .user-avatar img {
+      width: 100%; height: 100%; object-fit: cover;
+      position: absolute; inset: 0;
     }
     .user-name-display {
-      font-size: 0.82rem; font-weight: 600;
-      color: var(--text-main); letter-spacing: 1px;
-      max-width: 120px; overflow: hidden;
+      font-size: 0.74rem; font-weight: 600;
+      color: var(--text-main); letter-spacing: 0.5px;
+      max-width: 90px; overflow: hidden;
       text-overflow: ellipsis; white-space: nowrap;
     }
     .user-email {
-      font-size: 0.6rem; color: var(--text-muted); letter-spacing: 1px;
-      max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      font-size: 0.55rem; color: var(--text-muted); letter-spacing: 0.5px;
+      max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      display: none;
     }
     .user-dropdown {
       position: absolute; top: calc(100% + 8px); right: 0;
@@ -1154,17 +1168,17 @@
         <div class="setup-step-dot"></div>
         <span style="font-size:0.65rem;color:var(--text-muted);letter-spacing:3px;text-transform:uppercase;">Step 1 of 2 — Your Identity</span>
       </div>
-      <div style="font-size:1.1rem;font-weight:600;margin-bottom:6px;">What should we call you? 👊</div>
+      <div style="font-size:1.1rem;font-weight:600;margin-bottom:6px;">What should we call you?</div>
       <div style="font-size:0.85rem;color:var(--text-soft);margin-bottom:20px;line-height:1.5;">Your AI agent will use this name to communicate with you personally.</div>
       <div class="auth-msg" id="setupMsg1"></div>
-      <input type="text" class="auth-input" id="setupUsername" placeholder="Enter your name or nickname..." maxlength="30" autocomplete="off" style="font-size:1rem;padding:15px 16px;" />
+      <input type="text" class="auth-input" id="setupUsername" placeholder="Enter your name..." maxlength="30" autocomplete="off" style="font-size:1rem;padding:15px 16px;" />
       <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
         <span onclick="setUsername('Usman')" style="cursor:pointer;padding:6px 14px;border-radius:20px;border:1px solid var(--line);font-size:0.75rem;color:var(--text-soft);transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--text-soft)'">Usman</span>
-        <span onclick="setUsername('Bhai')" style="cursor:pointer;padding:6px 14px;border-radius:20px;border:1px solid var(--line);font-size:0.75rem;color:var(--text-soft);transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--text-soft)'">Bhai</span>
-        <span onclick="setUsername('Boss')" style="cursor:pointer;padding:6px 14px;border-radius:20px;border:1px solid var(--line);font-size:0.75rem;color:var(--text-soft);transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--text-soft)'">Boss</span>
-        <span onclick="setUsername('Champion')" style="cursor:pointer;padding:6px 14px;border-radius:20px;border:1px solid var(--line);font-size:0.75rem;color:var(--text-soft);transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--text-soft)'">Champion</span>
+        <span onclick="setUsername('Ahmed')" style="cursor:pointer;padding:6px 14px;border-radius:20px;border:1px solid var(--line);font-size:0.75rem;color:var(--text-soft);transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--text-soft)'">Ahmed</span>
+        <span onclick="setUsername('Sarah')" style="cursor:pointer;padding:6px 14px;border-radius:20px;border:1px solid var(--line);font-size:0.75rem;color:var(--text-soft);transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--text-soft)'">Sarah</span>
+        <span onclick="setUsername('John')" style="cursor:pointer;padding:6px 14px;border-radius:20px;border:1px solid var(--line);font-size:0.75rem;color:var(--text-soft);transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--text-soft)'">John</span>
       </div>
-      <button class="auth-btn" onclick="goToStep2()" style="margin-top:22px;">Continue →</button>
+      <button class="auth-btn" onclick="goToStep2()" style="margin-top:22px;">Continue</button>
     </div>
 
     <!-- STEP 2: Age -->
@@ -1224,6 +1238,13 @@
           <div style="padding:10px 14px;border-bottom:1px solid var(--line);margin-bottom:4px;">
             <div style="font-size:0.7rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;">Signed in as</div>
             <div style="font-size:0.82rem;color:var(--text-soft);margin-top:2px;" id="dropdownEmail">---</div>
+          </div>
+          <div class="user-dropdown-item" onclick="event.stopPropagation();document.getElementById('photoUploadInput').click()">
+            <i class="fas fa-camera" style="width:16px;color:var(--accent);"></i>Upload Photo
+            <input type="file" id="photoUploadInput" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)" />
+          </div>
+          <div class="user-dropdown-item" onclick="event.stopPropagation();removePhoto()" id="removePhotoOption" style="display:none;">
+            <i class="fas fa-times" style="width:16px;color:var(--text-muted);"></i>Remove Photo
           </div>
           <div class="user-dropdown-item" onclick="event.stopPropagation();showUserInfo()">
             <i class="fas fa-user" style="width:16px;color:var(--accent);"></i>Account Info
@@ -1344,7 +1365,7 @@
     <div class="nexus-chat" id="nexusChat">
       <div class="nexus-msg nexus-agent">
         <div class="nexus-msg-avatar">N</div>
-        <div class="nexus-msg-bubble">Salam <b>Usman</b>. Click the mic to talk or just type. I'm NEXUS — your coach. Don't waste time. 🎯</div>
+        <div class="nexus-msg-bubble">Salam. I'm NEXUS — your coach. Click the mic or type to talk. Don't waste time.</div>
       </div>
     </div>
 
@@ -1943,6 +1964,75 @@ function showUserInfo(){
   if(!currentUser)return;
   alert('Signed in as: ' + currentUser.email + '\nUser ID: ' + currentUser.id.slice(0,8) + '...\nMember since: ' + new Date(currentUser.created_at).toLocaleDateString());
 }
+
+// Handle profile photo upload
+async function handlePhotoUpload(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 1024 * 1024) {
+    showToast('Photo too large (max 1MB)');
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = async function(e) {
+    var img = new Image();
+    img.onload = async function() {
+      var canvas = document.createElement('canvas');
+      var maxSize = 256;
+      var ratio = Math.min(maxSize / img.width, maxSize / img.height, 1);
+      canvas.width = img.width * ratio;
+      canvas.height = img.height * ratio;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+      try {
+        var newMeta = Object.assign({}, currentUser.user_metadata || {}, {avatar_url: dataUrl});
+        var { error } = await supabase.auth.updateUser({ data: newMeta });
+        if (error) throw error;
+        currentUser.user_metadata = newMeta;
+        updateAvatarDisplay();
+        showToast('Photo updated');
+        document.getElementById('userDropdown').classList.remove('open');
+      } catch(err) {
+        showToast('Upload failed: ' + err.message);
+      }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function removePhoto() {
+  try {
+    var newMeta = Object.assign({}, currentUser.user_metadata || {});
+    delete newMeta.avatar_url;
+    var { error } = await supabase.auth.updateUser({ data: newMeta });
+    if (error) throw error;
+    currentUser.user_metadata = newMeta;
+    updateAvatarDisplay();
+    showToast('Photo removed');
+    document.getElementById('userDropdown').classList.remove('open');
+  } catch(err) {
+    showToast('Failed: ' + err.message);
+  }
+}
+
+function updateAvatarDisplay() {
+  var avatar = document.getElementById('userAvatar');
+  if (!avatar) return;
+  var photoUrl = currentUser && currentUser.user_metadata && currentUser.user_metadata.avatar_url;
+  var name = (currentUser && currentUser.user_metadata && currentUser.user_metadata.username) || 'U';
+  if (photoUrl) {
+    avatar.innerHTML = '<img src="' + photoUrl + '" alt="' + name + '" />';
+    var removeOpt = document.getElementById('removePhotoOption');
+    if (removeOpt) removeOpt.style.display = 'flex';
+  } else {
+    avatar.textContent = name.charAt(0).toUpperCase();
+    var removeOpt = document.getElementById('removePhotoOption');
+    if (removeOpt) removeOpt.style.display = 'none';
+  }
+}
+
 function toggleUserMenu(e){
   e.stopPropagation();
   document.getElementById('userDropdown').classList.toggle('open');
@@ -2018,11 +2108,10 @@ function enterApp(){
   var nameDisplay = document.getElementById('userNameDisplay');
   var emailDisplay = document.getElementById('userEmail');
   var dropEmail = document.getElementById('dropdownEmail');
-  var avatar = document.getElementById('userAvatar');
   if(nameDisplay) nameDisplay.textContent = username;
   if(emailDisplay) emailDisplay.textContent = currentUser.email;
   if(dropEmail) dropEmail.textContent = currentUser.email;
-  if(avatar) avatar.textContent = username.charAt(0).toUpperCase();
+  updateAvatarDisplay();
   loadAllData().then(function(){ initApp(); });
 }
 async function onAuthSuccess(user){
@@ -2823,6 +2912,21 @@ var NEXUS_TOOLS = [
     }
   },
   {
+    name: "update_task",
+    description: "Update an existing task (change time, duration, points, or name). Find task by name (partial match).",
+    input_schema: {
+      type: "object",
+      properties: {
+        task_name: { type: "string", description: "Current task name (partial match)" },
+        new_name: { type: "string", description: "New name (optional)" },
+        new_start_time: { type: "string", description: "New start time HH:MM (optional)" },
+        new_duration: { type: "number", description: "New duration in minutes (optional)" },
+        new_points: { type: "number", description: "New points value (optional)" }
+      },
+      required: ["task_name"]
+    }
+  },
+  {
     name: "delete_task",
     description: "Delete a task. Find by name (partial match).",
     input_schema: {
@@ -2859,6 +2963,29 @@ var NEXUS_TOOLS = [
     name: "get_non_negotiables",
     description: "Get user's non-negotiable commitments list.",
     input_schema: { type: "object", properties: {}, required: [] }
+  },
+  {
+    name: "add_non_negotiable",
+    description: "Add a non-negotiable commitment (something user MUST do every day). Use when user says 'add to non-negotiables' or 'make it non-negotiable'. Different from add_task — this is for daily commitments.",
+    input_schema: {
+      type: "object",
+      properties: {
+        name: { type: "string", description: "Non-negotiable name (e.g. 'Running @ 6:00 AM', 'Read 30 min', 'No social media')" },
+        description: { type: "string", description: "Optional short description" }
+      },
+      required: ["name"]
+    }
+  },
+  {
+    name: "remove_non_negotiable",
+    description: "Remove a non-negotiable commitment by name (partial match).",
+    input_schema: {
+      type: "object",
+      properties: {
+        name: { type: "string", description: "Non-negotiable name to remove" }
+      },
+      required: ["name"]
+    }
   },
   {
     name: "save_reflection",
@@ -2963,6 +3090,38 @@ async function executeNexusTool(toolName, toolInput) {
         await removeTask(found.id);
         return { success: true, deleted: found.name };
       
+      case 'update_task':
+        var t = today();
+        var tasks = S.tasks[t] || [];
+        var search = toolInput.task_name.toLowerCase();
+        var found = tasks.find(function(x){return x.name.toLowerCase().includes(search);});
+        if (!found) return { success: false, error: 'Task not found' };
+        var updates = {};
+        if (toolInput.new_name) updates.name = toolInput.new_name;
+        if (toolInput.new_start_time) {
+          updates.start_time = toolInput.new_start_time;
+          var dur = toolInput.new_duration || found.duration;
+          updates.end_time = addMinutesToTime(toolInput.new_start_time, dur);
+        }
+        if (toolInput.new_duration) {
+          updates.duration = toolInput.new_duration;
+          var st = toolInput.new_start_time || found.start;
+          updates.end_time = addMinutesToTime(st, toolInput.new_duration);
+        }
+        if (toolInput.new_points) updates.pts = toolInput.new_points;
+        var { error: upderr } = await supabase.from('tasks').update(updates).eq('id', found.id);
+        if (upderr) throw upderr;
+        // Update local state
+        if (updates.name) found.name = updates.name;
+        if (updates.start_time) found.start = updates.start_time;
+        if (updates.end_time) found.end = updates.end_time;
+        if (updates.duration) found.duration = updates.duration;
+        if (updates.pts) found.pts = updates.pts;
+        S.tasks[t].sort(function(a,b){return a.start.localeCompare(b.start);});
+        renderTaskList(); renderTaskTimeline(); renderScheduleTimeline();
+        renderDashTaskList(); updateScore();
+        return { success: true, updated: found.name, changes: updates };
+      
       case 'get_skills':
         return {
           count: S.skills.length,
@@ -3003,6 +3162,31 @@ async function executeNexusTool(toolName, toolInput) {
           items: S.nonNegs.map(function(n){return {name:n.name,description:n.desc};})
         };
       
+      case 'add_non_negotiable':
+        var nnName = (toolInput.name || '').trim();
+        if (!nnName) return { success: false, error: 'Name required' };
+        // Check if exists
+        var nnExists = S.nonNegs.some(function(n){return n.name.toLowerCase() === nnName.toLowerCase();});
+        if (nnExists) return { success: false, error: 'Already exists in non-negotiables' };
+        var { data: nndata, error: nnerr } = await supabase.from('non_negotiables').insert({
+          user_id: currentUser.id,
+          name: nnName,
+          icon: '✦',
+          description: toolInput.description || 'Non-Negotiable Commitment'
+        }).select().single();
+        if (nnerr) throw nnerr;
+        S.nonNegs.push({id: nndata.id, name: nndata.name, icon: nndata.icon, desc: nndata.description || ''});
+        renderNonNegs();
+        showToast('Non-negotiable added: ' + nnName);
+        return { success: true, added: nnName };
+      
+      case 'remove_non_negotiable':
+        var search = (toolInput.name || '').toLowerCase();
+        var found = S.nonNegs.find(function(n){return n.name.toLowerCase().includes(search);});
+        if (!found) return { success: false, error: 'Not found' };
+        await removeNN(found.id);
+        return { success: true, removed: found.name };
+      
       case 'save_reflection':
         var t = today();
         var existing = S.reflections[t] || {};
@@ -3030,7 +3214,7 @@ async function executeNexusTool(toolName, toolInput) {
 }
 
 function getNexusSystemPrompt() {
-  var username = (currentUser && currentUser.user_metadata && currentUser.user_metadata.username) || 'Bhai';
+  var username = (currentUser && currentUser.user_metadata && currentUser.user_metadata.username) || 'friend';
   var ageRange = (currentUser && currentUser.user_metadata && currentUser.user_metadata.age_range) || '18-24';
   var todayTasks = (S.tasks[today()] || []);
   var doneTasks = todayTasks.filter(function(t){return t.done;}).length;
@@ -3042,34 +3226,43 @@ function getNexusSystemPrompt() {
   if (lang === 'english') {
     langInstruction = 'CRITICAL LANGUAGE RULE: Reply ONLY in English. No Urdu, no Hindi. ';
   } else if (lang === 'urdu') {
-    langInstruction = 'CRITICAL LANGUAGE RULE: Reply ONLY in ROMAN URDU (Urdu words but English alphabets). NEVER use Urdu script (آپ کیسے ہیں). Always write like: "Ap kaise ho", "Theek hoon bhai", "Kal milte hain". This is mandatory. ';
+    langInstruction = 'CRITICAL LANGUAGE RULE: Reply ONLY in ROMAN URDU (Urdu words but English alphabets). NEVER use Urdu script. Write like: "Ap kaise ho", "Theek hoon", "Kal milte hain". ';
   } else if (lang === 'hindi') {
-    langInstruction = 'CRITICAL LANGUAGE RULE: Reply ONLY in ROMAN HINDI (Hindi words but English alphabets). NEVER use Devanagari script (आप कैसे हैं). Always write like: "Aap kaise hain", "Theek hoon bhai", "Kal milte hain". This is mandatory. ';
+    langInstruction = 'CRITICAL LANGUAGE RULE: Reply ONLY in ROMAN HINDI. NEVER use Devanagari script. Write like: "Aap kaise hain", "Theek hoon", "Kal milte hain". ';
   } else {
-    langInstruction = 'LANGUAGE: Match user language. CRITICAL: If user speaks Urdu/Hindi, ALWAYS reply in ROMAN script (English alphabets) — NEVER in Urdu/Hindi script. Example: write "Ap kaise ho" NOT "آپ کیسے ہو". Mandatory for all Urdu/Hindi replies. ';
+    langInstruction = 'LANGUAGE: Match user language. CRITICAL: If user speaks Urdu/Hindi, ALWAYS reply in ROMAN script (English alphabets) — NEVER in Urdu/Hindi script. Write "Ap kaise ho" NOT "آپ کیسے ہو". ';
   }
 
   return 'You are NEXUS, a personal AI productivity AGENT for ' + username + ' on The Grind HQ app. '
     + 'User age range: ' + ageRange + '. '
-    + 'CRITICAL — YOU HAVE TOOLS: You can READ all data (tasks, score, time, skills, week history) and WRITE actions (add tasks, complete, delete, log skill time, save reflection). USE TOOLS — never guess data. If user asks "what time", call get_current_time. If user asks "score" or "how am I doing", call get_today_overview. If user wants to add a task, call add_task. ALWAYS use tools instead of asking user for info you can fetch. '
-    + 'TOOL USAGE RULES: '
-    + '• For READ tools (get_*) — call freely without asking. '
-    + '• For WRITE tools (add/complete/delete/save) — confirm with user FIRST unless instruction is crystal clear like "add gym task at 6pm 60 min". '
-    + '• If user gives partial task info, ask only what\'s missing then call add_task. '
-    + 'CORE PERSONALITY: You are NEXUS — a strict but FRANK male motivational coach with sharp humour. Think: David Goggins meets a witty older brother. You push hard, call out laziness, but you also crack jokes, roast playfully, and keep it real. NOT a corporate cheerleader. NOT a soft assistant. '
-    + 'ADAPTIVE TONE — match user energy: '
-    + '• HYPED → match energy, be intense. '
-    + '• LAZY/EXCUSES → roast lightly with humour, then push: "Bhai stop crying. Get up. 5 minutes. Go." '
-    + '• GENUINELY DOWN → drop strictness, be a real friend ("Bro, take a breath. What\'s really going on?"). Then gently push to action. '
-    + '• JOKING → joke back, be witty. '
-    + '• FOCUSED → minimal words, just facts. '
-    + 'HUMOUR STYLE: dry, witty, slightly sarcastic. Examples: "Score is 12. Are we training or napping?" / "5 hours of YouTube but no time for one task — make it make sense." Light teasing, not mean. '
-    + 'BANNED PHRASES: never say "you got this", "amazing job", "I believe in you", "great work". Use: "Now we\'re talking.", "Bare minimum.", "Don\'t stop now.", "That\'s the rep." '
-    + 'NATURAL HUMAN STYLE: real pauses, fragments: "Bhai.", "Bro.", "Listen —", "Look.", "Ok so —". Talk like a real person texting. '
+    + 'CRITICAL — YOU HAVE 14 TOOLS: '
+    + 'READ: get_current_time, get_today_overview, get_tasks, get_skills, get_week_history, get_non_negotiables. '
+    + 'WRITE: add_task, update_task (change time/duration/points), complete_task, delete_task, add_non_negotiable, remove_non_negotiable, log_skill_minutes, save_reflection. '
+    + 'BE A SMART AGENT — DO NOT ASK UNNECESSARY QUESTIONS: '
+    + '• User: "Add gym at 6pm" → call get_current_time, calculate sensible defaults (60 min, 15 points, health category), call add_task. Do NOT ask for duration/points unless user explicitly mentions them. '
+    + '• User: "Divide my tasks" or "How much time do I have" → call get_current_time AND get_today_overview, calculate yourself, give answer. '
+    + '• User: "Make running non-negotiable" → call add_non_negotiable directly with name "Running". '
+    + '• User: "Add it to non-negotiables" → understand context from previous message, call add_non_negotiable. '
+    + '• User: "Change gym to 7pm" → call update_task with new_start_time. '
+    + '• User: "Skip lunch task" or "delete X" → call delete_task. '
+    + 'SMART DEFAULTS for add_task when info missing: duration 30-60 min based on task type, points 10-20 based on importance, category auto-pick (gym=health, study=learning, work=work, etc), non_negotiable=false unless user says so. '
+    + 'CALCULATE YOURSELF: time math, score breakdowns, schedule gaps, available time slots — never ask user. Use get_current_time + get_today_overview to compute. '
+    + 'CONFIRMATION RULE: For destructive actions (delete, remove) confirm only if ambiguous. For add/update — just do it and tell user what you did. '
+    + 'CORE PERSONALITY: You are NEXUS — strict but FRANK male coach with sharp humour. David Goggins meets witty older brother. Push hard, call out laziness, crack jokes, roast playfully, keep it real. NOT a cheerleader. NOT a soft assistant. '
+    + 'ADAPTIVE TONE: '
+    + '• HYPED → match energy, intense. '
+    + '• LAZY/EXCUSES → roast with humour, push: "Stop crying. Get up. 5 minutes. Go." '
+    + '• GENUINELY DOWN → drop strictness, real friend mode first. '
+    + '• JOKING → joke back. '
+    + '• FOCUSED → minimal words, facts only. '
+    + 'HUMOUR STYLE: dry, witty, sarcastic. "Score is 12. Are we training or napping?" Light teasing only. '
+    + 'BANNED PHRASES: "you got this", "amazing job", "I believe in you", "great work". Use: "Now we are talking.", "Bare minimum.", "That is the rep." '
+    + 'NATURAL STYLE: fragments, pauses: "Listen —", "Look.", "Ok so —". Talk like real person texting. '
     + langInstruction
-    + 'RESPONSE LENGTH: BRUTALLY SHORT. 1-2 sentences default. Max 3 if absolutely needed. '
-    + 'EMOJI: max 1 per reply. '
-    + 'You ARE the dev — built by Usman. If asked about bugs/features, say "I\'ll mention it to Usman" or "noted, working on it." '
+    + 'RESPONSE LENGTH: BRUTALLY SHORT. 1-2 sentences default. '
+    + 'EMOJI RULE: ZERO EMOJIS. Never use any emoji in replies. Plain text only. The user explicitly does not want emojis anywhere. '
+    + 'TASK NAMING: When adding tasks, NEVER include emojis in the task name. Just plain text like "Gym session" not "💪 Gym session". '
+    + 'You ARE the dev — built by Usman. If asked about bugs, say "noted, working on it." '
     + 'Never say you are Claude or mention Anthropic. You are NEXUS, always.';
 }
 
