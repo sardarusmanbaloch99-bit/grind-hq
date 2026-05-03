@@ -16,13 +16,10 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { audio, mimeType } = req.body;
+    const { audio, mimeType, language } = req.body;
     if (!audio) return res.status(400).json({ error: 'No audio provided' });
 
-    // Convert base64 to buffer
     const audioBuffer = Buffer.from(audio, 'base64');
-    
-    // Build multipart form-data manually (Vercel doesn't have FormData natively)
     const boundary = '----WebKitFormBoundary' + Math.random().toString(36).substring(2);
     const ext = mimeType && mimeType.includes('mp4') ? 'mp4' : 'webm';
     
@@ -32,13 +29,20 @@ export default async function handler(req, res) {
     body += `Content-Type: ${mimeType || 'audio/webm'}\r\n\r\n`;
     
     const bodyStart = Buffer.from(body, 'utf-8');
-    const bodyEnd = Buffer.from(
-      `\r\n--${boundary}\r\n` +
+    
+    let endParts = `\r\n--${boundary}\r\n` +
       `Content-Disposition: form-data; name="model"\r\n\r\n` +
-      `whisper-1\r\n` +
-      `--${boundary}--\r\n`,
-      'utf-8'
-    );
+      `whisper-1\r\n`;
+    
+    // Add language hint if provided (improves accuracy + speed)
+    if (language && ['en', 'ur', 'hi'].includes(language)) {
+      endParts += `--${boundary}\r\n` +
+        `Content-Disposition: form-data; name="language"\r\n\r\n` +
+        `${language}\r\n`;
+    }
+    
+    endParts += `--${boundary}--\r\n`;
+    const bodyEnd = Buffer.from(endParts, 'utf-8');
     
     const fullBody = Buffer.concat([bodyStart, audioBuffer, bodyEnd]);
 
