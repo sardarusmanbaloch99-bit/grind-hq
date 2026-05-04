@@ -5046,6 +5046,42 @@ function stopPreview() {
 }
 
 // ---- ALARM SCHEDULER ----
+
+// LocalStorage backup so alarms survive even without DB columns
+function saveAlarmToLocal(taskId, musicId) {
+  try {
+    var key = 'grind_alarms';
+    var data = JSON.parse(localStorage.getItem(key) || '{}');
+    data[taskId] = { important:true, musicId: musicId, date: today() };
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch(e) {}
+}
+
+function loadAlarmsFromLocal() {
+  try {
+    var data = JSON.parse(localStorage.getItem('grind_alarms') || '{}');
+    var t = today();
+    var changed = false;
+    Object.keys(data).forEach(function(taskId) {
+      var saved = data[taskId];
+      // Cleanup: remove old days
+      if (saved.date !== t) {
+        delete data[taskId];
+        changed = true;
+        return;
+      }
+      // Patch matching task in S.tasks if alarm flag missing from DB
+      var tasks = S.tasks[t] || [];
+      var task = tasks.find(function(x){ return String(x.id) === String(taskId); });
+      if (task && !task.important) {
+        task.important = true;
+        task.musicId = saved.musicId || 1;
+      }
+    });
+    if (changed) localStorage.setItem('grind_alarms', JSON.stringify(data));
+  } catch(e) {}
+}
+
 var _alarmsFired = {}; // track which tasks already fired today to avoid duplicates
 
 function scheduleAlarms() {
@@ -5231,15 +5267,14 @@ addTask = async function() {
   var wasImportant = importantChecked;
   var musicId = (importantChecked && appliedMusicId) ? appliedMusicId : (importantChecked ? 1 : null);
   if (importantChecked && !appliedMusicId) {
-    showToast('Using default Morning Piano (no music applied)');
+    showToast('Using default Morning Piano');
   }
 
-  // CRITICAL: Unlock audio AND request notification permission on user gesture
+  // Unlock audio + ask permission ONLY first time per user
   if (wasImportant) {
     try {
       var ctx = getAudioCtx();
       if (ctx.state === 'suspended') await ctx.resume();
-      // Play a silent ping to fully unlock audio for later
       var silentOsc = ctx.createOscillator();
       var silentGain = ctx.createGain();
       silentGain.gain.value = 0.0001;
@@ -5249,9 +5284,12 @@ addTask = async function() {
       silentOsc.stop(ctx.currentTime + 0.05);
       console.log('[ALARM] Audio unlocked, state:', ctx.state);
     } catch(e) { console.error('[ALARM] Audio unlock failed:', e); }
-    // Ask for notification permission
-    if ('Notification' in window && Notification.permission === 'default') {
-      try { await Notification.requestPermission(); } catch(e){}
+    // Only ask once per user — store flag in localStorage
+    if ('Notification' in window && Notification.permission === 'default' && !localStorage.getItem('grind_notif_asked')) {
+      try {
+        await Notification.requestPermission();
+        localStorage.setItem('grind_notif_asked', '1');
+      } catch(e){}
     }
   }
 
@@ -5264,18 +5302,17 @@ addTask = async function() {
     if (last) {
       last.important = true;
       last.musicId = musicId || 1;
-      // Save to DB — log errors so user knows if columns are missing
+      // Save to DB silently — if columns don't exist, just use localStorage
       try {
         var { error: upErr } = await supabase.from('tasks').update({
           important: true, music_id: musicId || 1
         }).eq('id', last.id).eq('user_id', currentUser.id);
         if (upErr) {
-          console.error('[ALARM] DB update failed:', upErr.message);
-          showToast('⚠ Alarm saved locally — add `important` and `music_id` columns in Supabase tasks table');
+          console.warn('[ALARM] Using localStorage backup (DB columns not added yet)');
         }
-      } catch(e) {
-        console.error('[ALARM] update threw:', e);
-      }
+      } catch(e) {}
+      // ALWAYS save to localStorage as backup so alarms survive reload
+      saveAlarmToLocal(last.id, musicId || 1);
       // Re-render so bell badge appears NOW
       if (typeof renderTaskList === 'function') renderTaskList();
       if (typeof renderTaskTimeline === 'function') renderTaskTimeline();
@@ -5287,7 +5324,7 @@ addTask = async function() {
       var music = ALARM_TRACKS.find(function(m){return m.id===(musicId||1);});
       var minsToGo = Math.floor((new Date(today()+'T'+last.start+':00') - new Date()) / 60000);
       if (minsToGo > 0 && minsToGo < 1440) {
-        showToast('🔔 Alarm set for ' + last.start + ' — ' + (music?music.name:'') + ' will play in ' + minsToGo + ' min');
+        showToast('🔔 Alarm set for ' + last.start + ' · ' + (music?music.name:'') + ' · ' + minsToGo + ' min to go');
       } else {
         showToast('🔔 Alarm scheduled for ' + last.start);
       }
@@ -5363,6 +5400,7 @@ function nexus_test_alarm(musicName) {
 document.addEventListener('DOMContentLoaded', function(){
   setTimeout(function(){
     if (S && S.tasks) {
+      loadAlarmsFromLocal();  // Patch tasks with alarm flags from localStorage
       scheduleAlarms();
       startAlarmWatchdog();
     }
