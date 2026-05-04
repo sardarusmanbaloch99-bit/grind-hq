@@ -2871,6 +2871,7 @@ function renderDashTaskList(){
       +'<span style="font-size:0.9rem;">'+escHtml(t.icon)+'</span>'
       +'<span style="flex:1;font-size:0.83rem;color:'+(t.done?'var(--text-muted)':'var(--text-main)')+(t.done?';text-decoration:line-through':'')+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+escHtml(t.name)+'</span>'
       +(t.nonNeg?'<span class="nn-badge" style="font-size:0.45rem;">NN</span>':'')
+      +(t.important?'<i class="fas fa-bell" style="color:#ffb400;font-size:0.65rem;" title="Alarm Set"></i>':'')
       +'<span style="font-family:Orbitron,monospace;font-size:0.55rem;color:var(--text-muted);">'+t.start+'</span>'
       +'</div>';
   }).join('');
@@ -2890,7 +2891,7 @@ function renderTaskTimeline(){
       +'<div style="font-family:Orbitron,monospace;font-size:0.62rem;color:'+(active?'var(--accent)':'var(--text-soft)')+';font-weight:600;letter-spacing:1px;">'+b.start+' – '+b.end+'</div>'
       +(active?'<div class="now-pill">● NOW</div>':'')
       +'</div>'
-      +'<div style="font-size:0.92rem;font-weight:600;">'+escHtml(b.icon)+' '+escHtml(b.name)+(b.nonNeg?' <span class="nn-badge">NN</span>':'')+'</div>'
+      +'<div style="font-size:0.92rem;font-weight:600;">'+escHtml(b.icon)+' '+escHtml(b.name)+(b.nonNeg?' <span class="nn-badge">NN</span>':'')+(b.important?' <span style="font-size:0.55rem;background:rgba(255,180,0,0.15);color:#ffb400;border:1px solid rgba(255,180,0,0.35);border-radius:4px;padding:1px 5px;letter-spacing:0.5px;margin-left:4px;"><i class="fas fa-bell" style="font-size:0.55rem;margin-right:2px;"></i>ALARM</span>':'')+'</div>'
       +'</div>';
   }).join('')+'</div>';
 }
@@ -2926,7 +2927,7 @@ function renderScheduleTimeline(){
     wrap.innerHTML=
       '<div class="tl-left"><div class="tl-time">'+b.start+'</div><div class="tl-duration">'+durText+'</div></div>'
       +'<div class="tl-spine"><div class="tl-line" style="'+(i===0?'flex:0 0 12px':'')+'"></div><div class="tl-dot-outer"></div><div class="tl-line" style="'+(isLast?'flex:0 0 0':'')+'"></div></div>'
-      +'<div class="tl-content"><div class="tl-card'+(active?' active-block':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;"><div><div style="font-size:0.95rem;font-weight:600;display:flex;align-items:center;gap:8px;">'+escHtml(b.icon)+' '+escHtml(b.name)+(b.nonNeg?' <span class="nn-badge">NON-NEG</span>':'')+'</div><div style="font-size:0.65rem;color:var(--text-muted);margin-top:3px;font-family:Orbitron,monospace;letter-spacing:1px;">'+b.start+' – '+b.end+' · '+durText+'</div></div>'+(active?'<div class="now-pill">● NOW</div>':'')+'</div></div></div>';
+      +'<div class="tl-content"><div class="tl-card'+(active?' active-block':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;"><div><div style="font-size:0.95rem;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+escHtml(b.icon)+' '+escHtml(b.name)+(b.nonNeg?' <span class="nn-badge">NON-NEG</span>':'')+(b.important?' <span style="font-size:0.6rem;background:rgba(255,180,0,0.12);color:#ffb400;border:1px solid rgba(255,180,0,0.3);border-radius:4px;padding:2px 7px;letter-spacing:0.5px;font-weight:600;"><i class="fas fa-bell" style="font-size:0.6rem;margin-right:3px;"></i>ALARM</span>':'')+'</div><div style="font-size:0.65rem;color:var(--text-muted);margin-top:3px;font-family:Orbitron,monospace;letter-spacing:1px;">'+b.start+' – '+b.end+' · '+durText+'</div></div>'+(active?'<div class="now-pill">● NOW</div>':'')+'</div></div></div>';
     c.appendChild(wrap);
   });
   var curr=tasks.find(function(b){
@@ -5022,23 +5023,58 @@ function stopPreview() {
 }
 
 // ---- ALARM SCHEDULER ----
+var _alarmsFired = {}; // track which tasks already fired today to avoid duplicates
+
 function scheduleAlarms() {
   alarmTimers.forEach(function(t){ clearTimeout(t); });
   alarmTimers = [];
   var t = today();
   var tasks = (S.tasks && S.tasks[t]) || [];
   var now = new Date();
+  var scheduled = 0;
   tasks.forEach(function(task) {
     if (!task.important || task.done) return;
+    if (_alarmsFired[task.id]) return;
     var parts = task.start.split(':');
     var taskTime = new Date();
     taskTime.setHours(parseInt(parts[0]), parseInt(parts[1]), 0, 0);
     var diff = taskTime - now;
-    if (diff > 0 && diff < 24 * 3600 * 1000) {
-      var tid = setTimeout(function() { triggerAlarm(task); }, diff);
+    // Schedule if within next 24 hours OR just missed by < 30s (still fire)
+    if (diff > -30000 && diff < 24 * 3600 * 1000) {
+      var fireDelay = Math.max(0, diff);
+      var tid = setTimeout(function() {
+        _alarmsFired[task.id] = true;
+        triggerAlarm(task);
+      }, fireDelay);
       alarmTimers.push(tid);
+      scheduled++;
+      console.log('[ALARM] Scheduled "'+task.name+'" at '+task.start+' (in '+Math.round(diff/1000)+'s)');
     }
   });
+  console.log('[ALARM] Total scheduled: '+scheduled);
+}
+
+// Watchdog — every 60s check for any important task whose time has come and didn't fire
+var _alarmWatchdog = null;
+function startAlarmWatchdog() {
+  if (_alarmWatchdog) clearInterval(_alarmWatchdog);
+  _alarmWatchdog = setInterval(function() {
+    var t = today();
+    var tasks = (S.tasks && S.tasks[t]) || [];
+    var now = new Date();
+    var nowM = now.getHours()*60 + now.getMinutes();
+    tasks.forEach(function(task) {
+      if (!task.important || task.done || _alarmsFired[task.id]) return;
+      var parts = task.start.split(':');
+      var taskM = parseInt(parts[0])*60 + parseInt(parts[1]);
+      // If task time matches current minute (or 1 min late), fire now
+      if (Math.abs(taskM - nowM) <= 1) {
+        _alarmsFired[task.id] = true;
+        console.log('[ALARM-WATCHDOG] Firing missed alarm:', task.name);
+        triggerAlarm(task);
+      }
+    });
+  }, 30000); // check every 30s
 }
 
 function triggerAlarm(task) {
@@ -5113,12 +5149,16 @@ function appendNexusMessage(html) {
 var _origAddTask = addTask;
 addTask = async function() {
   var wasImportant = importantChecked;
-  // If important is on but no music applied, force music_id 1
   var musicId = (importantChecked && appliedMusicId) ? appliedMusicId : (importantChecked ? 1 : null);
   if (importantChecked && !appliedMusicId) {
-    showToast('Tip: Click APPLY on a music to confirm — using default Morning Piano');
+    showToast('Using default Morning Piano (no music applied)');
   }
+
+  // Unlock audio context now (browsers require user gesture)
+  try { getAudioCtx(); } catch(e) {}
+
   await _origAddTask();
+
   if (wasImportant) {
     var t = today();
     var tasks = S.tasks[t] || [];
@@ -5126,10 +5166,33 @@ addTask = async function() {
     if (last) {
       last.important = true;
       last.musicId = musicId || 1;
+      // Save to DB — log errors so user knows if columns are missing
       try {
-        await supabase.from('tasks').update({ important: true, music_id: musicId || 1 }).eq('id', last.id).eq('user_id', currentUser.id);
-      } catch(e) {}
+        var { error: upErr } = await supabase.from('tasks').update({
+          important: true, music_id: musicId || 1
+        }).eq('id', last.id).eq('user_id', currentUser.id);
+        if (upErr) {
+          console.error('[ALARM] DB update failed:', upErr.message);
+          showToast('⚠ Alarm saved locally — add `important` and `music_id` columns in Supabase tasks table');
+        }
+      } catch(e) {
+        console.error('[ALARM] update threw:', e);
+      }
+      // Re-render so bell badge appears NOW
+      if (typeof renderTaskList === 'function') renderTaskList();
+      if (typeof renderTaskTimeline === 'function') renderTaskTimeline();
+      if (typeof renderScheduleTimeline === 'function') renderScheduleTimeline();
+      if (typeof renderDashTaskList === 'function') renderDashTaskList();
+      // Schedule the alarm
       scheduleAlarms();
+      // Confirmation
+      var music = ALARM_TRACKS.find(function(m){return m.id===(musicId||1);});
+      var minsToGo = Math.floor((new Date(today()+'T'+last.start+':00') - new Date()) / 60000);
+      if (minsToGo > 0 && minsToGo < 1440) {
+        showToast('🔔 Alarm set for ' + last.start + ' — ' + (music?music.name:'') + ' will play in ' + minsToGo + ' min');
+      } else {
+        showToast('🔔 Alarm scheduled for ' + last.start);
+      }
     }
   }
   // Reset state
@@ -5201,7 +5264,10 @@ function nexus_test_alarm(musicName) {
 // Schedule alarms on page load
 document.addEventListener('DOMContentLoaded', function(){
   setTimeout(function(){
-    if (S && S.tasks) scheduleAlarms();
+    if (S && S.tasks) {
+      scheduleAlarms();
+      startAlarmWatchdog();
+    }
   }, 4000);
 });
 
