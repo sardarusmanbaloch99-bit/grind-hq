@@ -4814,14 +4814,28 @@ function playTrack(trackId, opts) {
   opts = opts || {};
   stopTrack();
   var track = ALARM_TRACKS.find(function(t){return t.id===trackId;});
-  if (!track) return null;
+  if (!track) {
+    console.error('[ALARM] Track not found:', trackId);
+    return null;
+  }
   var ctx = getAudioCtx();
-  var master = ctx.createGain();
-  master.gain.value = 0;
-  master.connect(ctx.destination);
+  console.log('[ALARM] AudioContext state:', ctx.state, '| Playing track:', track.name);
 
-  // Fade in gently
-  master.gain.linearRampToValueAtTime(opts.volume || 0.4, ctx.currentTime + 0.5);
+  // Force resume if suspended (critical for autoplay policy)
+  if (ctx.state === 'suspended') {
+    ctx.resume().then(function(){
+      console.log('[ALARM] AudioContext resumed');
+    }).catch(function(err){
+      console.error('[ALARM] Resume failed:', err);
+    });
+  }
+
+  var master = ctx.createGain();
+  // Start at very low audible level (not 0) and ramp UP — fixes Safari/Chrome silent fail
+  var targetVol = opts.volume || 0.5;
+  master.gain.setValueAtTime(0.001, ctx.currentTime);
+  master.gain.exponentialRampToValueAtTime(targetVol, ctx.currentTime + 0.4);
+  master.connect(ctx.destination);
 
   // Compute pattern total duration
   var totalDur = 0;
@@ -4829,7 +4843,7 @@ function playTrack(trackId, opts) {
     var endT = n.t + n.d;
     if (endT > totalDur) totalDur = endT;
   });
-  totalDur += 0.5; // small gap before loop
+  totalDur += 0.5;
 
   function scheduleOnce(startOffset) {
     var startBase = ctx.currentTime + startOffset;
@@ -4853,7 +4867,6 @@ function playTrack(trackId, opts) {
     player.loopTimer = setTimeout(loopFn, totalDur * 1000);
   }
 
-  // Auto-stop after maxDuration
   if (opts.maxDuration) {
     player.fadeTimer = setTimeout(function(){
       stopTrack();
@@ -4967,15 +4980,25 @@ function renderApplyButton() {
   if (!hasSelection) { box.innerHTML=''; return; }
 
   if (isApplied && appliedMusicId) {
-    box.innerHTML = '<div style="background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.3);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">'
+    box.innerHTML = '<div style="background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.3);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px;">'
       + '<i class="fas fa-check-circle" style="color:#34D399;font-size:14px;"></i>'
       + '<div style="flex:1;font-size:0.78rem;color:#34D399;font-weight:600;">Music applied: ' + sel.name + '</div>'
       + '<button onclick="changeAppliedMusic()" style="background:none;border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:4px 10px;color:var(--text-muted);font-size:0.65rem;cursor:pointer;">Change</button>'
-      + '</div>';
+      + '</div>'
+      + '<button onclick="testAlarmNow()" style="width:100%;background:rgba(255,180,0,0.1);border:1px dashed rgba(255,180,0,0.4);border-radius:8px;padding:8px;color:#ffb400;font-size:0.72rem;font-weight:600;letter-spacing:0.5px;cursor:pointer;">'
+      + '<i class="fas fa-volume-up" style="margin-right:6px;"></i>TEST ALARM NOW (5 sec preview)'
+      + '</button>';
   } else {
     box.innerHTML = '<button onclick="applyMusic()" style="width:100%;background:linear-gradient(135deg,#ffb400,#ff8c00);border:none;border-radius:10px;padding:11px;color:#000;font-size:0.82rem;font-weight:700;letter-spacing:0.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">'
       + '<i class="fas fa-check"></i>APPLY: ' + sel.name + '</button>';
   }
+}
+
+function testAlarmNow() {
+  var id = appliedMusicId || selectedMusicId || 1;
+  var track = ALARM_TRACKS.find(function(t){return t.id===id;});
+  showToast('Testing: ' + (track ? track.name : 'alarm') + ' — listen for 5 sec');
+  playTrack(id, { volume:0.5, loop:false, maxDuration:5 });
 }
 
 function selectMusic(id) {
@@ -5078,13 +5101,71 @@ function startAlarmWatchdog() {
 }
 
 function triggerAlarm(task) {
-  if (task.done) return;
+  console.log('[ALARM] 🔔 FIRING ALARM for task:', task.name, 'at', task.start);
+  if (task.done) {
+    console.log('[ALARM] Task already done, skipping');
+    return;
+  }
   activeAlarmTaskId = task.id;
   var musicId = task.musicId || 1;
   var track = ALARM_TRACKS.find(function(t){return t.id===musicId;}) || ALARM_TRACKS[0];
-  // Play looped track at moderate volume — auto-stop after 2 min
-  playTrack(musicId, { volume:0.5, loop:true, maxDuration:120 });
+
+  // CRITICAL: Force-resume audio context (autoplay policy fix)
+  try {
+    var ctx = getAudioCtx();
+    if (ctx.state === 'suspended') {
+      ctx.resume().then(function(){
+        console.log('[ALARM] Audio resumed, playing now');
+        playTrack(musicId, { volume:0.6, loop:true, maxDuration:120 });
+      });
+    } else {
+      playTrack(musicId, { volume:0.6, loop:true, maxDuration:120 });
+    }
+  } catch(e) {
+    console.error('[ALARM] Web Audio failed, using fallback beep:', e);
+    playFallbackBeep();
+  }
+
+  // Always show the modal — visual alert even if audio fails
   showAlarmModal(task, track);
+
+  // Browser notification (works even if tab in background)
+  try {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      var notif = new Notification('🔔 ' + task.name, {
+        body: 'Task time: ' + task.start + ' — Time to start!',
+        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%23FF6B2C"/><text x="50" y="65" text-anchor="middle" font-size="40" fill="white">🔔</text></svg>',
+        tag: 'grind-alarm-' + task.id,
+        requireInteraction: true
+      });
+      notif.onclick = function() { window.focus(); notif.close(); };
+    }
+  } catch(e) {}
+
+  // Vibrate phone if supported
+  try { if (navigator.vibrate) navigator.vibrate([400, 200, 400, 200, 400]); } catch(e){}
+}
+
+// Fallback simple beep using HTML5 audio + data URI (works without any external file)
+function playFallbackBeep() {
+  try {
+    var ctx = getAudioCtx();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0.001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.4, ctx.currentTime + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.5);
+    console.log('[ALARM] Fallback beep played');
+  } catch(e) {
+    console.error('[ALARM] Even fallback failed:', e);
+  }
+}
 }
 
 function showAlarmModal(task, track) {
@@ -5154,8 +5235,26 @@ addTask = async function() {
     showToast('Using default Morning Piano (no music applied)');
   }
 
-  // Unlock audio context now (browsers require user gesture)
-  try { getAudioCtx(); } catch(e) {}
+  // CRITICAL: Unlock audio AND request notification permission on user gesture
+  if (wasImportant) {
+    try {
+      var ctx = getAudioCtx();
+      if (ctx.state === 'suspended') await ctx.resume();
+      // Play a silent ping to fully unlock audio for later
+      var silentOsc = ctx.createOscillator();
+      var silentGain = ctx.createGain();
+      silentGain.gain.value = 0.0001;
+      silentOsc.connect(silentGain);
+      silentGain.connect(ctx.destination);
+      silentOsc.start();
+      silentOsc.stop(ctx.currentTime + 0.05);
+      console.log('[ALARM] Audio unlocked, state:', ctx.state);
+    } catch(e) { console.error('[ALARM] Audio unlock failed:', e); }
+    // Ask for notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+      try { await Notification.requestPermission(); } catch(e){}
+    }
+  }
 
   await _origAddTask();
 
@@ -5269,6 +5368,37 @@ document.addEventListener('DOMContentLoaded', function(){
       startAlarmWatchdog();
     }
   }, 4000);
+
+  // CRITICAL: Unlock audio on ANY click anywhere on page
+  // This ensures audio works even when alarm fires hours later
+  var unlockedOnce = false;
+  function unlockAudioOnce() {
+    if (unlockedOnce) return;
+    try {
+      var ctx = getAudioCtx();
+      if (ctx.state === 'suspended') ctx.resume();
+      // Tiny silent buffer to fully unlock
+      var buf = ctx.createBuffer(1, 1, 22050);
+      var src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.connect(ctx.destination);
+      src.start(0);
+      unlockedOnce = true;
+      console.log('[ALARM] Audio context globally unlocked');
+    } catch(e) {}
+  }
+  document.addEventListener('click', unlockAudioOnce);
+  document.addEventListener('touchstart', unlockAudioOnce);
+  document.addEventListener('keydown', unlockAudioOnce);
+
+  // Keep audio context alive — silent ping every 30s to prevent suspension
+  setInterval(function(){
+    try {
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    } catch(e){}
+  }, 30000);
 });
 
 </script>
