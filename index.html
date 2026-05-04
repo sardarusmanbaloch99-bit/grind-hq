@@ -1807,6 +1807,7 @@
             <i class="fas fa-music" style="margin-right:6px;"></i>Choose Alarm Music
           </div>
           <div id="musicList" style="display:flex;flex-direction:column;gap:6px;"></div>
+          <div id="applyMusicWrap" style="margin-top:4px;"></div>
         </div>
 
         <button class="save-btn" onclick="addTask()" style="width:100%;">
@@ -3373,6 +3374,45 @@ var NEXUS_TOOLS = [
       },
       required: []
     }
+  },
+  {
+    name: "set_task_alarm",
+    description: "Mark an existing task as important and set an alarm with music. The alarm will play at the task start time. Use when user wants to be reminded about a specific task.",
+    input_schema: {
+      type: "object",
+      properties: {
+        task_name: { type: "string", description: "Name of the task to set alarm on" },
+        music_name: { type: "string", description: "Music to play (e.g. Morning Piano, Acoustic Guitar, Lo-Fi Chill, Dreamy Bells, Soft Pad Ambient, Music Box, Energetic Pluck, Ocean Calm, Classical Touch, Spanish Guitar). Optional — defaults to Morning Piano." }
+      },
+      required: ["task_name"]
+    }
+  },
+  {
+    name: "remove_task_alarm",
+    description: "Remove the alarm from a task — task stays but no notification will fire.",
+    input_schema: {
+      type: "object",
+      properties: {
+        task_name: { type: "string", description: "Name of the task" }
+      },
+      required: ["task_name"]
+    }
+  },
+  {
+    name: "list_alarm_music",
+    description: "List all 10 available alarm music tracks with their names and vibes. Use this when user asks what music options are available.",
+    input_schema: { type: "object", properties: {}, required: [] }
+  },
+  {
+    name: "test_alarm_music",
+    description: "Play a music preview (about 12 seconds) so the user can hear what a track sounds like before choosing.",
+    input_schema: {
+      type: "object",
+      properties: {
+        music_name: { type: "string", description: "Music track name to preview" }
+      },
+      required: ["music_name"]
+    }
   }
 ];
 
@@ -3576,7 +3616,19 @@ async function executeNexusTool(toolName, toolInput) {
         if (error) throw error;
         S.reflections[t] = { wins: data.wins, fail: data.fail, lesson: data.lesson, prio: data.prio };
         return { success: true, saved: 'reflection' };
-      
+
+      case 'set_task_alarm':
+        return await nexus_set_task_alarm(toolInput.task_name, toolInput.music_name);
+
+      case 'remove_task_alarm':
+        return await nexus_remove_task_alarm(toolInput.task_name);
+
+      case 'list_alarm_music':
+        return { tracks: nexus_list_alarm_music() };
+
+      case 'test_alarm_music':
+        return nexus_test_alarm(toolInput.music_name);
+
       default:
         return { error: 'Unknown tool: ' + toolName };
     }
@@ -4497,28 +4549,343 @@ async function boot(){
 document.addEventListener('DOMContentLoaded',boot);
 
 // ============================================================
-// ALARM & MUSIC FEATURE — THE GRIND HQ
+// ALARM & MUSIC FEATURE — Synthesized Melodies (Web Audio API)
 // ============================================================
 
-// --- 10 Free Copyright-Free Tracks from Mixkit & Pixabay ---
+// Each track is a sequence of {freq, time, duration} notes
+// Frequencies: A=440, C5=523, D5=587, E5=659, F5=698, G5=784, A5=880, B5=988, C6=1047
+// Plus harmony notes from lower octaves
+var NOTE = {
+  C3:130.81, D3:146.83, E3:164.81, F3:174.61, G3:196.00, A3:220.00, B3:246.94,
+  C4:261.63, D4:293.66, E4:329.63, F4:349.23, G4:392.00, A4:440.00, B4:493.88,
+  C5:523.25, D5:587.33, E5:659.25, F5:698.46, G5:783.99, A5:880.00, B5:987.77,
+  C6:1046.50, D6:1174.66, E6:1318.51
+};
+
 var ALARM_TRACKS = [
-  { id:1,  name:'Soft Bell Chime',     vibe:'Gentle wake — minimal',   url:'https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3' },
-  { id:2,  name:'Morning Notification', vibe:'Soft & uplifting',        url:'https://assets.mixkit.co/active_storage/sfx/1518/1518-preview.mp3' },
-  { id:3,  name:'Crystal Ping',        vibe:'Clean & clear',           url:'https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3' },
-  { id:4,  name:'Soft Marimba',        vibe:'Warm & welcoming',        url:'https://assets.mixkit.co/active_storage/sfx/2356/2356-preview.mp3' },
-  { id:5,  name:'Happy Bells',         vibe:'Cheerful start',          url:'https://assets.mixkit.co/active_storage/sfx/1816/1816-preview.mp3' },
-  { id:6,  name:'Gentle Pop',          vibe:'Minimal & subtle',        url:'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3' },
-  { id:7,  name:'Calm Alert',          vibe:'Soothing focus',          url:'https://assets.mixkit.co/active_storage/sfx/1815/1815-preview.mp3' },
-  { id:8,  name:'Magic Twinkle',       vibe:'Light & dreamy',          url:'https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3' },
-  { id:9,  name:'Wood Knock',          vibe:'Sharp but friendly',      url:'https://assets.mixkit.co/active_storage/sfx/1862/1862-preview.mp3' },
-  { id:10, name:'Soft Whistle',        vibe:'Casual reminder',         url:'https://assets.mixkit.co/active_storage/sfx/2017/2017-preview.mp3' }
+  {
+    id:1, name:'Morning Piano', vibe:'Soft sunrise melody', icon:'🎹',
+    type:'piano', loop:true,
+    pattern:[
+      {n:'C5',t:0.0,d:0.5},{n:'E5',t:0.5,d:0.5},{n:'G5',t:1.0,d:0.5},{n:'C6',t:1.5,d:1.0},
+      {n:'B5',t:2.5,d:0.5},{n:'G5',t:3.0,d:0.5},{n:'E5',t:3.5,d:0.5},{n:'C5',t:4.0,d:1.0},
+      {n:'D5',t:5.0,d:0.5},{n:'F5',t:5.5,d:0.5},{n:'A5',t:6.0,d:0.5},{n:'D6',t:6.5,d:1.0},
+      {n:'C6',t:7.5,d:0.5},{n:'A5',t:8.0,d:0.5},{n:'F5',t:8.5,d:0.5},{n:'D5',t:9.0,d:1.5}
+    ]
+  },
+  {
+    id:2, name:'Acoustic Guitar', vibe:'Warm fingerpicking', icon:'🎸',
+    type:'guitar', loop:true,
+    pattern:[
+      {n:'E4',t:0.0,d:0.4},{n:'G4',t:0.4,d:0.4},{n:'B4',t:0.8,d:0.4},{n:'E5',t:1.2,d:0.6},
+      {n:'B4',t:1.8,d:0.4},{n:'G4',t:2.2,d:0.4},{n:'A4',t:2.6,d:0.4},{n:'C5',t:3.0,d:0.4},
+      {n:'E5',t:3.4,d:0.6},{n:'C5',t:4.0,d:0.4},{n:'A4',t:4.4,d:0.4},{n:'F4',t:4.8,d:0.4},
+      {n:'A4',t:5.2,d:0.4},{n:'D5',t:5.6,d:0.4},{n:'F5',t:6.0,d:0.6},{n:'D5',t:6.6,d:0.4},
+      {n:'A4',t:7.0,d:0.4},{n:'F4',t:7.4,d:0.4},{n:'G4',t:7.8,d:0.4},{n:'B4',t:8.2,d:0.4},
+      {n:'D5',t:8.6,d:0.4},{n:'G5',t:9.0,d:0.8}
+    ]
+  },
+  {
+    id:3, name:'Lo-Fi Chill', vibe:'Relaxed beats', icon:'🎧',
+    type:'lofi', loop:true,
+    pattern:[
+      {n:'C4',t:0.0,d:0.5},{n:'E4',t:0.5,d:0.5},{n:'G4',t:1.0,d:0.5},{n:'A4',t:1.5,d:0.5},
+      {n:'F4',t:2.0,d:0.5},{n:'A4',t:2.5,d:0.5},{n:'C5',t:3.0,d:0.5},{n:'E5',t:3.5,d:0.5},
+      {n:'D5',t:4.0,d:0.5},{n:'F4',t:4.5,d:0.5},{n:'A4',t:5.0,d:0.5},{n:'C5',t:5.5,d:0.5},
+      {n:'G4',t:6.0,d:0.5},{n:'B4',t:6.5,d:0.5},{n:'D5',t:7.0,d:0.5},{n:'F5',t:7.5,d:0.5},
+      {n:'E5',t:8.0,d:1.0},{n:'C5',t:9.0,d:1.0}
+    ]
+  },
+  {
+    id:4, name:'Dreamy Bells', vibe:'Magical chimes', icon:'🔔',
+    type:'bell', loop:true,
+    pattern:[
+      {n:'C5',t:0.0,d:1.2},{n:'E5',t:0.4,d:1.2},{n:'G5',t:0.8,d:1.2},{n:'C6',t:1.2,d:1.2},
+      {n:'A5',t:2.0,d:1.0},{n:'F5',t:2.5,d:1.0},{n:'C5',t:3.5,d:1.5},{n:'E5',t:4.5,d:1.0},
+      {n:'G5',t:5.0,d:1.0},{n:'B5',t:6.0,d:1.0},{n:'A5',t:7.0,d:1.5},{n:'D5',t:8.5,d:1.0},
+      {n:'F5',t:9.0,d:1.5}
+    ]
+  },
+  {
+    id:5, name:'Soft Pad Ambient', vibe:'Floating dreamscape', icon:'☁',
+    type:'pad', loop:true,
+    pattern:[
+      {n:'C4',t:0.0,d:2.5},{n:'E4',t:0.5,d:2.0},{n:'G4',t:1.0,d:2.0},
+      {n:'F4',t:2.5,d:2.5},{n:'A4',t:3.0,d:2.0},{n:'C5',t:3.5,d:2.0},
+      {n:'D4',t:5.0,d:2.5},{n:'F4',t:5.5,d:2.0},{n:'A4',t:6.0,d:2.0},
+      {n:'G4',t:7.5,d:2.5},{n:'B4',t:8.0,d:2.0},{n:'D5',t:8.5,d:2.0}
+    ]
+  },
+  {
+    id:6, name:'Music Box', vibe:'Twinkling lullaby', icon:'✨',
+    type:'musicbox', loop:true,
+    pattern:[
+      {n:'C5',t:0.0,d:0.4},{n:'E5',t:0.4,d:0.4},{n:'G5',t:0.8,d:0.4},{n:'E5',t:1.2,d:0.4},
+      {n:'C5',t:1.6,d:0.4},{n:'D5',t:2.0,d:0.4},{n:'F5',t:2.4,d:0.4},{n:'A5',t:2.8,d:0.4},
+      {n:'F5',t:3.2,d:0.4},{n:'D5',t:3.6,d:0.4},{n:'E5',t:4.0,d:0.4},{n:'G5',t:4.4,d:0.4},
+      {n:'B5',t:4.8,d:0.4},{n:'G5',t:5.2,d:0.4},{n:'E5',t:5.6,d:0.4},{n:'F5',t:6.0,d:0.4},
+      {n:'A5',t:6.4,d:0.4},{n:'C6',t:6.8,d:0.4},{n:'A5',t:7.2,d:0.4},{n:'F5',t:7.6,d:0.4},
+      {n:'G5',t:8.0,d:0.4},{n:'C6',t:8.4,d:0.4},{n:'E6',t:8.8,d:0.6},{n:'C6',t:9.4,d:0.6}
+    ]
+  },
+  {
+    id:7, name:'Energetic Pluck', vibe:'Wake up & move', icon:'⚡',
+    type:'pluck', loop:true,
+    pattern:[
+      {n:'A4',t:0.0,d:0.3},{n:'C5',t:0.3,d:0.3},{n:'E5',t:0.6,d:0.3},{n:'A5',t:0.9,d:0.3},
+      {n:'E5',t:1.2,d:0.3},{n:'C5',t:1.5,d:0.3},{n:'D5',t:1.8,d:0.3},{n:'F5',t:2.1,d:0.3},
+      {n:'A5',t:2.4,d:0.3},{n:'F5',t:2.7,d:0.3},{n:'D5',t:3.0,d:0.3},{n:'E5',t:3.3,d:0.3},
+      {n:'G5',t:3.6,d:0.3},{n:'B5',t:3.9,d:0.3},{n:'E5',t:4.2,d:0.3},{n:'C5',t:4.5,d:0.3},
+      {n:'A4',t:4.8,d:0.3},{n:'C5',t:5.1,d:0.3},{n:'E5',t:5.4,d:0.3},{n:'G5',t:5.7,d:0.3},
+      {n:'A5',t:6.0,d:0.3},{n:'E5',t:6.3,d:0.3},{n:'C5',t:6.6,d:0.6},{n:'D5',t:7.2,d:0.3},
+      {n:'F5',t:7.5,d:0.3},{n:'A5',t:7.8,d:0.3},{n:'D6',t:8.1,d:0.3},{n:'A5',t:8.4,d:0.3},
+      {n:'F5',t:8.7,d:0.3},{n:'E5',t:9.0,d:0.3},{n:'C5',t:9.3,d:0.7}
+    ]
+  },
+  {
+    id:8, name:'Ocean Calm', vibe:'Gentle ripples', icon:'🌊',
+    type:'pad', loop:true,
+    pattern:[
+      {n:'D4',t:0.0,d:3.0},{n:'A4',t:0.8,d:2.5},{n:'F4',t:1.6,d:2.0},
+      {n:'C4',t:3.0,d:3.0},{n:'G4',t:3.8,d:2.5},{n:'E4',t:4.6,d:2.0},
+      {n:'F4',t:6.0,d:3.0},{n:'C5',t:6.8,d:2.5},{n:'A4',t:7.6,d:2.0},
+      {n:'G4',t:9.0,d:2.5}
+    ]
+  },
+  {
+    id:9, name:'Classical Touch', vibe:'Elegant melody', icon:'🎼',
+    type:'piano', loop:true,
+    pattern:[
+      {n:'G4',t:0.0,d:0.6},{n:'B4',t:0.6,d:0.6},{n:'D5',t:1.2,d:0.6},{n:'G5',t:1.8,d:0.8},
+      {n:'F5',t:2.6,d:0.4},{n:'D5',t:3.0,d:0.4},{n:'B4',t:3.4,d:0.4},{n:'G4',t:3.8,d:0.6},
+      {n:'A4',t:4.4,d:0.6},{n:'C5',t:5.0,d:0.6},{n:'E5',t:5.6,d:0.6},{n:'A5',t:6.2,d:0.8},
+      {n:'G5',t:7.0,d:0.4},{n:'E5',t:7.4,d:0.4},{n:'C5',t:7.8,d:0.4},{n:'A4',t:8.2,d:0.6},
+      {n:'B4',t:8.8,d:0.4},{n:'D5',t:9.2,d:0.4},{n:'G5',t:9.6,d:0.8}
+    ]
+  },
+  {
+    id:10, name:'Spanish Guitar', vibe:'Rhythmic warmth', icon:'🌅',
+    type:'guitar', loop:true,
+    pattern:[
+      {n:'A3',t:0.0,d:0.3},{n:'E4',t:0.3,d:0.3},{n:'A4',t:0.6,d:0.3},{n:'C5',t:0.9,d:0.3},
+      {n:'E5',t:1.2,d:0.3},{n:'C5',t:1.5,d:0.3},{n:'A4',t:1.8,d:0.3},{n:'E4',t:2.1,d:0.3},
+      {n:'D4',t:2.4,d:0.3},{n:'A4',t:2.7,d:0.3},{n:'D5',t:3.0,d:0.3},{n:'F5',t:3.3,d:0.3},
+      {n:'A5',t:3.6,d:0.3},{n:'F5',t:3.9,d:0.3},{n:'D5',t:4.2,d:0.3},{n:'A4',t:4.5,d:0.3},
+      {n:'E4',t:4.8,d:0.3},{n:'B4',t:5.1,d:0.3},{n:'E5',t:5.4,d:0.3},{n:'G5',t:5.7,d:0.3},
+      {n:'B5',t:6.0,d:0.3},{n:'G5',t:6.3,d:0.3},{n:'E5',t:6.6,d:0.3},{n:'B4',t:6.9,d:0.3},
+      {n:'A4',t:7.2,d:0.3},{n:'C5',t:7.5,d:0.3},{n:'E5',t:7.8,d:0.3},{n:'A5',t:8.1,d:0.3},
+      {n:'E5',t:8.4,d:0.3},{n:'C5',t:8.7,d:0.3},{n:'A4',t:9.0,d:0.6},{n:'E4',t:9.6,d:0.6}
+    ]
+  }
 ];
 
+// ---- WEB AUDIO SYNTHESIZER ----
+var audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function playNote(ctx, freq, startTime, duration, type, masterGain) {
+  // Different instruments use different oscillator setups
+  var now = startTime;
+  var end = startTime + duration;
+
+  if (type === 'piano' || type === 'musicbox') {
+    // Piano: sine + slight triangle, sharp attack, exponential decay
+    var osc1 = ctx.createOscillator();
+    var osc2 = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc1.type = 'sine'; osc1.frequency.value = freq;
+    osc2.type = 'triangle'; osc2.frequency.value = freq * 2;
+    var osc2gain = ctx.createGain();
+    osc2gain.gain.value = type === 'musicbox' ? 0.3 : 0.15;
+    osc1.connect(gain); osc2.connect(osc2gain); osc2gain.connect(gain);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.4, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, end);
+    gain.connect(masterGain);
+    osc1.start(now); osc2.start(now);
+    osc1.stop(end); osc2.stop(end);
+  }
+  else if (type === 'guitar') {
+    // Guitar: triangle + sawtooth (plucked feel)
+    var osc = ctx.createOscillator();
+    var osc2 = ctx.createOscillator();
+    var gain = ctx.createGain();
+    var filter = ctx.createBiquadFilter();
+    osc.type = 'triangle'; osc.frequency.value = freq;
+    osc2.type = 'sawtooth'; osc2.frequency.value = freq;
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(2000, now);
+    filter.frequency.exponentialRampToValueAtTime(400, end);
+    var osc2gain = ctx.createGain();
+    osc2gain.gain.value = 0.1;
+    osc.connect(filter); osc2.connect(osc2gain); osc2gain.connect(filter);
+    filter.connect(gain);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.35, now + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.001, end);
+    gain.connect(masterGain);
+    osc.start(now); osc2.start(now);
+    osc.stop(end); osc2.stop(end);
+  }
+  else if (type === 'pluck') {
+    // Pluck: sawtooth filtered, fast attack
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    var filter = ctx.createBiquadFilter();
+    osc.type = 'sawtooth'; osc.frequency.value = freq;
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(3000, now);
+    filter.frequency.exponentialRampToValueAtTime(500, end);
+    osc.connect(filter); filter.connect(gain);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.3, now + 0.003);
+    gain.gain.exponentialRampToValueAtTime(0.001, end);
+    gain.connect(masterGain);
+    osc.start(now); osc.stop(end);
+  }
+  else if (type === 'lofi') {
+    // Lo-fi: sine with slight detune, warm filter
+    var osc = ctx.createOscillator();
+    var osc2 = ctx.createOscillator();
+    var gain = ctx.createGain();
+    var filter = ctx.createBiquadFilter();
+    osc.type = 'sine'; osc.frequency.value = freq;
+    osc2.type = 'sine'; osc2.frequency.value = freq * 1.005;
+    filter.type = 'lowpass'; filter.frequency.value = 1500;
+    var osc2g = ctx.createGain(); osc2g.gain.value = 0.5;
+    osc.connect(filter); osc2.connect(osc2g); osc2g.connect(filter);
+    filter.connect(gain);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.3, now + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, end);
+    gain.connect(masterGain);
+    osc.start(now); osc2.start(now);
+    osc.stop(end); osc2.stop(end);
+  }
+  else if (type === 'bell') {
+    // Bell: pure sine + harmonic, long decay
+    var osc1 = ctx.createOscillator();
+    var osc2 = ctx.createOscillator();
+    var osc3 = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc1.type = 'sine'; osc1.frequency.value = freq;
+    osc2.type = 'sine'; osc2.frequency.value = freq * 2;
+    osc3.type = 'sine'; osc3.frequency.value = freq * 3;
+    var g2 = ctx.createGain(); g2.gain.value = 0.4;
+    var g3 = ctx.createGain(); g3.gain.value = 0.15;
+    osc1.connect(gain); osc2.connect(g2); g2.connect(gain); osc3.connect(g3); g3.connect(gain);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.35, now + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.001, end);
+    gain.connect(masterGain);
+    osc1.start(now); osc2.start(now); osc3.start(now);
+    osc1.stop(end); osc2.stop(end); osc3.stop(end);
+  }
+  else if (type === 'pad') {
+    // Pad: warm sine + triangle, slow attack/release
+    var osc1 = ctx.createOscillator();
+    var osc2 = ctx.createOscillator();
+    var gain = ctx.createGain();
+    var filter = ctx.createBiquadFilter();
+    osc1.type = 'sine'; osc1.frequency.value = freq;
+    osc2.type = 'triangle'; osc2.frequency.value = freq * 0.5;
+    filter.type = 'lowpass'; filter.frequency.value = 1200;
+    osc1.connect(filter); osc2.connect(filter); filter.connect(gain);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.25, now + 0.4);
+    gain.gain.linearRampToValueAtTime(0, end);
+    gain.connect(masterGain);
+    osc1.start(now); osc2.start(now);
+    osc1.stop(end); osc2.stop(end);
+  }
+}
+
+// ---- TRACK PLAYER ----
+var currentPlayer = null;
+
+function playTrack(trackId, opts) {
+  opts = opts || {};
+  stopTrack();
+  var track = ALARM_TRACKS.find(function(t){return t.id===trackId;});
+  if (!track) return null;
+  var ctx = getAudioCtx();
+  var master = ctx.createGain();
+  master.gain.value = 0;
+  master.connect(ctx.destination);
+
+  // Fade in gently
+  master.gain.linearRampToValueAtTime(opts.volume || 0.4, ctx.currentTime + 0.5);
+
+  // Compute pattern total duration
+  var totalDur = 0;
+  track.pattern.forEach(function(n){
+    var endT = n.t + n.d;
+    if (endT > totalDur) totalDur = endT;
+  });
+  totalDur += 0.5; // small gap before loop
+
+  function scheduleOnce(startOffset) {
+    var startBase = ctx.currentTime + startOffset;
+    track.pattern.forEach(function(note){
+      var freq = NOTE[note.n];
+      if (!freq) return;
+      playNote(ctx, freq, startBase + note.t, note.d, track.type, master);
+    });
+  }
+
+  scheduleOnce(0);
+
+  var player = { track:track, master:master, ctx:ctx, totalDur:totalDur, stopped:false, loopTimer:null, fadeTimer:null };
+
+  if (opts.loop !== false) {
+    function loopFn() {
+      if (player.stopped) return;
+      scheduleOnce(0);
+      player.loopTimer = setTimeout(loopFn, totalDur * 1000);
+    }
+    player.loopTimer = setTimeout(loopFn, totalDur * 1000);
+  }
+
+  // Auto-stop after maxDuration
+  if (opts.maxDuration) {
+    player.fadeTimer = setTimeout(function(){
+      stopTrack();
+    }, opts.maxDuration * 1000);
+  }
+
+  currentPlayer = player;
+  return player;
+}
+
+function stopTrack() {
+  if (!currentPlayer) return;
+  currentPlayer.stopped = true;
+  if (currentPlayer.loopTimer) clearTimeout(currentPlayer.loopTimer);
+  if (currentPlayer.fadeTimer) clearTimeout(currentPlayer.fadeTimer);
+  try {
+    currentPlayer.master.gain.cancelScheduledValues(currentPlayer.ctx.currentTime);
+    currentPlayer.master.gain.setValueAtTime(currentPlayer.master.gain.value, currentPlayer.ctx.currentTime);
+    currentPlayer.master.gain.linearRampToValueAtTime(0, currentPlayer.ctx.currentTime + 0.3);
+    setTimeout(function(){
+      try { currentPlayer.master.disconnect(); } catch(e){}
+    }, 400);
+  } catch(e){}
+  currentPlayer = null;
+}
+
+// ---- UI STATE ----
 var importantChecked = false;
-var selectedMusicId = 1;
-var alarmAudio = null;
+var selectedMusicId = 1;     // currently highlighted (not yet applied)
+var appliedMusicId = null;   // confirmed via Apply button
 var alarmTimers = [];
 var activeAlarmTaskId = null;
+var previewBtn = null;
 
 function toggleImportantCheck() {
   importantChecked = !importantChecked;
@@ -4529,11 +4896,18 @@ function toggleImportantCheck() {
     el.style.borderColor = importantChecked ? 'rgba(255,180,0,0.5)' : 'rgba(255,180,0,0.2)';
     el.style.background = importantChecked ? 'rgba(255,180,0,0.06)' : '';
     var box = el.querySelector('.checkbox-box');
-    if (box) { box.style.borderColor = importantChecked ? '#ffb400' : 'rgba(255,180,0,0.4)'; box.style.background = importantChecked ? '#ffb400' : ''; }
+    if (box) {
+      box.style.borderColor = importantChecked ? '#ffb400' : 'rgba(255,180,0,0.4)';
+      box.style.background = importantChecked ? '#ffb400' : '';
+    }
   }
   if (wrap) {
     wrap.style.display = importantChecked ? 'flex' : 'none';
     if (importantChecked) renderMusicList();
+  }
+  if (!importantChecked) {
+    stopTrack();
+    appliedMusicId = null;
   }
 }
 
@@ -4541,28 +4915,27 @@ function renderMusicList() {
   var el = document.getElementById('musicList');
   if (!el) return;
   el.innerHTML = '';
+
   ALARM_TRACKS.forEach(function(t) {
     var sel = (t.id === selectedMusicId);
+    var applied = (t.id === appliedMusicId);
 
     var row = document.createElement('div');
     row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:all 0.2s;'
-      + 'border:1px solid ' + (sel ? 'rgba(255,180,0,0.5)' : 'rgba(255,255,255,0.06)') + ';'
-      + 'background:' + (sel ? 'rgba(255,180,0,0.08)' : 'rgba(255,255,255,0.02)') + ';';
+      + 'border:1px solid ' + (applied ? '#ffb400' : (sel ? 'rgba(255,180,0,0.5)' : 'rgba(255,255,255,0.06)')) + ';'
+      + 'background:' + (applied ? 'rgba(255,180,0,0.12)' : (sel ? 'rgba(255,180,0,0.06)' : 'rgba(255,255,255,0.02)')) + ';';
     row.onclick = function() { selectMusic(t.id); };
 
     var iconBox = document.createElement('div');
-    iconBox.style.cssText = 'width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;'
-      + 'background:' + (sel ? '#ffb400' : 'rgba(255,255,255,0.06)') + ';';
-    var iconI = document.createElement('i');
-    iconI.className = 'fas ' + (sel ? 'fa-check' : 'fa-music');
-    iconI.style.cssText = 'font-size:11px;color:' + (sel ? '#000' : 'var(--text-muted)') + ';';
-    iconBox.appendChild(iconI);
+    iconBox.style.cssText = 'width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;'
+      + 'background:' + (applied ? '#ffb400' : (sel ? 'rgba(255,180,0,0.2)' : 'rgba(255,255,255,0.06)')) + ';';
+    iconBox.textContent = t.icon;
 
     var info = document.createElement('div');
     info.style.cssText = 'flex:1;min-width:0;';
     var nameEl = document.createElement('div');
-    nameEl.style.cssText = 'font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:' + (sel ? '#ffb400' : 'var(--text-soft)') + ';';
-    nameEl.textContent = t.name;
+    nameEl.style.cssText = 'font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:' + (sel || applied ? '#ffb400' : 'var(--text-soft)') + ';';
+    nameEl.textContent = t.name + (applied ? ' ✓' : '');
     var vibeEl = document.createElement('div');
     vibeEl.style.cssText = 'font-size:0.7rem;color:var(--text-muted);margin-top:2px;';
     vibeEl.textContent = t.vibe;
@@ -4572,6 +4945,7 @@ function renderMusicList() {
     var btn = document.createElement('button');
     btn.style.cssText = 'background:rgba(255,180,0,0.08);border:1px solid rgba(255,180,0,0.25);border-radius:7px;padding:6px 12px;color:#ffb400;font-size:0.7rem;font-weight:600;cursor:pointer;white-space:nowrap;';
     btn.innerHTML = '<i class="fas fa-play" style="margin-right:4px;font-size:9px;"></i>Preview';
+    btn.dataset.trackId = t.id;
     btn.onclick = function(e) { e.stopPropagation(); previewMusic(t.id, btn); };
 
     row.appendChild(iconBox);
@@ -4579,6 +4953,28 @@ function renderMusicList() {
     row.appendChild(btn);
     el.appendChild(row);
   });
+
+  renderApplyButton();
+}
+
+function renderApplyButton() {
+  var box = document.getElementById('applyMusicWrap');
+  if (!box) return;
+  var isApplied = (selectedMusicId === appliedMusicId);
+  var hasSelection = !!selectedMusicId;
+  var sel = ALARM_TRACKS.find(function(t){return t.id===selectedMusicId;});
+  if (!hasSelection) { box.innerHTML=''; return; }
+
+  if (isApplied && appliedMusicId) {
+    box.innerHTML = '<div style="background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.3);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">'
+      + '<i class="fas fa-check-circle" style="color:#34D399;font-size:14px;"></i>'
+      + '<div style="flex:1;font-size:0.78rem;color:#34D399;font-weight:600;">Music applied: ' + sel.name + '</div>'
+      + '<button onclick="changeAppliedMusic()" style="background:none;border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:4px 10px;color:var(--text-muted);font-size:0.65rem;cursor:pointer;">Change</button>'
+      + '</div>';
+  } else {
+    box.innerHTML = '<button onclick="applyMusic()" style="width:100%;background:linear-gradient(135deg,#ffb400,#ff8c00);border:none;border-radius:10px;padding:11px;color:#000;font-size:0.82rem;font-weight:700;letter-spacing:0.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">'
+      + '<i class="fas fa-check"></i>APPLY: ' + sel.name + '</button>';
+  }
 }
 
 function selectMusic(id) {
@@ -4587,38 +4983,45 @@ function selectMusic(id) {
   renderMusicList();
 }
 
-var previewAudio = null;
-var previewBtn = null;
+function applyMusic() {
+  appliedMusicId = selectedMusicId;
+  stopPreview();
+  showToast('Music applied — now click Add to Timeline');
+  renderMusicList();
+}
+
+function changeAppliedMusic() {
+  appliedMusicId = null;
+  renderMusicList();
+}
+
 function previewMusic(id, btn) {
-  if (previewAudio && previewBtn === btn) {
+  if (currentPlayer && previewBtn === btn) {
     stopPreview();
     return;
   }
   stopPreview();
-  var track = ALARM_TRACKS.find(function(t){ return t.id === id; });
-  if (!track) return;
-  previewAudio = new Audio(track.url);
-  previewAudio.volume = 0.6;
   previewBtn = btn;
   if (btn) btn.innerHTML = '<i class="fas fa-stop" style="margin-right:4px;font-size:9px;"></i>Stop';
-  previewAudio.play().catch(function(err){
-    showToast('Could not play preview — try clicking again');
-    if (btn) btn.innerHTML = '<i class="fas fa-play" style="margin-right:4px;font-size:9px;"></i>Preview';
-  });
-  previewAudio.onended = function(){ stopPreview(); };
+  playTrack(id, { volume:0.35, loop:false, maxDuration:12 });
+  // Reset button after track ends
+  setTimeout(function(){
+    if (previewBtn === btn && btn) {
+      btn.innerHTML = '<i class="fas fa-play" style="margin-right:4px;font-size:9px;"></i>Preview';
+      previewBtn = null;
+    }
+  }, 12000);
 }
+
 function stopPreview() {
-  if (previewAudio) {
-    try { previewAudio.pause(); } catch(e) {}
-    previewAudio = null;
-  }
+  stopTrack();
   if (previewBtn) {
     previewBtn.innerHTML = '<i class="fas fa-play" style="margin-right:4px;font-size:9px;"></i>Preview';
     previewBtn = null;
   }
 }
 
-// --- Schedule alarms for all important tasks ---
+// ---- ALARM SCHEDULER ----
 function scheduleAlarms() {
   alarmTimers.forEach(function(t){ clearTimeout(t); });
   alarmTimers = [];
@@ -4641,23 +5044,11 @@ function scheduleAlarms() {
 function triggerAlarm(task) {
   if (task.done) return;
   activeAlarmTaskId = task.id;
-  var track = ALARM_TRACKS.find(function(t){ return t.id === (task.musicId || 1); }) || ALARM_TRACKS[0];
-  alarmAudio = new Audio(track.url);
-  alarmAudio.loop = true;
-  alarmAudio.volume = 0;
-  alarmAudio.play().then(function() {
-    // Fade in gently over 3 seconds
-    var vol = 0;
-    var fade = setInterval(function() {
-      vol = Math.min(vol + 0.05, 0.7);
-      alarmAudio.volume = vol;
-      if (vol >= 0.7) clearInterval(fade);
-    }, 150);
-  }).catch(function(){});
+  var musicId = task.musicId || 1;
+  var track = ALARM_TRACKS.find(function(t){return t.id===musicId;}) || ALARM_TRACKS[0];
+  // Play looped track at moderate volume — auto-stop after 2 min
+  playTrack(musicId, { volume:0.5, loop:true, maxDuration:120 });
   showAlarmModal(task, track);
-  // Auto-stop after 2 min if user ignores
-  var autoStop = setTimeout(function(){ dismissAlarm(); }, 120000);
-  alarmTimers.push(autoStop);
 }
 
 function showAlarmModal(task, track) {
@@ -4668,55 +5059,43 @@ function showAlarmModal(task, track) {
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(16px);animation:fadeInModal 0.4s ease;';
   modal.innerHTML = '<div style="background:linear-gradient(160deg,#0F1218,#0A0C10);border:1px solid rgba(255,180,0,0.35);border-radius:22px;max-width:420px;width:90%;padding:32px;box-shadow:0 0 80px rgba(255,180,0,0.12);text-align:center;position:relative;overflow:hidden;">'
     + '<div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(255,180,0,0.08),transparent);"></div>'
-    // Pulsing ring
-    + '<div style="width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(255,180,0,0.2),transparent);border:2px solid rgba(255,180,0,0.4);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;animation:alarmPulse 1.2s ease-in-out infinite;">'
-    + '<span style="font-size:2rem;">'+escHtml(task.icon || '🎯')+'</span></div>'
+    + '<div style="width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(255,180,0,0.2),transparent);border:2px solid rgba(255,180,0,0.4);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;animation:alarmPulse 1.2s ease-in-out infinite;font-size:2rem;">'+escHtml(task.icon || '🎯')+'</div>'
     + '<div style="font-family:\'Orbitron\',monospace;font-size:0.65rem;color:rgba(255,180,0,0.7);letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;">NEXUS ALERT</div>'
     + '<div style="font-size:1.25rem;font-weight:700;color:#F5F7FA;margin-bottom:6px;">'+escHtml(task.name)+'</div>'
     + '<div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:4px;">Scheduled for <span style="color:rgba(255,180,0,0.85);font-weight:600;">'+task.start+'</span> — Time to start.</div>'
-    + '<div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:22px;font-style:italic;">Playing: '+track.name+'</div>'
-    // Music wave visualizer (CSS only)
-    + '<div style="display:flex;align-items:flex-end;justify-content:center;gap:3px;height:28px;margin-bottom:22px;" id="waveViz">'
-    + [3,5,8,12,9,14,10,7,13,6,11,8,4].map(function(h){ return '<div style="width:3px;border-radius:2px;background:rgba(255,180,0,0.6);height:'+h+'px;animation:waveBar 0.8s ease-in-out infinite alternate;animation-delay:'+Math.random().toFixed(2)+'s;"></div>'; }).join('')
+    + '<div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:22px;font-style:italic;">♪ '+track.name+'</div>'
+    + '<div style="display:flex;align-items:flex-end;justify-content:center;gap:3px;height:28px;margin-bottom:22px;">'
+    + [3,5,8,12,9,14,10,7,13,6,11,8,4].map(function(h,i){ return '<div style="width:3px;border-radius:2px;background:rgba(255,180,0,0.6);height:'+h+'px;animation:waveBar 0.8s ease-in-out infinite alternate;animation-delay:'+(i*0.05).toFixed(2)+'s;"></div>'; }).join('')
     + '</div>'
     + '<div style="display:flex;gap:10px;justify-content:center;">'
     + '<button onclick="dismissAlarm()" style="flex:1;padding:12px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text-soft);font-size:0.82rem;font-weight:600;cursor:pointer;letter-spacing:0.5px;">Dismiss</button>'
     + '<button onclick="startTaskNow(\''+task.id+'\')" style="flex:1;padding:12px;border-radius:12px;background:linear-gradient(135deg,#ffb400,#ff8c00);border:none;color:#000;font-size:0.82rem;font-weight:700;cursor:pointer;letter-spacing:0.5px;">Start Now</button>'
     + '</div></div>';
   document.body.appendChild(modal);
-  // Inject keyframes if not already present
   if (!document.getElementById('alarmKeyframes')) {
     var st = document.createElement('style');
     st.id = 'alarmKeyframes';
     st.textContent = '@keyframes alarmPulse{0%{box-shadow:0 0 0 0 rgba(255,180,0,0.4);}70%{box-shadow:0 0 0 18px rgba(255,180,0,0);}100%{box-shadow:0 0 0 0 rgba(255,180,0,0);}} @keyframes waveBar{from{transform:scaleY(0.4);}to{transform:scaleY(1.4);}} @keyframes fadeInModal{from{opacity:0;transform:scale(0.95);}to{opacity:1;transform:scale(1);}}';
     document.head.appendChild(st);
   }
-  // NEXUS sends a message
   setTimeout(function(){
-    appendNexusMessage('Task time: <strong>'+task.name+'</strong>. Your alarm is going off. No more waiting — start right now. Dismiss it only when you\'re already moving.');
+    appendNexusMessage('Task time: <strong>'+escHtml(task.name)+'</strong>. Your alarm is going off. No more waiting — start right now.');
   }, 1500);
 }
 
 function dismissAlarm() {
-  if (alarmAudio) {
-    var a = alarmAudio;
-    var fadeOut = setInterval(function(){
-      a.volume = Math.max(0, a.volume - 0.08);
-      if (a.volume <= 0) { a.pause(); clearInterval(fadeOut); }
-    }, 80);
-    alarmAudio = null;
-  }
+  stopTrack();
   var modal = document.getElementById('alarmModal');
   if (modal) modal.remove();
-  stopPreview();
+  activeAlarmTaskId = null;
 }
 
 function startTaskNow(id) {
   dismissAlarm();
   var t = today();
   var task = (S.tasks[t] || []).find(function(x){ return x.id == id; });
-  if (task) showToast('Starting: ' + task.name + ' — Let\'s go!');
-  showView('tasks');
+  if (task) showToast('Starting: ' + task.name);
+  if (typeof showView === 'function') showView('tasks');
 }
 
 function appendNexusMessage(html) {
@@ -4730,44 +5109,99 @@ function appendNexusMessage(html) {
   chat.scrollTop = chat.scrollHeight;
 }
 
-// --- Patch addTask to save important + musicId ---
+// ---- PATCH addTask TO SAVE important + musicId ----
 var _origAddTask = addTask;
 addTask = async function() {
-  // Temporarily save these before original function resets the form
   var wasImportant = importantChecked;
-  var musicId = selectedMusicId;
+  // If important is on but no music applied, force music_id 1
+  var musicId = (importantChecked && appliedMusicId) ? appliedMusicId : (importantChecked ? 1 : null);
+  if (importantChecked && !appliedMusicId) {
+    showToast('Tip: Click APPLY on a music to confirm — using default Morning Piano');
+  }
   await _origAddTask();
-  // After insert, patch the last added task with important & musicId
   if (wasImportant) {
     var t = today();
     var tasks = S.tasks[t] || [];
     var last = tasks[tasks.length - 1];
     if (last) {
       last.important = true;
-      last.musicId = musicId;
-      // Update DB
-      await supabase.from('tasks').update({ important: true, music_id: musicId }).eq('id', last.id).eq('user_id', currentUser.id);
+      last.musicId = musicId || 1;
+      try {
+        await supabase.from('tasks').update({ important: true, music_id: musicId || 1 }).eq('id', last.id).eq('user_id', currentUser.id);
+      } catch(e) {}
       scheduleAlarms();
     }
   }
-  // Reset
+  // Reset state
   importantChecked = false;
   selectedMusicId = 1;
+  appliedMusicId = null;
   var it = document.getElementById('importantToggle');
-  if (it) { it.classList.remove('on'); it.style.borderColor = 'rgba(255,180,0,0.2)'; it.style.background = ''; }
+  if (it) {
+    it.classList.remove('on');
+    it.style.borderColor = 'rgba(255,180,0,0.2)';
+    it.style.background = '';
+    var box = it.querySelector('.checkbox-box');
+    if (box) { box.style.borderColor = 'rgba(255,180,0,0.4)'; box.style.background = ''; }
+  }
   var wrap = document.getElementById('musicPickerWrap');
   if (wrap) wrap.style.display = 'none';
 };
 
-// Re-schedule alarms on page load after data loads
-var _origLoadData = typeof loadAllData === 'function' ? loadAllData : null;
+// ---- NEXUS TOOL HANDLERS (so the AI can use these features) ----
+// Set alarm on existing task by name
+async function nexus_set_task_alarm(taskName, musicName) {
+  var t = today();
+  var tasks = S.tasks[t] || [];
+  var task = tasks.find(function(x){ return x.name.toLowerCase() === (taskName||'').toLowerCase(); });
+  if (!task) return { success:false, error:'Task not found: '+taskName };
+  var music = ALARM_TRACKS[0];
+  if (musicName) {
+    var found = ALARM_TRACKS.find(function(m){ return m.name.toLowerCase().indexOf(musicName.toLowerCase()) >= 0; });
+    if (found) music = found;
+  }
+  task.important = true;
+  task.musicId = music.id;
+  try {
+    await supabase.from('tasks').update({ important:true, music_id:music.id }).eq('id', task.id).eq('user_id', currentUser.id);
+  } catch(e) {}
+  scheduleAlarms();
+  if (typeof renderTaskList === 'function') renderTaskList();
+  return { success:true, task:task.name, music:music.name, time:task.start };
+}
+
+async function nexus_remove_task_alarm(taskName) {
+  var t = today();
+  var tasks = S.tasks[t] || [];
+  var task = tasks.find(function(x){ return x.name.toLowerCase() === (taskName||'').toLowerCase(); });
+  if (!task) return { success:false, error:'Task not found' };
+  task.important = false;
+  try {
+    await supabase.from('tasks').update({ important:false }).eq('id', task.id).eq('user_id', currentUser.id);
+  } catch(e) {}
+  scheduleAlarms();
+  if (typeof renderTaskList === 'function') renderTaskList();
+  return { success:true, task:task.name };
+}
+
+function nexus_list_alarm_music() {
+  return ALARM_TRACKS.map(function(t){ return { id:t.id, name:t.name, vibe:t.vibe }; });
+}
+
+function nexus_test_alarm(musicName) {
+  var music = ALARM_TRACKS[0];
+  if (musicName) {
+    var found = ALARM_TRACKS.find(function(m){ return m.name.toLowerCase().indexOf(musicName.toLowerCase()) >= 0; });
+    if (found) music = found;
+  }
+  playTrack(music.id, { volume:0.4, loop:false, maxDuration:12 });
+  return { success:true, playing:music.name };
+}
+
+// Schedule alarms on page load
 document.addEventListener('DOMContentLoaded', function(){
   setTimeout(function(){
-    if (S && S.tasks) {
-      // Patch loaded tasks with important flag
-      var t = today();
-      scheduleAlarms();
-    }
+    if (S && S.tasks) scheduleAlarms();
   }, 4000);
 });
 
