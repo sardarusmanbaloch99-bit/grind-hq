@@ -1795,9 +1795,9 @@
           <div style="flex:1;">
             <div style="font-size:0.92rem;font-weight:600;display:flex;align-items:center;gap:7px;">
               <i class="fas fa-bell" style="color:rgba(255,180,0,0.7);font-size:0.8rem;"></i>
-              Mark as Important — Notify Me
+              Set Alarm So You Don't Forget
             </div>
-            <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px;">NEXUS will alarm + play music when this task starts</div>
+            <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px;">Gentle, non-annoying music when task time comes</div>
           </div>
         </div>
 
@@ -4502,16 +4502,16 @@ document.addEventListener('DOMContentLoaded',boot);
 
 // --- 10 Free Copyright-Free Tracks from Mixkit & Pixabay ---
 var ALARM_TRACKS = [
-  { id:1, name:'Gentle Morning Rise',   vibe:'Soft & Uplifting',  url:'https://cdn.pixabay.com/audio/2024/01/16/audio_0de21d5a80.mp3' },
-  { id:2, name:'Lo-Fi Focus Flow',      vibe:'Calm & Focused',    url:'https://cdn.pixabay.com/audio/2023/10/30/audio_9fb25b4429.mp3' },
-  { id:3, name:'Soft Piano Wake',       vibe:'Warm & Gentle',     url:'https://cdn.pixabay.com/audio/2023/11/13/audio_8d5f1d6b4e.mp3' },
-  { id:4, name:'Motivational Pulse',    vibe:'Energetic',         url:'https://cdn.mixkit.co/music/preview/mixkit-inspiring-life-574.mp3' },
-  { id:5, name:'Chill Acoustic',        vibe:'Cozy & Relaxed',    url:'https://cdn.mixkit.co/music/preview/mixkit-life-is-a-dream-837.mp3' },
-  { id:6, name:'Deep Work Mode',        vibe:'Concentration',     url:'https://cdn.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3' },
-  { id:7, name:'Bell Chime Alert',      vibe:'Minimal & Clean',   url:'https://cdn.pixabay.com/audio/2022/03/24/audio_655ca6e32c.mp3' },
-  { id:8, name:'Power Up Rise',         vibe:'High Energy',       url:'https://cdn.mixkit.co/music/preview/mixkit-hip-hop-02-738.mp3' },
-  { id:9, name:'Sunrise Acoustic',      vibe:'Fresh & Positive',  url:'https://cdn.mixkit.co/music/preview/mixkit-dreaming-big-31.mp3' },
-  { id:10,name:'Electronic Alert',      vibe:'Sharp & Alert',     url:'https://cdn.pixabay.com/audio/2023/03/14/audio_b8d3a48b4a.mp3' }
+  { id:1,  name:'Soft Bell Chime',     vibe:'Gentle wake — minimal',   url:'https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3' },
+  { id:2,  name:'Morning Notification', vibe:'Soft & uplifting',        url:'https://assets.mixkit.co/active_storage/sfx/1518/1518-preview.mp3' },
+  { id:3,  name:'Crystal Ping',        vibe:'Clean & clear',           url:'https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3' },
+  { id:4,  name:'Soft Marimba',        vibe:'Warm & welcoming',        url:'https://assets.mixkit.co/active_storage/sfx/2356/2356-preview.mp3' },
+  { id:5,  name:'Happy Bells',         vibe:'Cheerful start',          url:'https://assets.mixkit.co/active_storage/sfx/1816/1816-preview.mp3' },
+  { id:6,  name:'Gentle Pop',          vibe:'Minimal & subtle',        url:'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3' },
+  { id:7,  name:'Calm Alert',          vibe:'Soothing focus',          url:'https://assets.mixkit.co/active_storage/sfx/1815/1815-preview.mp3' },
+  { id:8,  name:'Magic Twinkle',       vibe:'Light & dreamy',          url:'https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3' },
+  { id:9,  name:'Wood Knock',          vibe:'Sharp but friendly',      url:'https://assets.mixkit.co/active_storage/sfx/1862/1862-preview.mp3' },
+  { id:10, name:'Soft Whistle',        vibe:'Casual reminder',         url:'https://assets.mixkit.co/active_storage/sfx/2017/2017-preview.mp3' }
 ];
 
 var importantChecked = false;
@@ -4540,18 +4540,45 @@ function toggleImportantCheck() {
 function renderMusicList() {
   var el = document.getElementById('musicList');
   if (!el) return;
-  el.innerHTML = ALARM_TRACKS.map(function(t) {
-    var sel = t.id === selectedMusicId;
-    return '<div onclick="selectMusic('+t.id+')" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;border:1px solid '+(sel?'rgba(255,180,0,0.5)':'rgba(255,255,255,0.06)')+';background:'+(sel?'rgba(255,180,0,0.08)':'rgba(255,255,255,0.02)')+';transition:all 0.2s;">'
-      + '<div style="width:28px;height:28px;border-radius:50%;background:'+(sel?'#ffb400':'rgba(255,255,255,0.06)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
-      + '<i class="fas '+(sel?'fa-volume-up':'fa-music')+'" style="font-size:11px;color:'+(sel?'#000':'var(--text-muted)');+'"></i></div>'
-      + '<div style="flex:1;min-width:0;">'
-      + '<div style="font-size:0.82rem;font-weight:600;color:'+(sel?'#ffb400':'var(--text-soft)')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+t.name+'</div>'
-      + '<div style="font-size:0.68rem;color:var(--text-muted);">'+t.vibe+'</div></div>'
-      + '<button onclick="event.stopPropagation();previewMusic('+t.id+')" style="background:none;border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:4px 8px;color:var(--text-muted);font-size:0.65rem;cursor:pointer;white-space:nowrap;">'
-      + '<i class="fas fa-play" style="margin-right:3px;"></i>Preview</button>'
-      + '</div>';
-  }).join('');
+  el.innerHTML = '';
+  ALARM_TRACKS.forEach(function(t) {
+    var sel = (t.id === selectedMusicId);
+
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:all 0.2s;'
+      + 'border:1px solid ' + (sel ? 'rgba(255,180,0,0.5)' : 'rgba(255,255,255,0.06)') + ';'
+      + 'background:' + (sel ? 'rgba(255,180,0,0.08)' : 'rgba(255,255,255,0.02)') + ';';
+    row.onclick = function() { selectMusic(t.id); };
+
+    var iconBox = document.createElement('div');
+    iconBox.style.cssText = 'width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;'
+      + 'background:' + (sel ? '#ffb400' : 'rgba(255,255,255,0.06)') + ';';
+    var iconI = document.createElement('i');
+    iconI.className = 'fas ' + (sel ? 'fa-check' : 'fa-music');
+    iconI.style.cssText = 'font-size:11px;color:' + (sel ? '#000' : 'var(--text-muted)') + ';';
+    iconBox.appendChild(iconI);
+
+    var info = document.createElement('div');
+    info.style.cssText = 'flex:1;min-width:0;';
+    var nameEl = document.createElement('div');
+    nameEl.style.cssText = 'font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:' + (sel ? '#ffb400' : 'var(--text-soft)') + ';';
+    nameEl.textContent = t.name;
+    var vibeEl = document.createElement('div');
+    vibeEl.style.cssText = 'font-size:0.7rem;color:var(--text-muted);margin-top:2px;';
+    vibeEl.textContent = t.vibe;
+    info.appendChild(nameEl);
+    info.appendChild(vibeEl);
+
+    var btn = document.createElement('button');
+    btn.style.cssText = 'background:rgba(255,180,0,0.08);border:1px solid rgba(255,180,0,0.25);border-radius:7px;padding:6px 12px;color:#ffb400;font-size:0.7rem;font-weight:600;cursor:pointer;white-space:nowrap;';
+    btn.innerHTML = '<i class="fas fa-play" style="margin-right:4px;font-size:9px;"></i>Preview';
+    btn.onclick = function(e) { e.stopPropagation(); previewMusic(t.id, btn); };
+
+    row.appendChild(iconBox);
+    row.appendChild(info);
+    row.appendChild(btn);
+    el.appendChild(row);
+  });
 }
 
 function selectMusic(id) {
@@ -4561,19 +4588,34 @@ function selectMusic(id) {
 }
 
 var previewAudio = null;
-function previewMusic(id) {
+var previewBtn = null;
+function previewMusic(id, btn) {
+  if (previewAudio && previewBtn === btn) {
+    stopPreview();
+    return;
+  }
   stopPreview();
   var track = ALARM_TRACKS.find(function(t){ return t.id === id; });
   if (!track) return;
   previewAudio = new Audio(track.url);
-  previewAudio.volume = 0.5;
-  previewAudio.play().catch(function(){
-    showToast('Preview failed — browser blocked autoplay. Click the page first.');
+  previewAudio.volume = 0.6;
+  previewBtn = btn;
+  if (btn) btn.innerHTML = '<i class="fas fa-stop" style="margin-right:4px;font-size:9px;"></i>Stop';
+  previewAudio.play().catch(function(err){
+    showToast('Could not play preview — try clicking again');
+    if (btn) btn.innerHTML = '<i class="fas fa-play" style="margin-right:4px;font-size:9px;"></i>Preview';
   });
-  setTimeout(function(){ stopPreview(); }, 8000);
+  previewAudio.onended = function(){ stopPreview(); };
 }
 function stopPreview() {
-  if (previewAudio) { previewAudio.pause(); previewAudio.currentTime = 0; previewAudio = null; }
+  if (previewAudio) {
+    try { previewAudio.pause(); } catch(e) {}
+    previewAudio = null;
+  }
+  if (previewBtn) {
+    previewBtn.innerHTML = '<i class="fas fa-play" style="margin-right:4px;font-size:9px;"></i>Preview';
+    previewBtn = null;
+  }
 }
 
 // --- Schedule alarms for all important tasks ---
