@@ -1788,6 +1788,27 @@
             <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px;">Cannot be postponed — Every. Single. Day.</div>
           </div>
         </div>
+
+        <!-- IMPORTANT TASK TOGGLE -->
+        <div class="checkbox-row" id="importantToggle" onclick="toggleImportantCheck()" style="border-color:rgba(255,180,0,0.2);">
+          <div class="checkbox-box" style="border-color:rgba(255,180,0,0.4);"></div>
+          <div style="flex:1;">
+            <div style="font-size:0.92rem;font-weight:600;display:flex;align-items:center;gap:7px;">
+              <i class="fas fa-bell" style="color:rgba(255,180,0,0.7);font-size:0.8rem;"></i>
+              Mark as Important — Notify Me
+            </div>
+            <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px;">NEXUS will alarm + play music when this task starts</div>
+          </div>
+        </div>
+
+        <!-- MUSIC PICKER — shown only when important is ON -->
+        <div id="musicPickerWrap" style="display:none;background:rgba(255,180,0,0.04);border:1px solid rgba(255,180,0,0.15);border-radius:12px;padding:13px;gap:10px;flex-direction:column;">
+          <div style="font-size:0.75rem;font-weight:700;color:rgba(255,180,0,0.8);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;">
+            <i class="fas fa-music" style="margin-right:6px;"></i>Choose Alarm Music
+          </div>
+          <div id="musicList" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+
         <button class="save-btn" onclick="addTask()" style="width:100%;">
           <i class="fas fa-plus" style="margin-right:7px;"></i>ADD TO TIMELINE
         </button>
@@ -2547,7 +2568,8 @@ async function loadAllData(){
       S.tasks[t.task_date].push({
         id:t.id,name:t.name,start:t.start_time,end:t.end_time,
         duration:t.duration,pts:t.pts,icon:t.icon,cat:t.category,
-        nonNeg:t.non_negotiable,done:t.done
+        nonNeg:t.non_negotiable,done:t.done,
+        important:t.important||false, musicId:t.music_id||1
       });
     });
     Object.keys(S.tasks).forEach(function(k){
@@ -2824,7 +2846,7 @@ function renderTaskList(){
       return '<div class="task-item'+(task.done?' done':'')+(task.nonNeg?' non-neg':'')+'" id="titem-'+task.id+'">'
         +'<div class="task-check" onclick="toggleTask(\''+task.id+'\')"></div>'
         +'<div style="font-size:1rem;flex-shrink:0;">'+escHtml(task.icon)+'</div>'
-        +'<div class="task-label">'+escHtml(task.name)+(task.nonNeg?' <span class="nn-badge">NON-NEG</span>':'')+'</div>'
+        +'<div class="task-label">'+escHtml(task.name)+(task.nonNeg?' <span class="nn-badge">NON-NEG</span>':'')+(task.important?' <span style="font-size:0.6rem;background:rgba(255,180,0,0.12);color:#ffb400;border:1px solid rgba(255,180,0,0.3);border-radius:4px;padding:1px 5px;letter-spacing:0.5px;">🔔 ALARM</span>':'')+'</div>'
         +'<div class="task-time-badge">'+task.start+' – '+task.end+'</div>'
         +'<div class="task-pts-badge">+'+task.pts+'</div>'
         +'<span class="task-remove" onclick="removeTask(\''+task.id+'\')" title="Remove"><i class="fas fa-trash"></i></span>'
@@ -4473,6 +4495,239 @@ async function boot(){
   }
 }
 document.addEventListener('DOMContentLoaded',boot);
+
+// ============================================================
+// ALARM & MUSIC FEATURE — THE GRIND HQ
+// ============================================================
+
+// --- 10 Free Copyright-Free Tracks from Mixkit & Pixabay ---
+var ALARM_TRACKS = [
+  { id:1, name:'Gentle Morning Rise',   vibe:'Soft & Uplifting',  url:'https://cdn.pixabay.com/audio/2024/01/16/audio_0de21d5a80.mp3' },
+  { id:2, name:'Lo-Fi Focus Flow',      vibe:'Calm & Focused',    url:'https://cdn.pixabay.com/audio/2023/10/30/audio_9fb25b4429.mp3' },
+  { id:3, name:'Soft Piano Wake',       vibe:'Warm & Gentle',     url:'https://cdn.pixabay.com/audio/2023/11/13/audio_8d5f1d6b4e.mp3' },
+  { id:4, name:'Motivational Pulse',    vibe:'Energetic',         url:'https://cdn.mixkit.co/music/preview/mixkit-inspiring-life-574.mp3' },
+  { id:5, name:'Chill Acoustic',        vibe:'Cozy & Relaxed',    url:'https://cdn.mixkit.co/music/preview/mixkit-life-is-a-dream-837.mp3' },
+  { id:6, name:'Deep Work Mode',        vibe:'Concentration',     url:'https://cdn.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3' },
+  { id:7, name:'Bell Chime Alert',      vibe:'Minimal & Clean',   url:'https://cdn.pixabay.com/audio/2022/03/24/audio_655ca6e32c.mp3' },
+  { id:8, name:'Power Up Rise',         vibe:'High Energy',       url:'https://cdn.mixkit.co/music/preview/mixkit-hip-hop-02-738.mp3' },
+  { id:9, name:'Sunrise Acoustic',      vibe:'Fresh & Positive',  url:'https://cdn.mixkit.co/music/preview/mixkit-dreaming-big-31.mp3' },
+  { id:10,name:'Electronic Alert',      vibe:'Sharp & Alert',     url:'https://cdn.pixabay.com/audio/2023/03/14/audio_b8d3a48b4a.mp3' }
+];
+
+var importantChecked = false;
+var selectedMusicId = 1;
+var alarmAudio = null;
+var alarmTimers = [];
+var activeAlarmTaskId = null;
+
+function toggleImportantCheck() {
+  importantChecked = !importantChecked;
+  var el = document.getElementById('importantToggle');
+  var wrap = document.getElementById('musicPickerWrap');
+  if (el) {
+    el.classList.toggle('on', importantChecked);
+    el.style.borderColor = importantChecked ? 'rgba(255,180,0,0.5)' : 'rgba(255,180,0,0.2)';
+    el.style.background = importantChecked ? 'rgba(255,180,0,0.06)' : '';
+    var box = el.querySelector('.checkbox-box');
+    if (box) { box.style.borderColor = importantChecked ? '#ffb400' : 'rgba(255,180,0,0.4)'; box.style.background = importantChecked ? '#ffb400' : ''; }
+  }
+  if (wrap) {
+    wrap.style.display = importantChecked ? 'flex' : 'none';
+    if (importantChecked) renderMusicList();
+  }
+}
+
+function renderMusicList() {
+  var el = document.getElementById('musicList');
+  if (!el) return;
+  el.innerHTML = ALARM_TRACKS.map(function(t) {
+    var sel = t.id === selectedMusicId;
+    return '<div onclick="selectMusic('+t.id+')" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;border:1px solid '+(sel?'rgba(255,180,0,0.5)':'rgba(255,255,255,0.06)')+';background:'+(sel?'rgba(255,180,0,0.08)':'rgba(255,255,255,0.02)')+';transition:all 0.2s;">'
+      + '<div style="width:28px;height:28px;border-radius:50%;background:'+(sel?'#ffb400':'rgba(255,255,255,0.06)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+      + '<i class="fas '+(sel?'fa-volume-up':'fa-music')+'" style="font-size:11px;color:'+(sel?'#000':'var(--text-muted)');+'"></i></div>'
+      + '<div style="flex:1;min-width:0;">'
+      + '<div style="font-size:0.82rem;font-weight:600;color:'+(sel?'#ffb400':'var(--text-soft)')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+t.name+'</div>'
+      + '<div style="font-size:0.68rem;color:var(--text-muted);">'+t.vibe+'</div></div>'
+      + '<button onclick="event.stopPropagation();previewMusic('+t.id+')" style="background:none;border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:4px 8px;color:var(--text-muted);font-size:0.65rem;cursor:pointer;white-space:nowrap;">'
+      + '<i class="fas fa-play" style="margin-right:3px;"></i>Preview</button>'
+      + '</div>';
+  }).join('');
+}
+
+function selectMusic(id) {
+  selectedMusicId = id;
+  stopPreview();
+  renderMusicList();
+}
+
+var previewAudio = null;
+function previewMusic(id) {
+  stopPreview();
+  var track = ALARM_TRACKS.find(function(t){ return t.id === id; });
+  if (!track) return;
+  previewAudio = new Audio(track.url);
+  previewAudio.volume = 0.5;
+  previewAudio.play().catch(function(){
+    showToast('Preview failed — browser blocked autoplay. Click the page first.');
+  });
+  setTimeout(function(){ stopPreview(); }, 8000);
+}
+function stopPreview() {
+  if (previewAudio) { previewAudio.pause(); previewAudio.currentTime = 0; previewAudio = null; }
+}
+
+// --- Schedule alarms for all important tasks ---
+function scheduleAlarms() {
+  alarmTimers.forEach(function(t){ clearTimeout(t); });
+  alarmTimers = [];
+  var t = today();
+  var tasks = (S.tasks && S.tasks[t]) || [];
+  var now = new Date();
+  tasks.forEach(function(task) {
+    if (!task.important || task.done) return;
+    var parts = task.start.split(':');
+    var taskTime = new Date();
+    taskTime.setHours(parseInt(parts[0]), parseInt(parts[1]), 0, 0);
+    var diff = taskTime - now;
+    if (diff > 0 && diff < 24 * 3600 * 1000) {
+      var tid = setTimeout(function() { triggerAlarm(task); }, diff);
+      alarmTimers.push(tid);
+    }
+  });
+}
+
+function triggerAlarm(task) {
+  if (task.done) return;
+  activeAlarmTaskId = task.id;
+  var track = ALARM_TRACKS.find(function(t){ return t.id === (task.musicId || 1); }) || ALARM_TRACKS[0];
+  alarmAudio = new Audio(track.url);
+  alarmAudio.loop = true;
+  alarmAudio.volume = 0;
+  alarmAudio.play().then(function() {
+    // Fade in gently over 3 seconds
+    var vol = 0;
+    var fade = setInterval(function() {
+      vol = Math.min(vol + 0.05, 0.7);
+      alarmAudio.volume = vol;
+      if (vol >= 0.7) clearInterval(fade);
+    }, 150);
+  }).catch(function(){});
+  showAlarmModal(task, track);
+  // Auto-stop after 2 min if user ignores
+  var autoStop = setTimeout(function(){ dismissAlarm(); }, 120000);
+  alarmTimers.push(autoStop);
+}
+
+function showAlarmModal(task, track) {
+  var existing = document.getElementById('alarmModal');
+  if (existing) existing.remove();
+  var modal = document.createElement('div');
+  modal.id = 'alarmModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(16px);animation:fadeInModal 0.4s ease;';
+  modal.innerHTML = '<div style="background:linear-gradient(160deg,#0F1218,#0A0C10);border:1px solid rgba(255,180,0,0.35);border-radius:22px;max-width:420px;width:90%;padding:32px;box-shadow:0 0 80px rgba(255,180,0,0.12);text-align:center;position:relative;overflow:hidden;">'
+    + '<div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(255,180,0,0.08),transparent);"></div>'
+    // Pulsing ring
+    + '<div style="width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(255,180,0,0.2),transparent);border:2px solid rgba(255,180,0,0.4);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;animation:alarmPulse 1.2s ease-in-out infinite;">'
+    + '<span style="font-size:2rem;">'+escHtml(task.icon || '🎯')+'</span></div>'
+    + '<div style="font-family:\'Orbitron\',monospace;font-size:0.65rem;color:rgba(255,180,0,0.7);letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;">NEXUS ALERT</div>'
+    + '<div style="font-size:1.25rem;font-weight:700;color:#F5F7FA;margin-bottom:6px;">'+escHtml(task.name)+'</div>'
+    + '<div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:4px;">Scheduled for <span style="color:rgba(255,180,0,0.85);font-weight:600;">'+task.start+'</span> — Time to start.</div>'
+    + '<div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:22px;font-style:italic;">Playing: '+track.name+'</div>'
+    // Music wave visualizer (CSS only)
+    + '<div style="display:flex;align-items:flex-end;justify-content:center;gap:3px;height:28px;margin-bottom:22px;" id="waveViz">'
+    + [3,5,8,12,9,14,10,7,13,6,11,8,4].map(function(h){ return '<div style="width:3px;border-radius:2px;background:rgba(255,180,0,0.6);height:'+h+'px;animation:waveBar 0.8s ease-in-out infinite alternate;animation-delay:'+Math.random().toFixed(2)+'s;"></div>'; }).join('')
+    + '</div>'
+    + '<div style="display:flex;gap:10px;justify-content:center;">'
+    + '<button onclick="dismissAlarm()" style="flex:1;padding:12px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text-soft);font-size:0.82rem;font-weight:600;cursor:pointer;letter-spacing:0.5px;">Dismiss</button>'
+    + '<button onclick="startTaskNow(\''+task.id+'\')" style="flex:1;padding:12px;border-radius:12px;background:linear-gradient(135deg,#ffb400,#ff8c00);border:none;color:#000;font-size:0.82rem;font-weight:700;cursor:pointer;letter-spacing:0.5px;">Start Now</button>'
+    + '</div></div>';
+  document.body.appendChild(modal);
+  // Inject keyframes if not already present
+  if (!document.getElementById('alarmKeyframes')) {
+    var st = document.createElement('style');
+    st.id = 'alarmKeyframes';
+    st.textContent = '@keyframes alarmPulse{0%{box-shadow:0 0 0 0 rgba(255,180,0,0.4);}70%{box-shadow:0 0 0 18px rgba(255,180,0,0);}100%{box-shadow:0 0 0 0 rgba(255,180,0,0);}} @keyframes waveBar{from{transform:scaleY(0.4);}to{transform:scaleY(1.4);}} @keyframes fadeInModal{from{opacity:0;transform:scale(0.95);}to{opacity:1;transform:scale(1);}}';
+    document.head.appendChild(st);
+  }
+  // NEXUS sends a message
+  setTimeout(function(){
+    appendNexusMessage('Task time: <strong>'+task.name+'</strong>. Your alarm is going off. No more waiting — start right now. Dismiss it only when you\'re already moving.');
+  }, 1500);
+}
+
+function dismissAlarm() {
+  if (alarmAudio) {
+    var a = alarmAudio;
+    var fadeOut = setInterval(function(){
+      a.volume = Math.max(0, a.volume - 0.08);
+      if (a.volume <= 0) { a.pause(); clearInterval(fadeOut); }
+    }, 80);
+    alarmAudio = null;
+  }
+  var modal = document.getElementById('alarmModal');
+  if (modal) modal.remove();
+  stopPreview();
+}
+
+function startTaskNow(id) {
+  dismissAlarm();
+  var t = today();
+  var task = (S.tasks[t] || []).find(function(x){ return x.id == id; });
+  if (task) showToast('Starting: ' + task.name + ' — Let\'s go!');
+  showView('tasks');
+}
+
+function appendNexusMessage(html) {
+  var chat = document.getElementById('nexusChat');
+  if (!chat) return;
+  var div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:10px;margin-bottom:14px;';
+  div.innerHTML = '<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--neural),var(--accent));display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:#fff;flex-shrink:0;">N</div>'
+    + '<div style="background:rgba(255,255,255,0.04);border:1px solid var(--line-strong);border-radius:0 14px 14px 14px;padding:12px 15px;max-width:85%;font-size:0.88rem;line-height:1.6;color:var(--text-soft);">'+html+'</div>';
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// --- Patch addTask to save important + musicId ---
+var _origAddTask = addTask;
+addTask = async function() {
+  // Temporarily save these before original function resets the form
+  var wasImportant = importantChecked;
+  var musicId = selectedMusicId;
+  await _origAddTask();
+  // After insert, patch the last added task with important & musicId
+  if (wasImportant) {
+    var t = today();
+    var tasks = S.tasks[t] || [];
+    var last = tasks[tasks.length - 1];
+    if (last) {
+      last.important = true;
+      last.musicId = musicId;
+      // Update DB
+      await supabase.from('tasks').update({ important: true, music_id: musicId }).eq('id', last.id).eq('user_id', currentUser.id);
+      scheduleAlarms();
+    }
+  }
+  // Reset
+  importantChecked = false;
+  selectedMusicId = 1;
+  var it = document.getElementById('importantToggle');
+  if (it) { it.classList.remove('on'); it.style.borderColor = 'rgba(255,180,0,0.2)'; it.style.background = ''; }
+  var wrap = document.getElementById('musicPickerWrap');
+  if (wrap) wrap.style.display = 'none';
+};
+
+// Re-schedule alarms on page load after data loads
+var _origLoadData = typeof loadAllData === 'function' ? loadAllData : null;
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){
+    if (S && S.tasks) {
+      // Patch loaded tasks with important flag
+      var t = today();
+      scheduleAlarms();
+    }
+  }, 4000);
+});
 
 </script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
