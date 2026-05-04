@@ -4879,18 +4879,18 @@ function playTrack(trackId, opts) {
 
 function stopTrack() {
   if (!currentPlayer) return;
-  currentPlayer.stopped = true;
-  if (currentPlayer.loopTimer) clearTimeout(currentPlayer.loopTimer);
-  if (currentPlayer.fadeTimer) clearTimeout(currentPlayer.fadeTimer);
-  try {
-    currentPlayer.master.gain.cancelScheduledValues(currentPlayer.ctx.currentTime);
-    currentPlayer.master.gain.setValueAtTime(currentPlayer.master.gain.value, currentPlayer.ctx.currentTime);
-    currentPlayer.master.gain.linearRampToValueAtTime(0, currentPlayer.ctx.currentTime + 0.3);
-    setTimeout(function(){
-      try { currentPlayer.master.disconnect(); } catch(e){}
-    }, 400);
-  } catch(e){}
+  var p = currentPlayer;
   currentPlayer = null;
+  p.stopped = true;
+  if (p.loopTimer) clearTimeout(p.loopTimer);
+  if (p.fadeTimer) clearTimeout(p.fadeTimer);
+  try {
+    // INSTANTLY mute — no fade, kills queued notes too
+    p.master.gain.cancelScheduledValues(p.ctx.currentTime);
+    p.master.gain.setValueAtTime(0, p.ctx.currentTime);
+    // Disconnect immediately so no future notes can play through
+    p.master.disconnect();
+  } catch(e){}
 }
 
 // ---- UI STATE ----
