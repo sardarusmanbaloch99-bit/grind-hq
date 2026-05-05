@@ -2604,56 +2604,64 @@ function today(){var d=new Date();var y=d.getFullYear();var m=String(d.getMonth(
 function uid(prefix){return(prefix||'id')+'_'+Date.now()+'_'+Math.floor(Math.random()*999);}
 
 // ============== NON-NEG CARRY FORWARD ==============
-// Non-negotiables are DAILY commitments — they must show up every day in tasks + timeline
-// This function finds non-neg tasks from previous dates and re-creates them for today
+// Non-negotiables are DAILY commitments — appear every day in tasks + timeline
+// Runs after loadAllData — inserts today's copy if missing, max ONCE per day per non-neg
 async function carryForwardNonNegTasks(){
   if(!currentUser || !S.nonNegs.length) return;
   var t = today();
+
+  // Guard: track which non-negs we already carried forward today (prevents duplicates on double-call)
+  var carriedKey = 'grind_cf_' + currentUser.id + '_' + t;
+  if(sessionStorage.getItem(carriedKey)) return; // Already ran this session
+
   var todayTasks = S.tasks[t] || [];
 
-  // Find which non-negs are missing from today's task list
-  var missingNonNegs = S.nonNegs.filter(function(nn){
+  // Which non-negs are missing from today's tasks?
+  var missing = S.nonNegs.filter(function(nn){
     return !todayTasks.some(function(task){
-      return task.nonNeg && task.name.toLowerCase() === nn.name.toLowerCase();
+      return task.nonNeg && task.name.toLowerCase().trim() === nn.name.toLowerCase().trim();
     });
   });
 
-  if(!missingNonNegs.length) return; // All non-negs already exist for today
+  if(!missing.length){
+    sessionStorage.setItem(carriedKey, '1');
+    return;
+  }
 
-  // For each missing non-neg, look up its last known task entry to copy time/duration/pts
-  var allPastTasks = [];
+  // Collect all non-neg tasks from ALL dates (to find last known time/duration)
+  var allNonNegTasks = [];
   Object.keys(S.tasks).forEach(function(dateKey){
-    if(dateKey !== t){
-      S.tasks[dateKey].forEach(function(task){
-        if(task.nonNeg) allPastTasks.push(task);
-      });
-    }
+    S.tasks[dateKey].forEach(function(task){
+      if(task.nonNeg) allNonNegTasks.push(task);
+    });
   });
 
-  for(var i=0; i<missingNonNegs.length; i++){
-    var nn = missingNonNegs[i];
-    // Find most recent past version of this task for its time/duration/pts
-    var pastVersion = allPastTasks.find(function(task){
-      return task.name.toLowerCase() === nn.name.toLowerCase();
+  for(var i=0; i<missing.length; i++){
+    var nn = missing[i];
+    // Find most recent entry for this non-neg across all dates
+    var past = allNonNegTasks.find(function(task){
+      return task.name.toLowerCase().trim() === nn.name.toLowerCase().trim();
     });
-    var start = pastVersion ? pastVersion.start : '08:00';
-    var dur   = pastVersion ? (pastVersion.duration || 60) : 60;
-    var pts   = pastVersion ? (pastVersion.pts || 10) : 10;
-    var cat   = pastVersion ? (pastVersion.cat || 'personal') : 'personal';
-    var icon  = nn.icon || (pastVersion ? pastVersion.icon : '🎯') || '🎯';
+    var start = past ? past.start : '08:00';
+    var dur   = past ? (past.duration || 60) : 60;
+    var pts   = past ? (past.pts || 10) : 10;
+    var cat   = past ? (past.cat || 'personal') : 'personal';
+    var icon  = nn.icon || (past ? past.icon : '🎯') || '🎯';
     var end   = addMinutesToTime(start, dur);
 
     try {
       var res = await supabase.from('tasks').insert({
-        user_id: currentUser.id, name: nn.name, start_time: start, end_time: end,
+        user_id: currentUser.id, name: nn.name,
+        start_time: start, end_time: end,
         duration: dur, pts: pts, icon: icon, category: cat,
         non_negotiable: true, done: false, task_date: t
       }).select().single();
-      if(res.data){
+      if(res.data && !res.error){
         if(!S.tasks[t]) S.tasks[t] = [];
         S.tasks[t].push({
-          id: res.data.id, name: res.data.name, start: res.data.start_time,
-          end: res.data.end_time, duration: res.data.duration, pts: res.data.pts,
+          id: res.data.id, name: res.data.name,
+          start: res.data.start_time, end: res.data.end_time,
+          duration: res.data.duration, pts: res.data.pts,
           icon: res.data.icon, cat: res.data.category,
           nonNeg: true, done: false, important: false, musicId: 1
         });
@@ -2661,8 +2669,9 @@ async function carryForwardNonNegTasks(){
     } catch(e){ console.warn('[carry-forward] failed for', nn.name, e); }
   }
 
-  // Re-sort today's tasks by start time
+  // Sort today's tasks
   if(S.tasks[t]) S.tasks[t].sort(function(a,b){ return a.start.localeCompare(b.start); });
+  sessionStorage.setItem(carriedKey, '1'); // Mark as done for this session
 }
 
 // ============== CLOUD SYNC ==============
@@ -2679,10 +2688,26 @@ async function loadAllData(){
 
     // Process tasks
     var tasks = tasksRes.data || [];
+    var todayKey = today();
     S.tasks={};
+
+    // ONE-TIME FIX: patch any tasks with null task_date in DB → set to today
+    var nullDateTasks = tasks.filter(function(t){ return !t.task_date; });
+    if(nullDateTasks.length > 0){
+      var nullIds = nullDateTasks.map(function(t){ return t.id; });
+      // Update in DB silently (don't await — runs in background)
+      supabase.from('tasks').update({ task_date: todayKey }).in('id', nullIds).eq('user_id', currentUser.id)
+        .then(function(){ console.log('[fix] Patched ' + nullIds.length + ' null task_date rows → ' + todayKey); })
+        .catch(function(e){ console.warn('[fix] null task_date patch failed', e); });
+      // Also fix in memory immediately
+      nullDateTasks.forEach(function(t){ t.task_date = todayKey; });
+    }
+
     tasks.forEach(function(t){
-      if(!S.tasks[t.task_date])S.tasks[t.task_date]=[];
-      S.tasks[t.task_date].push({
+      // FIX: If task_date is null/undefined (old tasks), treat as today
+      var dateKey = t.task_date || todayKey;
+      if(!S.tasks[dateKey])S.tasks[dateKey]=[];
+      S.tasks[dateKey].push({
         id:t.id,name:t.name,start:t.start_time,end:t.end_time,
         duration:t.duration,pts:t.pts,icon:t.icon,cat:t.category,
         nonNeg:t.non_negotiable,done:t.done,
