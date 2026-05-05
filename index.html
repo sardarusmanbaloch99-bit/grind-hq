@@ -2515,7 +2515,7 @@ function enterApp(){
     if (cached && cached.uid === currentUser.id && cached.t > Date.now() - 3600000) {
       // Cache is < 1 hour old — show it instantly
       var t = today();
-      S.tasks[t] = cached.tasks || [];
+      S.tasks = (cached.tasks && typeof cached.tasks === 'object' && !Array.isArray(cached.tasks)) ? cached.tasks : {};  // Restore all dates
       S.nonNegs = cached.nonNegs || [];
       S.skills = cached.skills || [];
       initApp(); // Show UI immediately with cached data
@@ -2600,7 +2600,7 @@ function stageOf(totalMinutes){
 }
 
 var S={tasks:{},reflections:{},nonNegs:[],skills:[],unlockedQuotes:{}};
-function today(){return new Date().toISOString().slice(0,10);}
+function today(){var d=new Date();var y=d.getFullYear();var m=String(d.getMonth()+1).padStart(2,'0');var day=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+day;}
 function uid(prefix){return(prefix||'id')+'_'+Date.now()+'_'+Math.floor(Math.random()*999);}
 
 // ============== CLOUD SYNC ==============
@@ -2658,7 +2658,7 @@ async function loadAllData(){
       localStorage.setItem('grind_cache', JSON.stringify({
         t: Date.now(),
         uid: currentUser.id,
-        tasks: S.tasks[today()] || [],
+        tasks: S.tasks,  // Save ALL dates — fixes tasks disappearing on refresh
         nonNegs: S.nonNegs,
         skills: S.skills.map(function(s){return {id:s.id,name:s.name,icon:s.icon,cat:s.cat,goal:s.goal,total:s.total};})
       }));
