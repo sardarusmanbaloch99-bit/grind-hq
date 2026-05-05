@@ -2603,6 +2603,68 @@ var S={tasks:{},reflections:{},nonNegs:[],skills:[],unlockedQuotes:{}};
 function today(){var d=new Date();var y=d.getFullYear();var m=String(d.getMonth()+1).padStart(2,'0');var day=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+day;}
 function uid(prefix){return(prefix||'id')+'_'+Date.now()+'_'+Math.floor(Math.random()*999);}
 
+// ============== NON-NEG CARRY FORWARD ==============
+// Non-negotiables are DAILY commitments — they must show up every day in tasks + timeline
+// This function finds non-neg tasks from previous dates and re-creates them for today
+async function carryForwardNonNegTasks(){
+  if(!currentUser || !S.nonNegs.length) return;
+  var t = today();
+  var todayTasks = S.tasks[t] || [];
+
+  // Find which non-negs are missing from today's task list
+  var missingNonNegs = S.nonNegs.filter(function(nn){
+    return !todayTasks.some(function(task){
+      return task.nonNeg && task.name.toLowerCase() === nn.name.toLowerCase();
+    });
+  });
+
+  if(!missingNonNegs.length) return; // All non-negs already exist for today
+
+  // For each missing non-neg, look up its last known task entry to copy time/duration/pts
+  var allPastTasks = [];
+  Object.keys(S.tasks).forEach(function(dateKey){
+    if(dateKey !== t){
+      S.tasks[dateKey].forEach(function(task){
+        if(task.nonNeg) allPastTasks.push(task);
+      });
+    }
+  });
+
+  for(var i=0; i<missingNonNegs.length; i++){
+    var nn = missingNonNegs[i];
+    // Find most recent past version of this task for its time/duration/pts
+    var pastVersion = allPastTasks.find(function(task){
+      return task.name.toLowerCase() === nn.name.toLowerCase();
+    });
+    var start = pastVersion ? pastVersion.start : '08:00';
+    var dur   = pastVersion ? (pastVersion.duration || 60) : 60;
+    var pts   = pastVersion ? (pastVersion.pts || 10) : 10;
+    var cat   = pastVersion ? (pastVersion.cat || 'personal') : 'personal';
+    var icon  = nn.icon || (pastVersion ? pastVersion.icon : '🎯') || '🎯';
+    var end   = addMinutesToTime(start, dur);
+
+    try {
+      var res = await supabase.from('tasks').insert({
+        user_id: currentUser.id, name: nn.name, start_time: start, end_time: end,
+        duration: dur, pts: pts, icon: icon, category: cat,
+        non_negotiable: true, done: false, task_date: t
+      }).select().single();
+      if(res.data){
+        if(!S.tasks[t]) S.tasks[t] = [];
+        S.tasks[t].push({
+          id: res.data.id, name: res.data.name, start: res.data.start_time,
+          end: res.data.end_time, duration: res.data.duration, pts: res.data.pts,
+          icon: res.data.icon, cat: res.data.category,
+          nonNeg: true, done: false, important: false, musicId: 1
+        });
+      }
+    } catch(e){ console.warn('[carry-forward] failed for', nn.name, e); }
+  }
+
+  // Re-sort today's tasks by start time
+  if(S.tasks[t]) S.tasks[t].sort(function(a,b){ return a.start.localeCompare(b.start); });
+}
+
 // ============== CLOUD SYNC ==============
 async function loadAllData(){
   if(!currentUser)return;
@@ -2652,6 +2714,10 @@ async function loadAllData(){
         wins:r.wins||'',fail:r.fails||'',lesson:r.lesson||'',prio:r.priorities||''
       };
     });
+
+    // ⚡ AUTO CARRY-FORWARD: Non-neg tasks should appear EVERY day
+    // If a non-neg task exists in DB from a previous date but NOT in today's tasks — add it for today
+    await carryForwardNonNegTasks();
 
     // ⚡ Cache in localStorage for instant next-visit load
     try {
