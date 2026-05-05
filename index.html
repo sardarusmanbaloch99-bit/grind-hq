@@ -7,11 +7,34 @@
   <meta name="description" content="ADHD-friendly personal command center. Track tasks, build skills, reflect daily. No excuses. No shortcuts." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%231E5BFF'/><stop offset='50%25' stop-color='%234D9FFF'/><stop offset='100%25' stop-color='%23FF6B2C'/></linearGradient></defs><rect width='100' height='100' rx='22' fill='url(%23g)'/><rect width='100' height='50' rx='22' fill='white' opacity='0.15'/><text x='50' y='68' text-anchor='middle' font-family='Inter,Arial,sans-serif' font-size='44' font-weight='800' fill='white' letter-spacing='-2'>TG</text><circle cx='82' cy='18' r='10' fill='%23FF3344'/></svg>" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%231E5BFF'/><stop offset='50%25' stop-color='%234D9FFF'/><stop offset='100%25' stop-color='%23FF6B2C'/></linearGradient></defs><rect width='180' height='180' rx='40' fill='url(%23g)'/><rect width='180' height='90' rx='40' fill='white' opacity='0.15'/><text x='90' y='118' text-anchor='middle' font-family='Inter,Arial,sans-serif' font-size='80' font-weight='800' fill='white' letter-spacing='-4'>TG</text><circle cx='148' cy='32' r='18' fill='%23FF3344'/></svg>" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Raleway:wght@200;300;400;500;600;700&family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Performance: preconnect to critical origins -->
+  <link rel="preconnect" href="https://zvqhpqwuyvhnszhbrnuj.supabase.co" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+  <link rel="dns-prefetch" href="https://unpkg.com" />
+
+  <!-- Supabase — faster CDN with crossorigin -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
+
+  <!-- Font Awesome (icons used everywhere) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" /></noscript>
+
+  <!-- Only essential fonts: Inter + Space Grotesk + Orbitron (Cinzel & Raleway removed — not used) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Chart.js will be lazy-loaded ONLY when Analytics tab is opened — saves ~250KB on initial load -->
+  <script>
+    var __chartJsLoaded = false;
+    function loadChartJs(callback) {
+      if (__chartJsLoaded || window.Chart) { callback && callback(); return; }
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+      s.onload = function(){ __chartJsLoaded = true; callback && callback(); };
+      document.head.appendChild(s);
+    }
+  </script>
   <style>
     :root {
       /* === APPLE VISION + NEURAL BRAIN PALETTE === */
@@ -1374,7 +1397,10 @@
 <!-- LOADING SCREEN -->
 <div class="loading-screen" id="loadingScreen">
   <div class="spinner"></div>
-  <p>Initializing</p>
+  <p id="loadingText">Initializing</p>
+  <div style="width:160px;height:2px;background:rgba(255,255,255,0.08);border-radius:2px;margin-top:16px;overflow:hidden;">
+    <div id="loadingBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--neural),var(--accent));border-radius:2px;transition:width 0.4s ease;"></div>
+  </div>
 </div>
 
 <!-- ============== AUTH SCREEN ============== -->
@@ -2482,6 +2508,26 @@ function enterApp(){
   if(emailDisplay) emailDisplay.textContent = currentUser.email;
   if(dropEmail) dropEmail.textContent = currentUser.email;
   updateAvatarDisplay();
+
+  // ⚡ INSTANT LOAD: Show cached data immediately while DB loads in background
+  try {
+    var cached = JSON.parse(localStorage.getItem('grind_cache') || 'null');
+    if (cached && cached.uid === currentUser.id && cached.t > Date.now() - 3600000) {
+      // Cache is < 1 hour old — show it instantly
+      var t = today();
+      S.tasks[t] = cached.tasks || [];
+      S.nonNegs = cached.nonNegs || [];
+      S.skills = cached.skills || [];
+      initApp(); // Show UI immediately with cached data
+      // Then silently refresh from DB in background
+      loadAllData().then(function(){
+        initApp(); // Re-render with fresh data (user won't notice the swap)
+      });
+      return;
+    }
+  } catch(e){}
+
+  // No cache — load from DB normally (first visit or cache expired)
   loadAllData().then(function(){ initApp(); });
 }
 async function onAuthSuccess(user){
@@ -2561,10 +2607,18 @@ function uid(prefix){return(prefix||'id')+'_'+Date.now()+'_'+Math.floor(Math.ran
 async function loadAllData(){
   if(!currentUser)return;
   try {
-    // Load tasks
-    var { data:tasks } = await supabase.from('tasks').select('*').eq('user_id',currentUser.id);
+    // ⚡ PERFORMANCE: Run all 4 queries IN PARALLEL (was sequential before — 4x slower)
+    var [tasksRes, nnsRes, skillsRes, reflsRes] = await Promise.all([
+      supabase.from('tasks').select('id,name,start_time,end_time,duration,pts,icon,category,non_negotiable,done,task_date,important,music_id').eq('user_id',currentUser.id),
+      supabase.from('non_negotiables').select('id,name,icon,description').eq('user_id',currentUser.id),
+      supabase.from('skills').select('id,name,icon,category,daily_goal,total_minutes,history,unlocked_quotes').eq('user_id',currentUser.id),
+      supabase.from('reflections').select('refl_date,score,wins,fails,lesson,priorities').eq('user_id',currentUser.id)
+    ]);
+
+    // Process tasks
+    var tasks = tasksRes.data || [];
     S.tasks={};
-    (tasks||[]).forEach(function(t){
+    tasks.forEach(function(t){
       if(!S.tasks[t.task_date])S.tasks[t.task_date]=[];
       S.tasks[t.task_date].push({
         id:t.id,name:t.name,start:t.start_time,end:t.end_time,
@@ -2577,30 +2631,39 @@ async function loadAllData(){
       S.tasks[k].sort(function(a,b){return a.start.localeCompare(b.start);});
     });
 
-    // Load non-negotiables
-    var { data:nns } = await supabase.from('non_negotiables').select('*').eq('user_id',currentUser.id);
-    S.nonNegs=(nns||[]).map(function(n){return {id:n.id,name:n.name,icon:n.icon,desc:n.description||''};});
+    // Process non-negotiables
+    var nns = nnsRes.data || [];
+    S.nonNegs=nns.map(function(n){return {id:n.id,name:n.name,icon:n.icon,desc:n.description||''};});
 
-    // Load skills
-    var { data:skills } = await supabase.from('skills').select('*').eq('user_id',currentUser.id);
-    S.skills=(skills||[]).map(function(s){
-      return {
-        id:s.id,name:s.name,icon:s.icon,cat:s.category,goal:s.daily_goal,
-        total:s.total_minutes||0,history:s.history||{}
-      };
+    // Process skills
+    var skills = skillsRes.data || [];
+    S.skills=skills.map(function(s){
+      return {id:s.id,name:s.name,icon:s.icon,cat:s.category,goal:s.daily_goal,total:s.total_minutes||0,history:s.history||{}};
     });
     S.unlockedQuotes={};
-    (skills||[]).forEach(function(s){if(s.unlocked_quotes)S.unlockedQuotes[s.id]=s.unlocked_quotes;});
+    skills.forEach(function(s){if(s.unlocked_quotes)S.unlockedQuotes[s.id]=s.unlocked_quotes;});
 
-    // Load reflections
-    var { data:refls } = await supabase.from('reflections').select('*').eq('user_id',currentUser.id);
+    // Process reflections
+    var refls = reflsRes.data || [];
     S.reflections={};
-    (refls||[]).forEach(function(r){
+    refls.forEach(function(r){
       S.reflections[r.refl_date]={
         date:r.refl_date,score:r.score,
         wins:r.wins||'',fail:r.fails||'',lesson:r.lesson||'',prio:r.priorities||''
       };
     });
+
+    // ⚡ Cache in localStorage for instant next-visit load
+    try {
+      localStorage.setItem('grind_cache', JSON.stringify({
+        t: Date.now(),
+        uid: currentUser.id,
+        tasks: S.tasks[today()] || [],
+        nonNegs: S.nonNegs,
+        skills: S.skills.map(function(s){return {id:s.id,name:s.name,icon:s.icon,cat:s.cat,goal:s.goal,total:s.total};})
+      }));
+    } catch(e){}
+
   } catch(err) {
     console.error('Load failed:',err);
     showToast('Could not sync — check your connection');
@@ -3159,8 +3222,8 @@ function switchTab(name,el){
   document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active');});
   var sec=document.getElementById('tab-'+name);if(sec)sec.classList.add('active');
   if(el)el.classList.add('active');
-  if(name==='analytics'){setTimeout(function(){initHistChart();initSkillRadar();initTierChart();buildGrid();},80);}
-  if(name==='dashboard'){setTimeout(initWeeklyChart,80);}
+  if(name==='analytics'){loadChartJs(function(){setTimeout(function(){initHistChart();initSkillRadar();initTierChart();buildGrid();},80);});}
+  if(name==='dashboard'){loadChartJs(function(){setTimeout(initWeeklyChart,80);});}
   if(name==='tasks'){renderTaskList();renderTaskTimeline();}
   if(name==='schedule'){renderScheduleTimeline();}
   if(name==='skills'){renderSkills();}
@@ -3206,7 +3269,7 @@ function initApp(){
   renderTaskList();renderTaskTimeline();renderDashTaskList();
   renderScheduleTimeline();setInterval(renderScheduleTimeline,60000);
   renderSkills();renderPastRefls();updateScore();updateWeekStats();
-  setTimeout(initWeeklyChart,300);
+  setTimeout(function(){ loadChartJs(initWeeklyChart); },300);
   initNexus();
 
   var t=today();
@@ -4512,6 +4575,13 @@ function initNexus() {
 }
 
 async function boot(){
+  var bar = document.getElementById('loadingBar');
+  var txt = document.getElementById('loadingText');
+  function setProgress(pct, msg) {
+    if(bar) bar.style.width = pct + '%';
+    if(txt) txt.textContent = msg;
+  }
+  setProgress(20, 'Connecting...');
   // Wait until Supabase is ready (max 8 seconds)
   let waited = 0;
   while(!supabase && waited < 8000){
@@ -4522,16 +4592,19 @@ async function boot(){
     document.getElementById('loadingScreen').innerHTML = '<div style="text-align:center;color:#FF4560;padding:30px;"><h3 style="margin-bottom:10px;">Connection Error</h3><p style="font-size:0.85rem;color:#A8AEBA;">Could not load the database library.<br>Please check your internet and refresh the page.</p></div>';
     return;
   }
+  setProgress(60, 'Loading session...');
   try {
     var { data:{session} } = await supabase.auth.getSession();
-    document.getElementById('loadingScreen').style.display='none';
+    setProgress(100, 'Ready!');
+    setTimeout(function(){
+      document.getElementById('loadingScreen').style.display='none';
+    }, 200);
     if(session && session.user){
       onAuthSuccess(session.user);
     } else {
       document.getElementById('authScreen').style.display='flex';
       showForm('login');
     }
-    // Listen for auth events (only after supabase is ready)
     supabase.auth.onAuthStateChange(function(event,session){
       if(event==='SIGNED_OUT'){
         currentUser=null;
