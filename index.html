@@ -3332,7 +3332,7 @@ function updateClock(){
   var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var dl=document.getElementById('liveDate');if(dl)dl.textContent=days[n.getDay()]+' · '+months[n.getMonth()]+' '+n.getDate();
-  var rd=document.getElementById('reflDate');if(rd)rd.textContent=days[n.getDay()]+' · '+n.toISOString().slice(0,10);
+  var rd=document.getElementById('reflDate');if(rd)rd.textContent=days[n.getDay()]+' · '+today();
 }
 function showToast(msg){
   var t=document.getElementById('toast');
