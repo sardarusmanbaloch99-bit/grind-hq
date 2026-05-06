@@ -1729,6 +1729,7 @@
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
         <div id="nexusLangBadge" onclick="cycleNexusLang()" style="font-size:0.55rem;padding:5px 11px;border-radius:20px;border:1px solid var(--accent-dim);color:var(--accent);letter-spacing:2px;text-transform:uppercase;background:var(--accent-faint);cursor:pointer;user-select:none;" title="Click to change language">AUTO</div>
+        <div onclick="clearNexusHistory()" style="font-size:0.55rem;padding:5px 11px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;background:rgba(255,255,255,0.03);cursor:pointer;user-select:none;" title="Clear chat history">CLEAR</div>
         <button class="nexus-mic-btn" id="nexusMicBtn" onclick="toggleNexusRecording()" title="Click to record voice (say 'done' or click again to send)">
           <i class="fas fa-microphone" id="nexusMicIcon"></i>
         </button>
@@ -4451,7 +4452,9 @@ function addNexusMessage(role, text) {
   div.appendChild(bubble);
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
-  nexusConversationHistory.push({ role: role === 'agent' ? 'assistant' : 'user', content: text });
+  var dbRole = role === 'agent' ? 'assistant' : 'user';
+  nexusConversationHistory.push({ role: dbRole, content: text });
+  saveNexusMessage(dbRole, text);
 }
 
 function addNexusTyping() {
@@ -4663,6 +4666,67 @@ function initNexus() {
     var statusTxt = document.getElementById('nexusStatusTxt');
     if(statusTxt) statusTxt.textContent = 'Click mic to talk · or type below';
   }, 1500);
+  // Load chat history from Supabase
+  loadNexusHistory();
+}
+
+async function loadNexusHistory() {
+  if(!currentUser) return;
+  try {
+    var res = await supabase.from('nexus_chats')
+      .select('role,content,created_at')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: true })
+      .limit(50);
+    if(res.error || !res.data || !res.data.length) return;
+    var chat = document.getElementById('nexusChat');
+    if(!chat) return;
+    // Clear default welcome if history exists
+    chat.innerHTML = '';
+    res.data.forEach(function(msg) {
+      var div = document.createElement('div');
+      div.className = 'nexus-msg nexus-' + (msg.role === 'assistant' ? 'agent' : 'user');
+      var avatar = document.createElement('div');
+      avatar.className = 'nexus-msg-avatar';
+      avatar.textContent = msg.role === 'assistant' ? 'N' : '👤';
+      var bubble = document.createElement('div');
+      bubble.className = 'nexus-msg-bubble';
+      bubble.innerHTML = msg.content;
+      div.appendChild(avatar);
+      div.appendChild(bubble);
+      chat.appendChild(div);
+      // Also restore to memory history (last 20 only)
+      nexusConversationHistory.push({ role: msg.role, content: msg.content });
+    });
+    // Keep memory history to last 20
+    if(nexusConversationHistory.length > 20) {
+      nexusConversationHistory = nexusConversationHistory.slice(-20);
+    }
+    chat.scrollTop = chat.scrollHeight;
+  } catch(e) { console.warn('[nexus] history load failed', e); }
+}
+
+async function clearNexusHistory() {
+  if(!currentUser) return;
+  if(!confirm('Clear all NEXUS chat history?')) return;
+  try {
+    await supabase.from('nexus_chats').delete().eq('user_id', currentUser.id);
+    nexusConversationHistory = [];
+    var chat = document.getElementById('nexusChat');
+    if(chat) chat.innerHTML = '<div class="nexus-msg nexus-agent"><div class="nexus-msg-avatar">N</div><div class="nexus-msg-bubble">Chat cleared. Ready when you are.</div></div>';
+    showToast('Chat history cleared');
+  } catch(e) { showToast('Could not clear history'); }
+}
+
+async function saveNexusMessage(role, content) {
+  if(!currentUser) return;
+  try {
+    await supabase.from('nexus_chats').insert({
+      user_id: currentUser.id,
+      role: role, // 'user' or 'assistant'
+      content: content
+    });
+  } catch(e) { console.warn('[nexus] save failed', e); }
 }
 
 async function boot(){
