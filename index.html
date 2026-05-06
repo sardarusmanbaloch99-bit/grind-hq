@@ -2354,7 +2354,7 @@ async function doLogout(){
   currentUser=null;
   S={tasks:{},reflections:{},nonNegs:[],skills:[],unlockedQuotes:{}};
   document.getElementById('appScreen').style.display='none';
-  document.getElementById('authScreen').style.display='flex';
+  document.getElementById('authScreen').style.display='flex';if(document.getElementById('siteFooter'))document.getElementById('siteFooter').style.display='none';
   showForm('login');
 }
 function showUserInfo(){
@@ -2533,7 +2533,7 @@ function enterApp(){
 }
 async function onAuthSuccess(user){
   currentUser = user;
-  document.getElementById('authScreen').style.display='none';
+  document.getElementById('authScreen').style.display='none';if(document.getElementById('siteFooter'))document.getElementById('siteFooter').style.display='flex';
   // Check if user has completed profile setup
   var username = user.user_metadata && user.user_metadata.username;
   if(!username){
@@ -4757,20 +4757,20 @@ async function boot(){
     if(session && session.user){
       onAuthSuccess(session.user);
     } else {
-      document.getElementById('authScreen').style.display='flex';
+      document.getElementById('authScreen').style.display='flex';if(document.getElementById('siteFooter'))document.getElementById('siteFooter').style.display='none';
       showForm('login');
     }
     supabase.auth.onAuthStateChange(function(event,session){
       if(event==='SIGNED_OUT'){
         currentUser=null;
         document.getElementById('appScreen').style.display='none';
-        document.getElementById('authScreen').style.display='flex';
+        document.getElementById('authScreen').style.display='flex';if(document.getElementById('siteFooter'))document.getElementById('siteFooter').style.display='none';
         showForm('login');
       }
     });
   } catch(err) {
     document.getElementById('loadingScreen').style.display='none';
-    document.getElementById('authScreen').style.display='flex';
+    document.getElementById('authScreen').style.display='flex';if(document.getElementById('siteFooter'))document.getElementById('siteFooter').style.display='none';
     showForm('login');
     console.error('Boot error:',err);
   }
@@ -5713,18 +5713,15 @@ document.addEventListener('DOMContentLoaded', function(){
 </div>
 
 
-<!-- ===== FOOTER ===== -->
-<div style="text-align:center;padding:32px 20px 48px;margin-top:40px;border-top:1px solid rgba(255,255,255,0.06);">
-  <div style="font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:3px;color:var(--text-muted);margin-bottom:12px;">THE GRIND HQ</div>
-  <div style="font-size:12px;color:rgba(255,255,255,0.25);margin-bottom:14px;">Personal Command Center · No Excuses · No Shortcuts</div>
-  <div style="display:flex;gap:20px;justify-content:center;align-items:center;">
-    <a href="/legal.html" style="font-size:12px;color:rgba(255,255,255,0.35);text-decoration:none;letter-spacing:0.5px;transition:color 0.2s;" onmouseover="this.style.color='#FF6B2C'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">Privacy Policy</a>
-    <span style="color:rgba(255,255,255,0.15);font-size:10px;">·</span>
-    <a href="/legal.html" onclick="document.getElementById('legalTab2')&&document.getElementById('legalTab2').click()" style="font-size:12px;color:rgba(255,255,255,0.35);text-decoration:none;letter-spacing:0.5px;transition:color 0.2s;" onmouseover="this.style.color='#FF6B2C'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">Terms of Service</a>
-    <span style="color:rgba(255,255,255,0.15);font-size:10px;">·</span>
-    <span style="font-size:12px;color:rgba(255,255,255,0.2);">© 2026 M. Usman</span>
-  </div>
+<!-- ===== FIXED FOOTER ===== -->
+<div id="siteFooter" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;background:rgba(10,10,10,0.95);backdrop-filter:blur(10px);border-top:1px solid rgba(255,255,255,0.06);padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:16px;">
+  <span style="font-family:'Orbitron',monospace;font-size:9px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,0.2);">© 2026 THE GRIND HQ</span>
+  <span style="color:rgba(255,255,255,0.1);font-size:10px;">·</span>
+  <a href="/legal.html" style="font-size:11px;color:rgba(255,255,255,0.3);text-decoration:none;letter-spacing:0.5px;" onmouseover="this.style.color='#FF6B2C'" onmouseout="this.style.color='rgba(255,255,255,0.3)'">Privacy Policy</a>
+  <span style="color:rgba(255,255,255,0.1);font-size:10px;">·</span>
+  <a href="/legal.html" style="font-size:11px;color:rgba(255,255,255,0.3);text-decoration:none;letter-spacing:0.5px;" onmouseover="this.style.color='#FF6B2C'" onmouseout="this.style.color='rgba(255,255,255,0.3)'">Terms of Service</a>
 </div>
+<div style="height:40px;"></div><!-- spacer for fixed footer -->
 
 </body>
 </html>
