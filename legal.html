@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Legal — The Grind HQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #1a1a1a;
+    --orange: #FF6B2C;
+    --orange-dim: rgba(255,107,44,0.12);
+    --blue: #4D9FFF;
+    --text: #e8e8e8;
+    --text-dim: #888;
+    --border: rgba(255,255,255,0.07);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.8;
+    min-height: 100vh;
+  }
+
+  /* Background grain */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* Header */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,10,0.9);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .logo-mark {
+    width: 34px;
+    height: 34px;
+    background: linear-gradient(135deg, #1E5BFF, #4D9FFF, #FF6B2C);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    color: white;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text);
+    letter-spacing: 0.5px;
+  }
+
+  .logo-text span { color: var(--orange); }
+
+  .back-btn {
+    font-size: 13px;
+    color: var(--text-dim);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+  }
+  .back-btn:hover { color: var(--orange); }
+
+  /* Page layout */
+  .page-wrapper {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 60px 40px 100px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Tab nav */
+  .tab-nav {
+    display: flex;
+    gap: 4px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 48px;
+    width: fit-content;
+  }
+
+  .tab-btn {
+    padding: 9px 24px;
+    border-radius: 9px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tab-btn.active {
+    background: var(--orange);
+    color: white;
+    box-shadow: 0 4px 16px rgba(255,107,44,0.3);
+  }
+
+  /* Page title */
+  .page-title {
+    margin-bottom: 48px;
+  }
+
+  .page-title .eyebrow {
+    font-size: 11px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 12px;
+  }
+
+  .page-title h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(28px, 5vw, 42px);
+    line-height: 1.1;
+    color: white;
+    margin-bottom: 16px;
+  }
+
+  .page-title .meta {
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .page-title .meta span {
+    color: var(--orange);
+  }
+
+  /* Content sections */
+  .section {
+    margin-bottom: 40px;
+    padding: 28px 32px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--orange), transparent);
+    opacity: 0.5;
+  }
+
+  .section-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 8px;
+  }
+
+  .section h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: white;
+    margin-bottom: 16px;
+  }
+
+  .section p {
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    line-height: 1.8;
+  }
+
+  .section p:last-child { margin-bottom: 0; }
+
+  .section ul {
+    list-style: none;
+    margin: 12px 0;
+  }
+
+  .section ul li {
+    color: var(--text-dim);
+    padding: 6px 0 6px 20px;
+    position: relative;
+    line-height: 1.7;
+  }
+
+  .section ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--orange);
+    font-size: 12px;
+  }
+
+  .section strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .section a {
+    color: var(--orange);
+    text-decoration: none;
+  }
+  .section a:hover { text-decoration: underline; }
+
+  /* Contact card */
+  .contact-card {
+    background: var(--orange-dim);
+    border: 1px solid rgba(255,107,44,0.2);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-top: 16px;
+  }
+
+  .contact-card p {
+    color: var(--text) !important;
+    margin: 0 !important;
+    font-size: 14px;
+  }
+
+  .contact-card a {
+    color: var(--orange);
+    font-weight: 500;
+  }
+
+  /* Tab panels */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Footer note */
+  .footer-note {
+    margin-top: 48px;
+    padding: 20px 24px;
+    background: var(--bg3);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-dim);
+    text-align: center;
+  }
+
+  .footer-note strong { color: var(--text); }
+
+  /* Highlight box */
+  .highlight-box {
+    background: rgba(77,159,255,0.08);
+    border: 1px solid rgba(77,159,255,0.2);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .highlight-box p {
+    color: #a8c8ff !important;
+    margin: 0 !important;
+    font-size: 14px;
+  }
+
+  @media (max-width: 600px) {
+    header { padding: 0 20px; }
+    .page-wrapper { padding: 40px 20px 80px; }
+    .section { padding: 22px 20px; }
+    .tab-btn { padding: 8px 16px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">
+    <div class="logo-mark">TG</div>
+    <span class="logo-text">THE <span>GRIND</span> HQ</span>
+  </a>
+  <a href="/" class="back-btn">← Back to App</a>
+</header>
+
+<div class="page-wrapper">
+
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('privacy')">Privacy Policy</button>
+    <button class="tab-btn" onclick="switchTab('terms')">Terms of Service</button>
+  </div>
+
+  <!-- PRIVACY POLICY -->
+  <div class="tab-panel active" id="privacy">
+
+    <div class="page-title">
+      <div class="eyebrow">Legal Document</div>
+      <h1>Privacy Policy</h1>
+      <p class="meta">Last updated: <span>May 6, 2026</span> &nbsp;·&nbsp; Effective immediately</p>
+    </div>
+
+    <div class="section">
+      <div class="section-num">01</div>
+      <h2>Overview</h2>
+      <p>The Grind HQ ("we," "us," or "our") is a personal productivity application operated by M. Usman. We are committed to protecting your personal information.</p>
+      <p>This Privacy Policy explains what data we collect, how we use it, and your rights regarding your information when you use <strong>thegrindhq.com</strong>.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-num">02</div>
+      <h2>Information We Collect</h2>
+      <p>We collect only what is necessary to provide the service:</p>
+      <ul>
+        <li><strong>Account Information:</strong> Email address and password (or Google OAuth token) used to create your account.</li>
+        <li><strong>Profile Data:</strong> Username, age range, and optional profile photo you provide.</li>
+        <li><strong>App Content:</strong> Tasks, schedules, non-negotiables, skills, reflections, and day scores you create within the app.</li>
+        <li><strong>Voice Input:</strong> Audio recordings processed via OpenAI Whisper for speech-to-text. Audio is not stored after transcription.</li>
+        <li><strong>Usage Data:</strong> Basic app interaction logs for debugging and performance improvement.</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="section-num">03</div>
+      <h2>How We Use Your Information</h2>
+      <ul>
+        <li>To provide, maintain, and improve The Grind HQ service.</li>
+        <li>To authenticate your identity and protect your account.</li>
+        <li>To power the NEXUS AI agent with your personal productivity data.</li>
+        <li>To send app-related notifications (task alarms, reminders).</li>
+        <li>To analyze aggregate usage patterns and improve the product.</li>
+      </ul>
+      <div class="highlight-box">
+        <p>We do <strong>not</strong> sell your personal data to third parties. We do not use your data for advertising purposes.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-num">04</div>
+      <h2>Third-Party Services</h2>
+      <p>The Grind HQ uses the following third-party services to operate:</p>
+      <ul>
+        <li><strong>Supabase</strong> — Database and authentication (supabase.com)</li>
+        <li><strong>Vercel</strong> — Hosting and deployment (vercel.com)</li>
+        <li><strong>Anthropic Claude API</strong> — AI assistant features (anthropic.com)</li>
+        <li><strong>OpenAI Whisper API</strong> — Voice-to-text transcription (openai.com)</li>
+        <li><strong>Google OAuth</strong> — Optional Google sign-in (google.com)</li>
+      </ul>
+      <p>Each of these services has their own privacy policies. We encourage you to review them.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-num">05</div>
+      <h2>Data Storage & Security</h2>
+      <p>Your data is stored securely on Supabase's servers with Row Level Security (RLS) enabled — meaning only you can access your own data.</p>
+      <p>We implement industry-standard security measures including encrypted connections (HTTPS/SSL), secure authentication tokens, and access controls. However, no system is 100% secure and we cannot guarantee absolute security.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-num">06</div>
+      <h2>Your Rights</h2>
+      <p>You have the right to:</p>
+      <ul>
+        <li><strong>Access</strong> all personal data we hold about you.</li>
+        <li><strong>Correct</strong> inaccurate or incomplete information.</li>
+        <li><strong>Delete</strong> your account and all associated data at any time.</li>
+        <li><strong>Export</strong> your data in a readable format upon request.</li>
+        <li><strong>Opt out</strong> of non-essential communications.</li>
+      </ul>
+      <p>To exercise any of these rights, contact us at the email below.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-num">07</div>
+      <h2>Children's Privacy</h2>
+      <p>The Grind HQ is not directed to children under the age of 13. We do not knowingly collect personal information from children under 13. If you believe we have inadvertently collected such information, please contact us immediately.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-num">08</div>
+      <h2>Changes to This Policy</h2>
+      <p>We may update this Privacy Policy from time to time. We will notify users of significant changes via the app or by email. Continued use of The Grind HQ after changes constitutes acceptance of the updated policy.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-num">09</div>
+      <h2>Contact Us</h2>
+      <p>For any privacy-related questions, data requests, or concerns:</p>
+      <div class="contact-card">
+        <p>📧 <a href="mailto:sardarusmanbaloch99@gmail.com">sardarusmanbaloch99@gmail.com</a><br>
+        🌐 <a href="https://thegrindhq.com">thegrindhq.com</a><br>
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TERMS OF SERVICE -->
+  <div class="tab-panel" id="terms">
+
+    <div class="page-title">
+      <div class="eyebrow">Legal Document</div>
+      <h1>Terms of Service</h1>
+      <p class="meta">Last updated: <span>May 6, 2026</span> &nbsp;·&nbsp; Effective immediately</p>
+    </div>
+
+    <div class="section">
+      <div class="section-num">01</div>
+      <h2>Acceptance of Terms</h2>
+      <p>By accessing or using The Grind HQ ("Service") at <strong>thegrindhq.com</strong>, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service.</p>
+      <p>These Terms apply to all users of The Grind HQ, including free and paid subscribers.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-num">02</div>
+      <h2>Description of Service</h2>
+      <p>The Grind HQ is a personal productivity application that provides:</p>
+      <ul>
+        <li>Task scheduling and timeline management</li>
+        <li>Non-negotiable habits tracking</li>
+        <li>Skills and self-development tracking</li>
+        <li>AI-powered productivity coaching via NEXUS</li>
+        <li>Voice input for task creation</li>
+        <li>Day scoring and performance analytics</li>
+        <li>Daily reflection journaling</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="section-num">03</div>
+      <h2>User Accounts</h2>
+      <ul>
+        <li>You must provide accurate and complete information when creating an account.</li>
+        <li>You are responsible for maintaining the confidentiality of your account credentials.</li>
+        <li>You are responsible for all activity that occurs under your account.</li>
+        <li>You must notify us immediately of any unauthorized use of your account.</li>
+        <li>One person may not maintain more than one active free account.</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="section-num">04</div>
+      <h2>Acceptable Use</h2>
+      <p>You agree not to:</p>
+      <ul>
+        <li>Use the Service for any unlawful purpose or in violation of any regulations.</li>
+        <li>Attempt to gain unauthorized access to any part of the Service or its infrastructure.</li>
+        <li>Reverse engineer, decompile, or disassemble any part of the Service.</li>
+        <li>Use automated tools to scrape, crawl, or extract data from the Service.</li>
+        <li>Transmit harmful, offensive, or malicious content through the Service.</li>
+        <li>Impersonate any person or entity or misrepresent your affiliation.</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="section-num">05</div>
+      <h2>Subscription & Payments</h2>
+      <p>The Grind HQ offers the following plans:</p>
+      <ul>
+        <li><strong>Free:</strong> Limited access to core features.</li>
+        <li><strong>Basic ($1/month):</strong> Full access to all core features including NEXUS AI.</li>
+        <li><strong>Pro ($5/month):</strong> Everything in Basic plus premium voice features.</li>
+      </ul>
+      <div class="highlight-box">
+        <p>Subscriptions are billed monthly. You may cancel at any time. No refunds are provided for partial months. Prices are subject to change with 30 days notice.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-num">06</div>
+      <h2>Intellectual Property</h2>
+      <p>The Grind HQ, including its design, code, branding, and content, is owned by M. Usman. All rights reserved. All rights reserved.</p>
+      <p>You retain ownership of all content you create within the app (tasks, reflections, journal entries, etc.). By using the Service, you grant us a limited license to store and process your content solely to provide the Service to you.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-num">07</div>
+      <h2>Disclaimer of Warranties</h2>
+      <p>The Service is provided "as is" and "as available" without warranties of any kind, either express or implied. We do not warrant that:</p>
+      <ul>
+        <li>The Service will be uninterrupted or error-free.</li>
+        <li>Any errors or defects will be corrected.</li>
+        <li>The Service is free of viruses or other harmful components.</li>
+        <li>Results obtained from the Service will be accurate or reliable.</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="section-num">08</div>
+      <h2>Limitation of Liability</h2>
+      <p>To the maximum extent permitted by law, The Grind HQ and its operator shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the Service.</p>
+      <p>Our total liability for any claims arising from your use of the Service shall not exceed the amount you paid us in the 3 months preceding the claim.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-num">09</div>
+      <h2>Termination</h2>
+      <p>We reserve the right to suspend or terminate your account at our discretion if you violate these Terms. You may delete your account at any time through the app settings.</p>
+      <p>Upon termination, your right to use the Service will immediately cease. We may retain certain data as required by law or for legitimate business purposes.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-num">10</div>
+      <h2>Governing Law</h2>
+      <p>These Terms shall be governed by and construed in accordance with the laws of Pakistan. Any disputes arising from these Terms shall be subject to the jurisdiction of courts in .</p>
+      <p>For users outside Pakistan, local consumer protection laws may apply in addition to these Terms.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-num">11</div>
+      <h2>Contact</h2>
+      <p>For any questions about these Terms of Service:</p>
+      <div class="contact-card">
+        <p>📧 <a href="mailto:sardarusmanbaloch99@gmail.com">sardarusmanbaloch99@gmail.com</a><br>
+        🌐 <a href="https://thegrindhq.com">thegrindhq.com</a><br>
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-note">
+    <strong>The Grind HQ</strong> · Personal Command Center · No Excuses · No Shortcuts<br>
+    <span style="font-size:12px; margin-top:4px; display:block;">© 2026 M. Usman. All rights reserved. All rights reserved.</span>
+  </div>
+
+</div>
+
+<script>
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(function(btn, i) {
+    btn.classList.toggle('active', (i === 0 && tab === 'privacy') || (i === 1 && tab === 'terms'));
+  });
+  document.querySelectorAll('.tab-panel').forEach(function(panel) {
+    panel.classList.toggle('active', panel.id === tab);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
