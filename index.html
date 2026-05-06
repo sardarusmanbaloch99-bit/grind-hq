@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>THE GRIND — Personal Command Center</title>
   <meta name="description" content="ADHD-friendly personal command center. Track tasks, build skills, reflect daily. No excuses. No shortcuts." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%231E5BFF'/><stop offset='50%25' stop-color='%234D9FFF'/><stop offset='100%25' stop-color='%23FF6B2C'/></linearGradient></defs><rect width='100' height='100' rx='22' fill='url(%23g)'/><rect width='100' height='50' rx='22' fill='white' opacity='0.15'/><text x='50' y='68' text-anchor='middle' font-family='Inter,Arial,sans-serif' font-size='44' font-weight='800' fill='white' letter-spacing='-2'>TG</text><circle cx='82' cy='18' r='10' fill='%23FF3344'/></svg>" type="image/svg+xml" />
@@ -1163,28 +1163,89 @@
       .main-header{padding:10px 14px}
       .logo-mark{width:36px;height:36px}
       .logo-mark::after{font-size:0.7rem}
-      .nav-tab{padding:6px 12px;font-size:0.5rem;letter-spacing:1.5px}
-      .nav-tabs{padding:8px 12px;top:60px;}
+      .nav-tab{padding:6px 10px;font-size:0.48rem;letter-spacing:1px}
+      .nav-tabs{padding:6px 8px;top:60px;gap:2px;overflow-x:auto;flex-wrap:nowrap;justify-content:flex-start;}
+      .nav-tabs::-webkit-scrollbar{display:none;}
       .brain-wrap { width: 100vw; height: 60vh; opacity: 0.25; }
       .grid-3 { grid-template-columns: 1fr !important; }
       .grid-2 { grid-template-columns: 1fr !important; }
       .grid-23 { grid-template-columns: 1fr !important; }
       .grid-32 { grid-template-columns: 1fr !important; }
-      .auth-card { padding: 28px 22px; }
+      .auth-card { padding: 24px 18px; }
       .user-email { display: none; }
       .user-name-display { max-width: 70px; font-size: 0.7rem; }
       .live-clock { font-size: 0.85rem; letter-spacing: 2px; }
-      .card { padding: 18px; border-radius: 16px; }
-      .score-ring { width: 180px; height: 180px; }
-      .score-num { font-size: 2.5rem; }
-      .stat-num { font-size: 1.7rem; }
+      .card { padding: 16px; border-radius: 14px; }
+      .score-ring { width: 160px; height: 160px; }
+      .score-num { font-size: 2.2rem; }
+      .stat-num { font-size: 1.5rem; }
       .nexus-card::after { display: none; }
-      main { padding: 18px 14px !important; }
+      main { padding: 14px 12px 60px !important; }
+      /* Dashboard cards stacked */
+      .dash-top-grid { grid-template-columns: 1fr !important; }
+      /* Task form */
+      .task-form-row { flex-direction: column !important; }
+      .task-form-row > * { width: 100% !important; }
+      /* Timeline */
+      .timeline-card { padding: 12px !important; }
+      /* Score ring smaller */
+      .ring-wrap { transform: scale(0.85); }
+      /* Stat chips wrap */
+      .stat-chips { flex-wrap: wrap; gap: 8px; }
+      /* Non-neg list */
+      .nn-list { gap: 8px; }
+      /* Skills grid */
+      .skills-grid { grid-template-columns: 1fr !important; }
+      /* Nexus chat height */
+      .nexus-chat { max-height: 300px !important; }
+      /* Nexus quick buttons wrap */
+      .nexus-quick-btns { flex-wrap: wrap; gap: 6px; }
+      .nexus-quick-btns button { font-size: 0.6rem !important; padding: 6px 10px !important; }
+      /* Analytics charts */
+      .analytics-grid { grid-template-columns: 1fr !important; }
+      /* Header user badge */
+      .user-badge { padding: 5px 8px !important; gap: 6px !important; }
+      /* Footer fixed */
+      #siteFooter { padding: 8px 12px; gap: 10px; }
+      #siteFooter span, #siteFooter a { font-size: 10px !important; }
     }
     @media(max-width:480px){
       .header-sub{display:none}
-      .nav-tab{padding:6px 10px}
+      .header-title{font-size:0.8rem;letter-spacing:2px}
       .nav-tab i{display:none}
+      .nav-tab{padding:5px 8px;font-size:0.45rem;}
+      main { padding: 12px 10px 60px !important; }
+      .card { padding: 14px 12px; }
+      .score-ring { width: 140px; height: 140px; }
+      .score-num { font-size: 2rem; }
+      /* Hide non-essential header elements on very small screens */
+      .header-sub { display: none; }
+      /* Full width buttons */
+      .glow-btn { width: 100%; }
+      /* Task items */
+      .task-item { padding: 10px 12px !important; }
+      /* Timeline orb smaller */
+      .tl-orb { width: 36px !important; height: 36px !important; font-size: 14px !important; }
+      /* Nexus */
+      .nexus-input-row { gap: 6px !important; }
+      .nexus-send-btn { width: 42px !important; height: 42px !important; }
+      /* Reflection textareas */
+      .refl-textarea { font-size: 0.85rem !important; }
+      /* Analytics hide radar on tiny screens */
+      .skill-radar-wrap { display: none; }
+      /* All grids single column on small phones */
+      [style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+      .age-grid { grid-template-columns: repeat(2,1fr) !important; }
+      #skillsGrid { grid-template-columns: 1fr !important; }
+    }
+    @media(max-width:768px){
+      /* Override ALL inline grids on mobile */
+      [style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+      .age-grid { grid-template-columns: repeat(2,1fr) !important; }
+      #skillsGrid { grid-template-columns: 1fr !important; }
+      .nav-tabs { overflow-x:auto; flex-wrap:nowrap; justify-content:flex-start; }
+      .nav-tabs::-webkit-scrollbar { display:none; }
+      main { padding: 14px 12px 60px !important; }
     }
     .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
