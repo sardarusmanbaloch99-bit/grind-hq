@@ -1775,6 +1775,11 @@
     </div>
   </div>
 
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Priority Plan</div>
+      <div id="dashPriorityList" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <div style="font-size:0.65rem;color:var(--text-muted);margin-top:10px;letter-spacing:0.5px;">If your schedule fails — follow this order.</div>
+    </div>
   <!-- NEXUS AI AGENT CARD -->
   <div class="card nexus-card" id="nexusCard">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
@@ -1866,6 +1871,15 @@
               <option value="learning">Learning</option>
               <option value="creative">Creative</option>
               <option value="spiritual">Spiritual</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Priority</label>
+            <select class="form-input" id="newTaskPriority">
+              <option value="0">No Priority</option>
+              <option value="1">P1 — Must Do</option>
+              <option value="2">P2 — Should Do</option>
+              <option value="3">P3 — Nice to Do</option>
             </select>
           </div>
         </div>
@@ -2131,6 +2145,57 @@
   </div>
 </div>
 
+<!-- EDIT TASK MODAL -->
+<div class="modal-overlay" id="editTaskModal" onclick="if(event.target===this)closeEditTask()">
+  <div class="modal-box" style="max-width:440px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+      <div style="font-family:Orbitron,monospace;font-size:0.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Edit Task</div>
+      <button onclick="closeEditTask()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.2rem;">&times;</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div><label class="form-label">Task Name</label><input type="text" class="form-input" id="editTaskName" placeholder="Task name..." /></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div><label class="form-label">Start Time</label><input type="time" class="form-input" id="editTaskStart" /></div>
+        <div><label class="form-label">Duration (min)</label><input type="number" class="form-input" id="editTaskDuration" min="5" max="480" /></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div><label class="form-label">Points</label><input type="number" class="form-input" id="editTaskPts" min="1" max="100" /></div>
+        <div><label class="form-label">Priority</label>
+          <select class="form-input" id="editTaskPriority">
+            <option value="0">No Priority</option>
+            <option value="1">P1 — Must Do</option>
+            <option value="2">P2 — Should Do</option>
+            <option value="3">P3 — Nice to Do</option>
+          </select>
+        </div>
+      </div>
+      <div><label class="form-label">Category</label>
+        <select class="form-input" id="editTaskCat">
+          <option value="personal">Personal</option>
+          <option value="work">Work</option>
+          <option value="health">Health</option>
+          <option value="learning">Learning</option>
+          <option value="creative">Creative</option>
+          <option value="spiritual">Spiritual</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:12px;">
+        <div class="checkbox-row" id="editNNToggle" onclick="var cb=document.getElementById(\'editTaskNN\');cb.checked=!cb.checked;this.classList.toggle(\'on\',cb.checked)" style="flex:1;">
+          <input type="checkbox" id="editTaskNN" style="display:none;">
+          <div class="checkbox-box"></div>
+          <div style="font-size:0.85rem;font-weight:600;">Non-Negotiable</div>
+        </div>
+        <div class="checkbox-row" id="editAlarmToggle" onclick="var cb=document.getElementById(\'editTaskAlarm\');cb.checked=!cb.checked;this.classList.toggle(\'on\',cb.checked)" style="flex:1;">
+          <input type="checkbox" id="editTaskAlarm" style="display:none;">
+          <div class="checkbox-box"></div>
+          <div style="font-size:0.85rem;font-weight:600;">Alarm</div>
+        </div>
+      </div>
+      <input type="hidden" id="editTaskId" />
+      <button class="save-btn" onclick="saveEditTask()" style="width:100%;margin-top:4px;">Save Changes</button>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="skillModal">
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
@@ -2148,7 +2213,7 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div>
           <label class="form-label">Icon</label>
-          <input type="text" class="form-input" id="skIcon" placeholder="🎯" maxlength="4" value="🎯" />
+          <input type="text" class="form-input" id="skIcon" placeholder="icon" maxlength="4" value="" />
         </div>
         <div>
           <label class="form-label">Category</label>
@@ -2742,7 +2807,7 @@ async function loadAllData(){
   try {
     // ⚡ PERFORMANCE: Run all 4 queries IN PARALLEL (was sequential before — 4x slower)
     var [tasksRes, nnsRes, skillsRes, reflsRes] = await Promise.all([
-      supabase.from('tasks').select('id,name,start_time,end_time,duration,pts,icon,category,non_negotiable,done,task_date,important,music_id').eq('user_id',currentUser.id),
+      supabase.from('tasks').select('id,name,start_time,end_time,duration,pts,icon,category,non_negotiable,done,task_date,important,music_id,priority').eq('user_id',currentUser.id),
       supabase.from('non_negotiables').select('id,name,icon,description').eq('user_id',currentUser.id),
       supabase.from('skills').select('id,name,icon,category,daily_goal,total_minutes,history,unlocked_quotes').eq('user_id',currentUser.id),
       supabase.from('reflections').select('refl_date,score,wins,fails,lesson,priorities').eq('user_id',currentUser.id)
@@ -2773,7 +2838,7 @@ async function loadAllData(){
         id:t.id,name:t.name,start:t.start_time,end:t.end_time,
         duration:t.duration,pts:t.pts,icon:t.icon,cat:t.category,
         nonNeg:t.non_negotiable,done:t.done,
-        important:t.important||false, musicId:t.music_id||1
+        important:t.important||false, musicId:t.music_id||1, priority:t.priority||0
       });
     });
     Object.keys(S.tasks).forEach(function(k){
@@ -2977,15 +3042,70 @@ function toggleNNCheck(){
   var el=document.getElementById('nnToggle');
   if(el)el.classList.toggle('on',nnChecked);
 }
+
+// ===== EDIT TASK =====
+function openEditTask(id){
+  var t=today();
+  var tasks=S.tasks[t]||[];
+  var task=tasks.find(function(x){return x.id===id;});
+  if(!task)return;
+  document.getElementById('editTaskId').value=id;
+  document.getElementById('editTaskName').value=task.name;
+  document.getElementById('editTaskStart').value=task.start;
+  document.getElementById('editTaskDuration').value=task.duration||60;
+  document.getElementById('editTaskPts').value=task.pts||10;
+  document.getElementById('editTaskPriority').value=task.priority||0;
+  document.getElementById('editTaskCat').value=task.cat||'personal';
+  var nnCb=document.getElementById('editTaskNN');
+  nnCb.checked=task.nonNeg||false;
+  document.getElementById('editNNToggle').classList.toggle('on',task.nonNeg||false);
+  var alCb=document.getElementById('editTaskAlarm');
+  alCb.checked=task.important||false;
+  document.getElementById('editAlarmToggle').classList.toggle('on',task.important||false);
+  document.getElementById('editTaskModal').classList.add('open');
+}
+function closeEditTask(){
+  document.getElementById('editTaskModal').classList.remove('open');
+}
+async function saveEditTask(){
+  var id=document.getElementById('editTaskId').value;
+  var name=document.getElementById('editTaskName').value.trim();
+  var start=document.getElementById('editTaskStart').value;
+  var dur=parseInt(document.getElementById('editTaskDuration').value)||60;
+  var pts=parseInt(document.getElementById('editTaskPts').value)||10;
+  var priority=parseInt(document.getElementById('editTaskPriority').value)||0;
+  var cat=document.getElementById('editTaskCat').value;
+  var nn=document.getElementById('editTaskNN').checked;
+  var alarm=document.getElementById('editTaskAlarm').checked;
+  if(!name){showToast('Enter task name');return;}
+  if(!start){showToast('Set start time');return;}
+  var end=addMinutesToTime(start,dur);
+  try {
+    var updates={name:name,start_time:start,end_time:end,duration:dur,pts:pts,
+      category:cat,non_negotiable:nn,important:alarm,priority:priority};
+    var {error}=await supabase.from('tasks').update(updates).eq('id',id).eq('user_id',currentUser.id);
+    if(error)throw error;
+    var t=today();
+    var task=(S.tasks[t]||[]).find(function(x){return x.id===id;});
+    if(task){
+      task.name=name;task.start=start;task.end=end;task.duration=dur;
+      task.pts=pts;task.cat=cat;task.nonNeg=nn;task.important=alarm;task.priority=priority;
+    }
+    S.tasks[t].sort(function(a,b){return a.start.localeCompare(b.start);});
+    renderTaskList();renderTaskTimeline();renderScheduleTimeline();renderDashTaskList();renderDashPriority();updateScore();
+    closeEditTask();
+    showToast('Task updated');
+  } catch(err){showToast('Error: '+err.message);}
+}
+
 async function addTask(){
   var name=document.getElementById('newTaskName').value.trim();
   var start=document.getElementById('newTaskStart').value;
   var dur=parseInt(document.getElementById('newTaskDuration').value)||60;
   var pts=parseInt(document.getElementById('newTaskPts').value)||10;
   var cat=document.getElementById('newTaskCat').value;
-  // Auto-pick icon based on category — emoji input removed for simpler UX
-  var iconMap={personal:'🎯',work:'💼',health:'💪',learning:'📚',creative:'🎨',spiritual:'☪'};
-  var icon=iconMap[cat]||'🎯';
+  var priority=parseInt(document.getElementById('newTaskPriority').value)||0;
+  var icon=''; // No emoji
   if(!name){showToast('Enter a task name');return;}
   if(!start){showToast('Set a start time');return;}
   var t=today();
@@ -2994,14 +3114,18 @@ async function addTask(){
     var { data, error } = await supabase.from('tasks').insert({
       user_id:currentUser.id,name:name,start_time:start,end_time:end,
       duration:dur,pts:pts,icon:icon,category:cat,
-      non_negotiable:nnChecked,done:false,task_date:t
+      non_negotiable:nnChecked,done:false,task_date:t,
+      important:importantChecked,music_id:selectedMusicId||1,
+      priority:priority
     }).select().single();
     if(error)throw error;
     if(!S.tasks[t])S.tasks[t]=[];
     S.tasks[t].push({
       id:data.id,name:data.name,start:data.start_time,end:data.end_time,
-      duration:data.duration,pts:data.pts,icon:data.icon,cat:data.category,
-      nonNeg:data.non_negotiable,done:data.done
+      duration:data.duration,pts:data.pts,icon:data.icon||'',cat:data.category,
+      nonNeg:data.non_negotiable,done:data.done,
+      important:data.important||false,musicId:data.music_id||1,
+      priority:data.priority||0
     });
     S.tasks[t].sort(function(a,b){return a.start.localeCompare(b.start);});
     if(nnChecked){
@@ -3014,7 +3138,7 @@ async function addTask(){
       }
     }
     renderTaskList();renderTaskTimeline();renderScheduleTimeline();
-    renderDashTaskList();renderNonNegs();updateScore();
+    renderDashTaskList();renderDashPriority();renderNonNegs();updateScore();
     document.getElementById('newTaskName').value='';
     document.getElementById('newTaskDuration').value='60';
     document.getElementById('newTaskPts').value='10';
@@ -3023,6 +3147,14 @@ async function addTask(){
   } catch(err) {
     showToast('Error: '+err.message);
   }
+}
+function to12h(t){
+  if(!t)return '';
+  var parts=t.split(':');
+  var h=parseInt(parts[0]),m=parts[1];
+  var ampm=h>=12?'PM':'AM';
+  h=h%12||12;
+  return h+':'+m+' '+ampm;
 }
 function addMinutesToTime(timeStr,mins){
   var parts=timeStr.split(':');
@@ -3037,7 +3169,7 @@ async function toggleTask(id){
   task.done=!task.done;
   try {
     await supabase.from('tasks').update({done:task.done}).eq('id',id).eq('user_id',currentUser.id);
-    renderTaskList();renderDashTaskList();renderTaskTimeline();updateScore();
+    renderTaskList();renderDashTaskList();renderDashPriority();renderTaskTimeline();updateScore();
   } catch(err) {
     task.done=!task.done;showToast('Sync failed');
   }
@@ -3047,7 +3179,7 @@ async function removeTask(id){
   try {
     await supabase.from('tasks').delete().eq('id',id).eq('user_id',currentUser.id);
     S.tasks[t]=(S.tasks[t]||[]).filter(function(x){return x.id!==id;});
-    renderTaskList();renderTaskTimeline();renderScheduleTimeline();renderDashTaskList();updateScore();
+    renderTaskList();renderTaskTimeline();renderScheduleTimeline();renderDashTaskList();renderDashPriority();updateScore();
     showToast('Task Removed');
   } catch(err) {
     showToast('Error: '+err.message);
@@ -3059,20 +3191,52 @@ function renderTaskList(){
   if(tasks.length===0){
     ul.innerHTML='<div class="empty-state"><div class="big-icon"><i class="fas fa-list-check"></i></div><h3>No Tasks Yet</h3><div style="font-size:0.85rem;">Add your first task to begin building today.</div></div>';
   } else {
-    ul.innerHTML=tasks.map(function(task){
-      return '<div class="task-item'+(task.done?' done':'')+(task.nonNeg?' non-neg':'')+'" id="titem-'+task.id+'">'
-        +'<div class="task-check" onclick="toggleTask(\''+task.id+'\')"></div>'
-        +'<div style="font-size:1rem;flex-shrink:0;">'+escHtml(task.icon)+'</div>'
-        +'<div class="task-label">'+escHtml(task.name)+(task.nonNeg?' <span class="nn-badge">NON-NEG</span>':'')+(task.important?' <span style="font-size:0.6rem;background:rgba(255,180,0,0.12);color:#ffb400;border:1px solid rgba(255,180,0,0.3);border-radius:4px;padding:1px 5px;letter-spacing:0.5px;">🔔 ALARM</span>':'')+'</div>'
-        +'<div class="task-time-badge">'+task.start+' – '+task.end+'</div>'
+    var sorted=[...tasks].sort(function(a,b){
+      var pa=a.priority||0,pb=b.priority||0;
+      if(pa&&!pb)return -1;if(!pa&&pb)return 1;
+      if(pa&&pb&&pa!==pb)return pa-pb;
+      return a.start.localeCompare(b.start);
+    });
+    ul.innerHTML=sorted.map(function(task){
+      var prioHtml='';
+      if(task.priority===1)prioHtml='<span style="font-size:0.55rem;background:rgba(255,80,80,0.15);color:#ff5050;border:1px solid rgba(255,80,80,0.3);border-radius:4px;padding:1px 6px;letter-spacing:0.5px;font-weight:700;margin-left:4px;">P1</span>';
+      else if(task.priority===2)prioHtml='<span style="font-size:0.55rem;background:rgba(255,165,0,0.15);color:#ffa500;border:1px solid rgba(255,165,0,0.3);border-radius:4px;padding:1px 6px;letter-spacing:0.5px;font-weight:700;margin-left:4px;">P2</span>';
+      else if(task.priority===3)prioHtml='<span style="font-size:0.55rem;background:rgba(100,200,100,0.15);color:#64c864;border:1px solid rgba(100,200,100,0.3);border-radius:4px;padding:1px 6px;letter-spacing:0.5px;font-weight:700;margin-left:4px;">P3</span>';
+      var borderStyle=task.priority===1?'border-left:2px solid rgba(255,80,80,0.5);':task.priority===2?'border-left:2px solid rgba(255,165,0,0.4);':'';
+      return '<div class="task-item'+(task.done?' done':'')+(task.nonNeg?' non-neg':'')+'" style="'+borderStyle+'" id="titem-'+task.id+'">'
+        +'<div class="task-check" onclick="toggleTask(''+task.id+'')"></div>'
+        +'<div class="task-label">'+escHtml(task.name)+(task.nonNeg?' <span class="nn-badge">NON-NEG</span>':'')+prioHtml+(task.important?' <span style="font-size:0.6rem;background:rgba(255,180,0,0.12);color:#ffb400;border:1px solid rgba(255,180,0,0.3);border-radius:4px;padding:1px 5px;letter-spacing:0.5px;margin-left:4px;">ALARM</span>':'')+'</div>'
+        +'<div class="task-time-badge">'+to12h(task.start)+' – '+to12h(task.end)+'</div>'
         +'<div class="task-pts-badge">+'+task.pts+'</div>'
-        +'<span class="task-remove" onclick="removeTask(\''+task.id+'\')" title="Remove"><i class="fas fa-trash"></i></span>'
+        +'<span onclick="openEditTask(''+task.id+'')" title="Edit" style="cursor:pointer;color:var(--text-muted);font-size:0.75rem;padding:4px 6px;border-radius:6px;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'"><i class="fas fa-pen"></i></span>'
+        +'<span class="task-remove" onclick="removeTask(''+task.id+'')" title="Remove"><i class="fas fa-trash"></i></span>'
         +'</div>';
     }).join('');
   }
   var countEl=document.getElementById('taskCountDisp');var ptsEl=document.getElementById('taskPtsDisp');
   if(countEl)countEl.textContent=tasks.length;
   if(ptsEl)ptsEl.textContent=tasks.reduce(function(s,t){return s+t.pts;},0);
+}
+function renderDashPriority(){
+  var tasks=S.tasks[today()]||[];
+  var c=document.getElementById('dashPriorityList');if(!c)return;
+  var pTasks=tasks.filter(function(t){return t.priority>0&&!t.done;});
+  pTasks.sort(function(a,b){return (a.priority||9)-(b.priority||9);});
+  if(pTasks.length===0){
+    c.innerHTML='<div style="color:var(--text-muted);font-size:0.8rem;text-align:center;padding:16px;">No priorities set. Add P1/P2/P3 to tasks.</div>';
+    return;
+  }
+  var colors={1:'#ff5050',2:'#ffa500',3:'#64c864'};
+  var labels={1:'P1 — Must Do',2:'P2 — Should Do',3:'P3 — Nice to Do'};
+  c.innerHTML=pTasks.map(function(t){
+    var col=colors[t.priority]||'var(--text-muted)';
+    var lbl=labels[t.priority]||'';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-left:3px solid '+col+';border-radius:10px;">'
+      +'<span style="font-size:0.55rem;font-weight:700;color:'+col+';letter-spacing:1px;min-width:24px;">P'+t.priority+'</span>'
+      +'<span style="flex:1;font-size:0.85rem;font-weight:500;">'+escHtml(t.name)+'</span>'
+      +'<span style="font-size:0.65rem;color:var(--text-muted);">'+to12h(t.start)+'</span>'
+      +'</div>';
+  }).join('');
 }
 function renderDashTaskList(){
   var tasks=S.tasks[today()]||[];
@@ -3104,7 +3268,7 @@ function renderTaskTimeline(){
     var active=nm>=startM&&nm<endM;
     return '<div style="background:rgba(255,255,255,0.02);border:1px solid '+(active?'var(--accent)':'var(--line)')+';border-radius:12px;padding:12px 18px;min-width:220px;flex:1;'+(active?'box-shadow:0 0 18px rgba(255,107,44,0.2);background:linear-gradient(135deg,rgba(255,107,44,0.08),transparent);':'')+'">'
       +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'
-      +'<div style="font-family:Orbitron,monospace;font-size:0.62rem;color:'+(active?'var(--accent)':'var(--text-soft)')+';font-weight:600;letter-spacing:1px;">'+b.start+' – '+b.end+'</div>'
+      +'<div style="font-family:Orbitron,monospace;font-size:0.62rem;color:'+(active?'var(--accent)':'var(--text-soft)')+';font-weight:600;letter-spacing:1px;">'+to12h(b.start)+' – '+to12h(b.end)+'</div>'
       +(active?'<div class="now-pill">● NOW</div>':'')
       +'</div>'
       +'<div style="font-size:0.92rem;font-weight:600;">'+escHtml(b.icon)+' '+escHtml(b.name)+(b.nonNeg?' <span class="nn-badge">NN</span>':'')+(b.important?' <span style="font-size:0.55rem;background:rgba(255,180,0,0.15);color:#ffb400;border:1px solid rgba(255,180,0,0.35);border-radius:4px;padding:1px 5px;letter-spacing:0.5px;margin-left:4px;"><i class="fas fa-bell" style="font-size:0.55rem;margin-right:2px;"></i>ALARM</span>':'')+'</div>'
@@ -3141,7 +3305,7 @@ function renderScheduleTimeline(){
     wrap.className='tl-block'+(active?' active-block':'');
     var durText=dur>=60?(Math.floor(dur/60)+'h'+(dur%60?(' '+dur%60+'m'):'')):(dur+'m');
     wrap.innerHTML=
-      '<div class="tl-left"><div class="tl-time">'+b.start+'</div><div class="tl-duration">'+durText+'</div></div>'
+      '<div class="tl-left"><div class="tl-time">'+to12h(b.start)+'</div><div class="tl-duration">'+durText+'</div></div>'
       +'<div class="tl-spine"><div class="tl-line" style="'+(i===0?'flex:0 0 12px':'')+'"></div><div class="tl-dot-outer"></div><div class="tl-line" style="'+(isLast?'flex:0 0 0':'')+'"></div></div>'
       +'<div class="tl-content"><div class="tl-card'+(active?' active-block':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;"><div><div style="font-size:0.95rem;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+escHtml(b.icon)+' '+escHtml(b.name)+(b.nonNeg?' <span class="nn-badge">NON-NEG</span>':'')+(b.important?' <span style="font-size:0.6rem;background:rgba(255,180,0,0.12);color:#ffb400;border:1px solid rgba(255,180,0,0.3);border-radius:4px;padding:2px 7px;letter-spacing:0.5px;font-weight:600;"><i class="fas fa-bell" style="font-size:0.6rem;margin-right:3px;"></i>ALARM</span>':'')+'</div><div style="font-size:0.65rem;color:var(--text-muted);margin-top:3px;font-family:Orbitron,monospace;letter-spacing:1px;">'+b.start+' – '+b.end+' · '+durText+'</div></div>'+(active?'<div class="now-pill">● NOW</div>':'')+'</div></div></div>';
     c.appendChild(wrap);
@@ -3164,7 +3328,7 @@ function openSkillModal(){document.getElementById('skillModal').classList.add('o
 function closeSkillModal(){document.getElementById('skillModal').classList.remove('open');document.getElementById('skName').value='';}
 async function saveSkill(){
   var name=document.getElementById('skName').value.trim();
-  var icon=document.getElementById('skIcon').value.trim()||'🎯';
+  var icon=document.getElementById('skIcon').value.trim()||'';
   var cat=document.getElementById('skCat').value;
   var goal=parseInt(document.getElementById('skGoal').value)||60;
   if(!name){showToast('Enter a skill name');return;}
@@ -3419,7 +3583,7 @@ function initApp(){
   updateClock();setInterval(updateClock,1000);
   loadQuote();
   renderNonNegs();
-  renderTaskList();renderTaskTimeline();renderDashTaskList();
+  renderTaskList();renderTaskTimeline();renderDashTaskList();renderDashPriority();
   renderScheduleTimeline();setInterval(renderScheduleTimeline,60000);
   renderSkills();renderPastRefls();updateScore();updateWeekStats();
   setTimeout(function(){ loadChartJs(initWeeklyChart); },300);
@@ -3698,7 +3862,7 @@ async function executeNexusTool(toolName, toolInput) {
         });
         S.tasks[t].sort(function(a,b){return a.start.localeCompare(b.start);});
         renderTaskList(); renderTaskTimeline(); renderScheduleTimeline();
-        renderDashTaskList(); renderNonNegs(); updateScore();
+        renderDashTaskList();renderDashPriority(); renderNonNegs(); updateScore();
         showToast('NEXUS added: ' + name);
         return { success: true, task: { name: name, start: start, end: end, duration: dur, points: pts } };
       
@@ -3749,7 +3913,7 @@ async function executeNexusTool(toolName, toolInput) {
         if (updates.pts) found.pts = updates.pts;
         S.tasks[t].sort(function(a,b){return a.start.localeCompare(b.start);});
         renderTaskList(); renderTaskTimeline(); renderScheduleTimeline();
-        renderDashTaskList(); updateScore();
+        renderDashTaskList();renderDashPriority(); updateScore();
         return { success: true, updated: found.name, changes: updates };
       
       case 'get_skills':
@@ -4713,7 +4877,7 @@ async function parseAndAddTaskFromNexus(userText, agentReply) {
         if (!error) {
           if (!S.tasks[t]) S.tasks[t] = [];
           S.tasks[t].push({id:data.id,name:data.name,start:startTime,end:end,duration:duration,pts:10,icon:'🤖',cat:'work',done:false});
-          renderTaskList(); renderDashTaskList(); renderTaskTimeline(); updateScore();
+          renderTaskList(); renderDashTaskList();renderDashPriority(); renderTaskTimeline(); updateScore();
           showToast('NEXUS added: ' + taskName);
         }
       } catch(e) {}
@@ -5606,7 +5770,7 @@ addTask = async function() {
       if (typeof renderTaskList === 'function') renderTaskList();
       if (typeof renderTaskTimeline === 'function') renderTaskTimeline();
       if (typeof renderScheduleTimeline === 'function') renderScheduleTimeline();
-      if (typeof renderDashTaskList === 'function') renderDashTaskList();
+      if (typeof renderDashTaskList === 'function') renderDashTaskList();renderDashPriority();
       // Schedule the alarm
       scheduleAlarms();
       // Confirmation
