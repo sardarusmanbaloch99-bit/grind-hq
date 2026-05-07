@@ -2180,12 +2180,12 @@
         </select>
       </div>
       <div style="display:flex;gap:12px;">
-        <div class="checkbox-row" id="editNNToggle" onclick="var cb=document.getElementById(\'editTaskNN\');cb.checked=!cb.checked;this.classList.toggle(\'on\',cb.checked)" style="flex:1;">
+        <div class="checkbox-row" id="editNNToggle" onclick="var cb=document.getElementById('editTaskNN');cb.checked=!cb.checked;this.classList.toggle('on',cb.checked)" style="flex:1;">
           <input type="checkbox" id="editTaskNN" style="display:none;">
           <div class="checkbox-box"></div>
           <div style="font-size:0.85rem;font-weight:600;">Non-Negotiable</div>
         </div>
-        <div class="checkbox-row" id="editAlarmToggle" onclick="var cb=document.getElementById(\'editTaskAlarm\');cb.checked=!cb.checked;this.classList.toggle(\'on\',cb.checked)" style="flex:1;">
+        <div class="checkbox-row" id="editAlarmToggle" onclick="var cb=document.getElementById('editTaskAlarm');cb.checked=!cb.checked;this.classList.toggle('on',cb.checked)" style="flex:1;">
           <input type="checkbox" id="editTaskAlarm" style="display:none;">
           <div class="checkbox-box"></div>
           <div style="font-size:0.85rem;font-weight:600;">Alarm</div>
@@ -3162,7 +3162,8 @@ function addMinutesToTime(timeStr,mins){
   var total=h*60+m+mins;total=total%1440;
   return String(Math.floor(total/60)).padStart(2,'0')+':'+String(total%60).padStart(2,'0');
 }
-async function toggleTask(id){
+async function toggleTask(idOrEl){
+  var id=typeof idOrEl==='string'?idOrEl:idOrEl.dataset.id;
   var t=today();var tasks=S.tasks[t]||[];
   var task=tasks.find(function(x){return x.id===id;});
   if(!task)return;
@@ -3190,29 +3191,37 @@ function renderTaskList(){
   var ul=document.getElementById('userTaskList');if(!ul)return;
   if(tasks.length===0){
     ul.innerHTML='<div class="empty-state"><div class="big-icon"><i class="fas fa-list-check"></i></div><h3>No Tasks Yet</h3><div style="font-size:0.85rem;">Add your first task to begin building today.</div></div>';
-  } else {
-    var sorted=[...tasks].sort(function(a,b){
-      var pa=a.priority||0,pb=b.priority||0;
-      if(pa&&!pb)return -1;if(!pa&&pb)return 1;
-      if(pa&&pb&&pa!==pb)return pa-pb;
-      return a.start.localeCompare(b.start);
-    });
-    ul.innerHTML=sorted.map(function(task){
-      var prioHtml='';
-      if(task.priority===1)prioHtml='<span style="font-size:0.55rem;background:rgba(255,80,80,0.15);color:#ff5050;border:1px solid rgba(255,80,80,0.3);border-radius:4px;padding:1px 6px;letter-spacing:0.5px;font-weight:700;margin-left:4px;">P1</span>';
-      else if(task.priority===2)prioHtml='<span style="font-size:0.55rem;background:rgba(255,165,0,0.15);color:#ffa500;border:1px solid rgba(255,165,0,0.3);border-radius:4px;padding:1px 6px;letter-spacing:0.5px;font-weight:700;margin-left:4px;">P2</span>';
-      else if(task.priority===3)prioHtml='<span style="font-size:0.55rem;background:rgba(100,200,100,0.15);color:#64c864;border:1px solid rgba(100,200,100,0.3);border-radius:4px;padding:1px 6px;letter-spacing:0.5px;font-weight:700;margin-left:4px;">P3</span>';
-      var borderStyle=task.priority===1?'border-left:2px solid rgba(255,80,80,0.5);':task.priority===2?'border-left:2px solid rgba(255,165,0,0.4);':'';
-      return '<div class="task-item'+(task.done?' done':'')+(task.nonNeg?' non-neg':'')+'" style="'+borderStyle+'" id="titem-'+task.id+'">'
-        +'<div class="task-check" onclick="toggleTask(''+task.id+'')"></div>'
-        +'<div class="task-label">'+escHtml(task.name)+(task.nonNeg?' <span class="nn-badge">NON-NEG</span>':'')+prioHtml+(task.important?' <span style="font-size:0.6rem;background:rgba(255,180,0,0.12);color:#ffb400;border:1px solid rgba(255,180,0,0.3);border-radius:4px;padding:1px 5px;letter-spacing:0.5px;margin-left:4px;">ALARM</span>':'')+'</div>'
-        +'<div class="task-time-badge">'+to12h(task.start)+' – '+to12h(task.end)+'</div>'
-        +'<div class="task-pts-badge">+'+task.pts+'</div>'
-        +'<span onclick="openEditTask(''+task.id+'')" title="Edit" style="cursor:pointer;color:var(--text-muted);font-size:0.75rem;padding:4px 6px;border-radius:6px;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'"><i class="fas fa-pen"></i></span>'
-        +'<span class="task-remove" onclick="removeTask(''+task.id+'')" title="Remove"><i class="fas fa-trash"></i></span>'
-        +'</div>';
-    }).join('');
+    var countEl=document.getElementById('taskCountDisp');var ptsEl=document.getElementById('taskPtsDisp');
+    if(countEl)countEl.textContent=0;if(ptsEl)ptsEl.textContent=0;
+    return;
   }
+  var sorted=[...tasks].sort(function(a,b){
+    var pa=a.priority||0,pb=b.priority||0;
+    if(pa&&!pb)return -1;if(!pa&&pb)return 1;
+    if(pa&&pb&&pa!==pb)return pa-pb;
+    return a.start.localeCompare(b.start);
+  });
+  var html='';
+  for(var i=0;i<sorted.length;i++){
+    var task=sorted[i];
+    var pid=task.id;
+    var prioHtml='';
+    if(task.priority===1)prioHtml='<span style="font-size:0.55rem;background:rgba(255,80,80,0.15);color:#ff5050;border:1px solid rgba(255,80,80,0.3);border-radius:4px;padding:1px 6px;font-weight:700;margin-left:4px;">P1</span>';
+    else if(task.priority===2)prioHtml='<span style="font-size:0.55rem;background:rgba(255,165,0,0.15);color:#ffa500;border:1px solid rgba(255,165,0,0.3);border-radius:4px;padding:1px 6px;font-weight:700;margin-left:4px;">P2</span>';
+    else if(task.priority===3)prioHtml='<span style="font-size:0.55rem;background:rgba(100,200,100,0.15);color:#64c864;border:1px solid rgba(100,200,100,0.3);border-radius:4px;padding:1px 6px;font-weight:700;margin-left:4px;">P3</span>';
+    var bStyle=task.priority===1?'border-left:2px solid rgba(255,80,80,0.5);':task.priority===2?'border-left:2px solid rgba(255,165,0,0.4);':'';
+    var alarmHtml=task.important?'<span style="font-size:0.6rem;background:rgba(255,180,0,0.12);color:#ffb400;border:1px solid rgba(255,180,0,0.3);border-radius:4px;padding:1px 5px;margin-left:4px;">ALARM</span>':'';
+    var nnHtml=task.nonNeg?'<span class="nn-badge">NON-NEG</span>':'';
+    html+='<div class="task-item'+(task.done?' done':'')+(task.nonNeg?' non-neg':'')+'" style="'+bStyle+'" id="titem-'+pid+'">';
+    html+='<div class="task-check" onclick="toggleTask(this)" data-id="'+pid+'"></div>';
+    html+='<div class="task-label">'+escHtml(task.name)+nnHtml+prioHtml+alarmHtml+'</div>';
+    html+='<div class="task-time-badge">'+to12h(task.start)+' &ndash; '+to12h(task.end)+'</div>';
+    html+='<div class="task-pts-badge">+'+task.pts+'</div>';
+    html+='<span class="edit-btn" data-id="'+pid+'" onclick="openEditTask(this.dataset.id)" title="Edit"><i class="fas fa-pen"></i></span>';
+    html+='<span class="task-remove" data-id="'+pid+'" onclick="removeTask(this.dataset.id)" title="Remove"><i class="fas fa-trash"></i></span>';
+    html+='</div>';
+  }
+  ul.innerHTML=html;
   var countEl=document.getElementById('taskCountDisp');var ptsEl=document.getElementById('taskPtsDisp');
   if(countEl)countEl.textContent=tasks.length;
   if(ptsEl)ptsEl.textContent=tasks.reduce(function(s,t){return s+t.pts;},0);
