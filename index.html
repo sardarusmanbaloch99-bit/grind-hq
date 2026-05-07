@@ -3280,7 +3280,7 @@ function renderTaskTimeline(){
       +'<div style="font-family:Orbitron,monospace;font-size:0.62rem;color:'+(active?'var(--accent)':'var(--text-soft)')+';font-weight:600;letter-spacing:1px;">'+to12h(b.start)+' – '+to12h(b.end)+'</div>'
       +(active?'<div class="now-pill">● NOW</div>':'')
       +'</div>'
-      +'<div style="font-size:0.92rem;font-weight:600;">'+escHtml(b.icon)+' '+escHtml(b.name)+(b.nonNeg?' <span class="nn-badge">NN</span>':'')+(b.important?' <span style="font-size:0.55rem;background:rgba(255,180,0,0.15);color:#ffb400;border:1px solid rgba(255,180,0,0.35);border-radius:4px;padding:1px 5px;letter-spacing:0.5px;margin-left:4px;"><i class="fas fa-bell" style="font-size:0.55rem;margin-right:2px;"></i>ALARM</span>':'')+'</div>'
+      +'<div style="font-size:0.92rem;font-weight:600;">'+escHtml(b.name)+(b.priority===1?' <span style="font-size:0.55rem;background:rgba(255,80,80,0.15);color:#ff5050;border:1px solid rgba(255,80,80,0.3);border-radius:4px;padding:1px 6px;font-weight:700;margin-left:4px;">P1</span>':b.priority===2?' <span style="font-size:0.55rem;background:rgba(255,165,0,0.15);color:#ffa500;border:1px solid rgba(255,165,0,0.3);border-radius:4px;padding:1px 6px;font-weight:700;margin-left:4px;">P2</span>':b.priority===3?' <span style="font-size:0.55rem;background:rgba(100,200,100,0.15);color:#64c864;border:1px solid rgba(100,200,100,0.3);border-radius:4px;padding:1px 6px;font-weight:700;margin-left:4px;">P3</span>':'')+(b.nonNeg?' <span class="nn-badge">NN</span>':'')+(b.important?' <span style="font-size:0.55rem;background:rgba(255,180,0,0.15);color:#ffb400;border:1px solid rgba(255,180,0,0.35);border-radius:4px;padding:1px 5px;letter-spacing:0.5px;margin-left:4px;"><i class="fas fa-bell" style="font-size:0.55rem;margin-right:2px;"></i>ALARM</span>':'')+'</div>'
       +'</div>';
   }).join('')+'</div>';
 }
@@ -3316,7 +3316,7 @@ function renderScheduleTimeline(){
     wrap.innerHTML=
       '<div class="tl-left"><div class="tl-time">'+to12h(b.start)+'</div><div class="tl-duration">'+durText+'</div></div>'
       +'<div class="tl-spine"><div class="tl-line" style="'+(i===0?'flex:0 0 12px':'')+'"></div><div class="tl-dot-outer"></div><div class="tl-line" style="'+(isLast?'flex:0 0 0':'')+'"></div></div>'
-      +'<div class="tl-content"><div class="tl-card'+(active?' active-block':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;"><div><div style="font-size:0.95rem;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+escHtml(b.icon)+' '+escHtml(b.name)+(b.nonNeg?' <span class="nn-badge">NON-NEG</span>':'')+(b.important?' <span style="font-size:0.6rem;background:rgba(255,180,0,0.12);color:#ffb400;border:1px solid rgba(255,180,0,0.3);border-radius:4px;padding:2px 7px;letter-spacing:0.5px;font-weight:600;"><i class="fas fa-bell" style="font-size:0.6rem;margin-right:3px;"></i>ALARM</span>':'')+'</div><div style="font-size:0.65rem;color:var(--text-muted);margin-top:3px;font-family:Orbitron,monospace;letter-spacing:1px;">'+b.start+' – '+b.end+' · '+durText+'</div></div>'+(active?'<div class="now-pill">● NOW</div>':'')+'</div></div></div>';
+      +'<div class="tl-content"><div class="tl-card'+(active?' active-block':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;"><div><div style="font-size:0.95rem;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+escHtml(b.name)+(b.priority===1?' <span style="font-size:0.55rem;background:rgba(255,80,80,0.15);color:#ff5050;border:1px solid rgba(255,80,80,0.3);border-radius:4px;padding:1px 6px;font-weight:700;">P1</span>':b.priority===2?' <span style="font-size:0.55rem;background:rgba(255,165,0,0.15);color:#ffa500;border:1px solid rgba(255,165,0,0.3);border-radius:4px;padding:1px 6px;font-weight:700;">P2</span>':b.priority===3?' <span style="font-size:0.55rem;background:rgba(100,200,100,0.15);color:#64c864;border:1px solid rgba(100,200,100,0.3);border-radius:4px;padding:1px 6px;font-weight:700;">P3</span>':'')+(b.nonNeg?' <span class="nn-badge">NON-NEG</span>':'')+(b.important?' <span style="font-size:0.6rem;background:rgba(255,180,0,0.12);color:#ffb400;border:1px solid rgba(255,180,0,0.3);border-radius:4px;padding:2px 7px;letter-spacing:0.5px;font-weight:600;"><i class="fas fa-bell" style="font-size:0.6rem;margin-right:3px;"></i>ALARM</span>':'')+'</div><div style="font-size:0.65rem;color:var(--text-muted);margin-top:3px;font-family:Orbitron,monospace;letter-spacing:1px;">'+b.start+' – '+b.end+' · '+durText+'</div></div>'+(active?'<div class="now-pill">● NOW</div>':'')+'</div></div></div>';
     c.appendChild(wrap);
   });
   var curr=tasks.find(function(b){
@@ -3561,9 +3561,11 @@ function switchTab(name,el){
 // =============================================================
 function updateClock(){
   var n=new Date();
-  var hh=String(n.getHours()).padStart(2,'0'),mm=String(n.getMinutes()).padStart(2,'0'),ss=String(n.getSeconds()).padStart(2,'0');
-  var cl=document.getElementById('liveClock');if(cl)cl.textContent=hh+':'+mm+':'+ss;
-  var sc=document.getElementById('schedClock');if(sc)sc.textContent=hh+':'+mm+':'+ss;
+  var rawH=n.getHours(),mm=String(n.getMinutes()).padStart(2,'0'),ss=String(n.getSeconds()).padStart(2,'0');
+  var ampm=rawH>=12?'PM':'AM';var h12=rawH%12||12;
+  var timeStr=h12+':'+mm+':'+ss+' '+ampm;
+  var cl=document.getElementById('liveClock');if(cl)cl.textContent=timeStr;
+  var sc=document.getElementById('schedClock');if(sc)sc.textContent=timeStr;
   var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var dl=document.getElementById('liveDate');if(dl)dl.textContent=days[n.getDay()]+' · '+months[n.getMonth()]+' '+n.getDate();
