@@ -3127,7 +3127,7 @@ function renderTaskList(){
         +'<div class="task-time-badge">'+to12h(task.start)+' – '+to12h(task.end)+'</div>'
         +'<div class="task-pts-badge">+'+task.pts+'</div>'
         +'<span onclick="openEditTask(\''+task.id+'\')" title="Edit" style="cursor:pointer;color:var(--text-muted);font-size:0.75rem;padding:4px 6px;border-radius:6px;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'"><i class="fas fa-pen"></i></span>'
-        +'<span class="task-remove" onclick="removeTask(\''+task.id+'\')\" title="Remove"><i class="fas fa-trash"></i></span>'
+        +'<span class="task-remove" onclick="removeTask(\''+task.id+'\')" title="Remove"><i class="fas fa-trash"></i></span>'
         +'</div>';
     }).join('');
   }
