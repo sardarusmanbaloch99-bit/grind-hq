@@ -279,11 +279,11 @@
 
   /* ===== TICKER ===== */
   .moto-banner {
-    background: linear-gradient(180deg, var(--card-dark2), var(--card-dark));
+    background: linear-gradient(180deg, #ff5a1f, #ff8a4d);
     padding: 9px 0; font-family: 'Big Shoulders Display', Impact, sans-serif;
-    font-size: 0.8rem; font-weight: 800; letter-spacing: 0.18em; color: var(--accent);
+    font-size: 0.8rem; font-weight: 800; letter-spacing: 0.18em; color: #ffffff;
     overflow: hidden; text-transform: uppercase;
-    box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset;
+    box-shadow: 0 2px 8px rgba(255,90,31,0.3) inset;
   }
   .moto-scroll { animation: marqueeForge 60s linear infinite; white-space: nowrap; display: inline-block; }
   @keyframes marqueeForge { from{transform:translateX(100vw)} to{transform:translateX(-100%)} }
@@ -355,9 +355,25 @@
   /* ===== SCORE RING ===== */
   .score-ring { position: relative; width: 210px; height: 210px; margin: 0 auto 8px; }
   .score-ring svg { transform: rotate(-90deg); }
-  .score-ring::before { content: ''; position: absolute; inset: 15px; border-radius: 50%; background: radial-gradient(circle, rgba(255,90,31,0.05) 0%, rgba(196,61,14,0.02) 50%, transparent 70%); animation: ringPulse 4s ease-in-out infinite; }
+  .score-ring::before {
+    content: ''; position: absolute; inset: 35px; border-radius: 50%;
+    background: radial-gradient(ellipse, #ff5a1f, #ff8a4d);
+    opacity: 0.85;
+    animation: rotatingCircle 8s linear infinite;
+  }
+  .score-ring::after {
+    content: 'GRIND'; position: absolute; inset: 35px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Big Shoulders Display', Impact, sans-serif;
+    font-size: 2rem; font-weight: 900;
+    color: rgba(0,0,0,0.2);
+    text-align: center;
+    letter-spacing: -1px;
+    border-radius: 50%;
+  }
+  @keyframes rotatingCircle { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.05); } 100% { transform: rotate(360deg) scale(1); } }
   @keyframes ringPulse { 0%,100%{opacity:0.5;transform:scale(0.98)} 50%{opacity:1;transform:scale(1.02)} }
-  .score-num { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3rem; font-weight: 900; text-align: center; color: var(--text-main); font-family: 'Big Shoulders Display', Impact, sans-serif; letter-spacing: -2px; }
+  .score-num { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3rem; font-weight: 900; text-align: center; color: var(--text-main); font-family: 'Big Shoulders Display', Impact, sans-serif; letter-spacing: -2px; z-index: 10; }
   .score-num small { display: block; font-size: 0.5rem; letter-spacing: 3px; color: var(--text-muted); margin-top: 6px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
 
   /* ===== STAT CHIPS ===== */
@@ -965,8 +981,8 @@
           <div class="nexus-ring"></div>
         </div>
         <div>
-          <div style="font-family:'Orbitron',monospace;font-size:0.9rem;font-weight:700;letter-spacing:3px;color:var(--text-main);">NEXUS <span style="color:var(--accent);">AI</span></div>
-          <div style="font-size:0.62rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;" id="nexusStatusTxt">Click mic to talk · or type below</div>
+          <div style="font-family:'Orbitron',monospace;font-size:0.9rem;font-weight:700;letter-spacing:3px;color:#ffffff;">NEXUS <span style="color:var(--accent);">AI</span></div>
+          <div style="font-size:0.62rem;color:#ffffff;letter-spacing:2px;text-transform:uppercase;" id="nexusStatusTxt">Click mic to talk · or type below</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
@@ -2380,7 +2396,7 @@ function renderTaskList(){
       else if(task.priority===3)prioHtml='<span style="font-size:0.55rem;background:rgba(100,200,100,0.15);color:#64c864;border:1px solid rgba(100,200,100,0.3);border-radius:4px;padding:1px 6px;letter-spacing:0.5px;font-weight:700;margin-left:4px;">P3</span>';
       var borderStyle=task.priority===1?'border-left:2px solid rgba(255,80,80,0.5);':task.priority===2?'border-left:2px solid rgba(255,165,0,0.4);':'';
       return '<div class="task-item'+(task.done?' done':'')+(task.nonNeg?' non-neg':'')+'" style="'+borderStyle+'" id="titem-'+task.id+'">'
-        +'<div class="task-check" onclick="toggleTask(this)" data-id="'+task.id+'"></div>'
+        +'<div class="task-check" onclick="toggleTask(\''+task.id+'\')" data-id="'+task.id+'"></div>'
         +'<div class="task-label">'+escHtml(task.name)+(task.nonNeg?' <span class="nn-badge">NON-NEG</span>':'')+prioHtml+(task.important?' <span style="font-size:0.6rem;background:rgba(255,180,0,0.12);color:#ffb400;border:1px solid rgba(255,180,0,0.3);border-radius:4px;padding:1px 5px;letter-spacing:0.5px;margin-left:4px;">ALARM</span>':'')+'</div>'
         +'<div class="task-time-badge">'+to12h(task.start)+' – '+to12h(task.end)+'</div>'
         +'<div class="task-pts-badge">+'+task.pts+'</div>'
