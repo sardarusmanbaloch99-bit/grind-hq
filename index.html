@@ -22,7 +22,7 @@
   <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" /></noscript>
 
   <!-- Only essential fonts: Inter + Space Grotesk + Orbitron (Cinzel & Raleway removed — not used) -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Big+Shoulders+Display:wght@700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
   <!-- Chart.js will be lazy-loaded ONLY when Analytics tab is opened — saves ~250KB on initial load -->
   <script>
@@ -37,37 +37,49 @@
   </script>
   <style>
     :root {
-      --bg-deep:       #FAF9F5;
-      --bg-mid:        #F0EEE6;
-      --bg-elev:       #FFFFFF;
-      --bg-card:       #FFFFFF;
-      --bg-glass:      rgba(255,255,255,0.9);
-      --bg-glass-hover: rgba(255,255,255,0.98);
-      --line:          rgba(15,12,8,0.08);
-      --line-strong:   rgba(15,12,8,0.12);
-      --accent:        #D97757;
-      --accent-soft:   #E8956E;
-      --accent-dim:    rgba(217,119,87,0.35);
-      --accent-faint:  rgba(217,119,87,0.08);
-      --accent-glow:   rgba(217,119,87,0.2);
-      --neural:        #191915;
-      --neural-soft:   #2B2B26;
-      --neural-dim:    rgba(25,25,21,0.4);
-      --neural-faint:  rgba(25,25,21,0.06);
-      --neural-glow:   rgba(25,25,21,0.12);
-      --depth-1:       rgba(15,12,8,0.02);
-      --depth-2:       rgba(15,12,8,0.04);
-      --depth-3:       rgba(15,12,8,0.07);
-      --text-main:     rgba(15,12,8,0.92);
-      --text-soft:     rgba(15,12,8,0.60);
-      --text-muted:    rgba(15,12,8,0.44);
-      --text-dim:      rgba(15,12,8,0.28);
-      --success:       #2D9B5A;
-      --error:         #C0392B;
-      --blur-sm: blur(8px); --blur-md: blur(16px); --blur-lg: blur(32px);
+      /* === APPLE VISION + NEURAL BRAIN PALETTE === */
+      --bg-deep:       #030408;
+      --bg-mid:        #060810;
+      --bg-elev:       #0E1220;
+      --bg-card:       rgba(20, 28, 48, 0.45);
+      --bg-glass:      rgba(255, 255, 255, 0.04);
+      --bg-glass-hover: rgba(255, 255, 255, 0.08);
+      --line:          rgba(255,255,255,0.06);
+      --line-strong:   rgba(255,255,255,0.14);
+      
+      /* Primary brand */
+      --accent:        #FF6B2C;
+      --accent-soft:   #FF8B4D;
+      --accent-dim:    rgba(255,107,44,0.40);
+      --accent-faint:  rgba(255,107,44,0.08);
+      --accent-glow:   rgba(255,107,44,0.30);
+      
+      /* Neural blue (AI smart vibe) */
+      --neural:        #4D9FFF;
+      --neural-soft:   #6FB5FF;
+      --neural-dim:    rgba(77,159,255,0.35);
+      --neural-faint:  rgba(77,159,255,0.06);
+      --neural-glow:   rgba(77,159,255,0.25);
+      
+      /* Apple-style depth tints */
+      --depth-1:       rgba(255, 255, 255, 0.03);
+      --depth-2:       rgba(255, 255, 255, 0.06);
+      --depth-3:       rgba(255, 255, 255, 0.10);
+      
+      --text-main:     #F5F7FA;
+      --text-soft:     #B8BFCC;
+      --text-muted:    #6B7385;
+      --text-dim:      #3A4055;
+      --success:       #34D399;
+      --error:         #FF5A6E;
+      
+      /* Glass blur values */
+      --blur-sm:       blur(12px);
+      --blur-md:       blur(20px);
+      --blur-lg:       blur(40px);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { background: #FAF9F5; color: var(--text-main); }
+    html, body { background: var(--bg-deep); color: var(--text-main); }
     body {
       font-family: 'Inter', 'SF Pro Display', 'Space Grotesk', system-ui, sans-serif;
       min-height: 100vh;
@@ -123,14 +135,18 @@
     /* Premium scrollbar */
     ::-webkit-scrollbar { width: 10px; height: 10px; }
     ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
-    ::-webkit-scrollbar-thumb { background: rgba(15,12,8,0.12); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { 
+      background: linear-gradient(180deg, var(--accent-dim), var(--neural-dim));
+      border-radius: 10px;
+      border: 2px solid var(--bg-deep);
+    }
     ::-webkit-scrollbar-thumb:hover { 
       background: linear-gradient(180deg, var(--accent), var(--neural));
     }
     .brain-wrap {
       position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
       width: min(80vw, 1100px); height: min(80vh, 700px);
-      z-index: 0; pointer-events: none; opacity: 0.04;
+      z-index: 0; pointer-events: none; opacity: 0.40;
     }
     .brain-wrap canvas { width: 100%; height: 100%; }
     .brain-vignette {
@@ -149,7 +165,7 @@
     }
     .auth-card {
       width: 100%; max-width: 440px;
-      background: #FFFFFF;
+      background: rgba(15, 18, 24, 0.85);
       border: 1px solid var(--line-strong);
       border-radius: 20px;
       padding: 40px 36px;
@@ -176,8 +192,9 @@
     }
     .auth-title b { 
       font-weight: 700;
-      color: var(--accent);
-      -webkit-text-fill-color: var(--accent);
+      background: linear-gradient(135deg, #fff 0%, var(--accent-soft) 60%, var(--accent) 100%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     .auth-sub {
       font-size: 0.7rem; color: var(--text-muted);
@@ -195,19 +212,19 @@
     }
     .auth-input {
       width: 100%;
-      background: #F0EEE6;
-      border: 1px solid rgba(15,12,8,0.1);
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
       border-radius: 10px;
       padding: 13px 16px;
       color: var(--text-main);
       font-family: 'Space Grotesk', sans-serif;
       font-size: 0.95rem;
       outline: none;
-      transition: border-color 0.2s, background 0.2s;
+      transition: border-color 0.3s, background 0.3s;
       margin-bottom: 14px;
     }
-    .auth-input::placeholder { color: var(--text-muted); }
-    .auth-input:focus { border-color: var(--accent); background: #FFFFFF; }
+    .auth-input::placeholder { color: var(--text-dim); }
+    .auth-input:focus { border-color: var(--accent-dim); background: rgba(255,255,255,0.05); }
     .auth-btn {
       width: 100%;
       background: var(--accent);
@@ -372,15 +389,15 @@
 
     /* HEADER */
     .main-header {
-      background: rgba(250,249,245,0.97);
-      border-bottom: 1px solid rgba(15,12,8,0.08);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      padding: 12px 32px;
+      background: linear-gradient(180deg, rgba(3,4,8,0.85) 0%, rgba(3,4,8,0.4) 100%);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      padding: 16px 36px;
       position: sticky;
       top: 0;
       z-index: 50;
-      box-shadow: 0 1px 0 rgba(15,12,8,0.06);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 30px 60px -30px rgba(0,0,0,0.5);
     }
     /* logo-mark replaced by inline SVG */
     .logo-mark-wrap { flex-shrink: 0; }
@@ -397,8 +414,9 @@
     }
     .header-title b { 
       font-weight: 700;
-      color: var(--accent);
-      -webkit-text-fill-color: var(--accent);
+      background: linear-gradient(135deg, #fff 0%, var(--accent-soft) 60%, var(--accent) 100%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     .header-sub {
       font-size: 0.55rem;
@@ -412,22 +430,28 @@
       font-family: 'Orbitron', monospace;
       font-size: 1.05rem; font-weight: 600;
       letter-spacing: 3px;
-      color: var(--text-main);
-      -webkit-text-fill-color: var(--text-main);
+      background: linear-gradient(135deg, var(--neural-soft) 0%, var(--accent-soft) 100%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: none;
     }
     .user-menu {
       position: relative;
       display: flex; align-items: center; gap: 8px;
       padding: 5px 12px 5px 5px;
-      background: #F0EEE6;
-      border: 1px solid rgba(15,12,8,0.1);
+      background: linear-gradient(135deg, rgba(255,107,44,0.08), rgba(255,107,44,0.02));
+      border: 1px solid rgba(255,107,44,0.2);
       border-radius: 100px;
       cursor: pointer;
       transition: all 0.25s;
       backdrop-filter: blur(10px);
     }
     .user-menu:hover { 
-      border-color: rgba(15,12,8,0.18); background: #E8E6DC; transform: translateY(-1px); }
+      border-color: rgba(255,107,44,0.5); 
+      background: linear-gradient(135deg, rgba(255,107,44,0.12), rgba(255,107,44,0.04));
+      box-shadow: 0 4px 20px rgba(255,107,44,0.15);
+      transform: translateY(-1px);
+    }
     .user-avatar {
       width: 28px; height: 28px; border-radius: 50%;
       background: linear-gradient(135deg, var(--accent), var(--accent-soft));
@@ -455,8 +479,8 @@
     }
     .user-dropdown {
       position: absolute; top: calc(100% + 8px); right: 0;
-      background: #FFFFFF;
-      border: 1px solid rgba(15,12,8,0.1);
+      background: var(--bg-elev);
+      border: 1px solid var(--line-strong);
       border-radius: 10px;
       min-width: 200px;
       padding: 6px;
@@ -479,11 +503,11 @@
 
     /* TICKER */
     .moto-banner {
-      background: #191915;
-      border-bottom: none;
-      padding: 9px 0;
-      font-size: 0.58rem; font-weight: 700; letter-spacing: 5px;
-      color: rgba(255,255,255,0.55);
+      background: rgba(5,6,8,0.6);
+      border-bottom: 1px solid var(--line);
+      padding: 8px 0;
+      font-size: 0.6rem; font-weight: 400; letter-spacing: 4px;
+      color: rgba(255,255,255,0.35);
       overflow: hidden; text-transform: uppercase;
     }
     .moto-scroll { animation: scrollText 40s linear infinite; white-space: nowrap; display: inline-block; }
@@ -492,16 +516,17 @@
     /* NAV */
     .nav-tabs {
       display: flex; gap: 4px;
-      background: rgba(250,249,245,0.97);
-      border-bottom: 1px solid rgba(15,12,8,0.07);
+      background: linear-gradient(180deg, rgba(3,4,8,0.7) 0%, rgba(6,8,16,0.4) 100%);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
       padding: 10px 28px;
       overflow-x: auto;
-      backdrop-filter: blur(20px);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
       scrollbar-width: none;
       position: sticky;
-      top: 66px;
+      top: 70px;
       z-index: 40;
-      box-shadow: 0 1px 0 rgba(15,12,8,0.05);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.03) inset;
     }
     .nav-tabs::-webkit-scrollbar { display: none; }
     .nav-tab {
@@ -510,20 +535,38 @@
       font-size: 0.6rem; font-weight: 600; letter-spacing: 2px;
       color: var(--text-muted);
       white-space: nowrap;
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       user-select: none;
       position: relative;
       text-transform: uppercase;
       border-radius: 100px;
       border: 1px solid transparent;
-      display: flex; align-items: center; gap: 6px;
+      display: flex; align-items: center; gap: 7px;
     }
     .nav-tab i { font-size: 0.65rem; opacity: 0.7; transition: opacity 0.3s; }
-    .nav-tab:hover { color: var(--text-main); background: rgba(15,12,8,0.05); }
+    .nav-tab:hover { 
+      color: var(--text-soft); 
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.06);
+    }
     .nav-tab:hover i { opacity: 1; }
-    .nav-tab.active { color: #FAF9F5; background: #191915; border-color: #191915; box-shadow: 0 2px 8px rgba(15,12,8,0.2); }
-    .nav-tab.active i { opacity: 1; color: #FAF9F5; }
-    .nav-tab.active::after { display: none; }
+    .nav-tab.active { 
+      color: var(--text-main);
+      background: linear-gradient(135deg, rgba(255,107,44,0.12), rgba(77,159,255,0.06));
+      border-color: rgba(255,107,44,0.25);
+      box-shadow: 
+        0 0 20px rgba(255,107,44,0.08),
+        0 1px 0 rgba(255,255,255,0.06) inset;
+    }
+    .nav-tab.active i { opacity: 1; color: var(--accent); }
+    .nav-tab.active::after {
+      content: '';
+      position: absolute; bottom: -11px; left: 50%;
+      transform: translateX(-50%);
+      width: 20px; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      border-radius: 2px;
+    }
     .nav-tab .badge {
       background: linear-gradient(135deg, var(--accent), var(--accent-soft));
       color: #fff;
@@ -535,14 +578,19 @@
 
     /* CARDS */
     .card {
-      background: #FFFFFF;
-      border: 1px solid rgba(15,12,8,0.07);
-      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
       padding: 24px;
-      transition: all 0.25s ease;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
       position: relative;
       overflow: hidden;
-      box-shadow: 0 1px 3px rgba(15,12,8,0.05), 0 4px 12px rgba(15,12,8,0.03);
+      box-shadow: 
+        0 1px 0 0 rgba(255,255,255,0.04) inset,
+        0 0 0 1px rgba(255,255,255,0.02) inset,
+        0 30px 60px -15px rgba(0,0,0,0.5);
     }
     .card::before {
       content: '';
@@ -557,12 +605,20 @@
       background: radial-gradient(circle at 30% 0%, rgba(77,159,255,0.04), transparent 50%);
       pointer-events: none;
     }
-    .card:hover { border-color: rgba(15,12,8,0.11); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(15,12,8,0.08); }
+    .card:hover { 
+      border-color: rgba(255,255,255,0.14); 
+      transform: translateY(-2px);
+      box-shadow: 
+        0 1px 0 0 rgba(255,255,255,0.08) inset,
+        0 0 0 1px rgba(77,159,255,0.06) inset,
+        0 40px 80px -15px rgba(0,0,0,0.6),
+        0 0 60px -20px rgba(77,159,255,0.15);
+    }
     .card-title {
       font-size: 0.62rem; font-weight: 600; letter-spacing: 3px;
       text-transform: uppercase;
       margin-bottom: 20px;
-      color: var(--accent);
+      color: var(--text-soft);
       display: flex; align-items: center; gap: 10px;
       position: relative;
     }
@@ -603,11 +659,11 @@
     /* STAT CHIPS — Glass Premium */
     .stat-chip {
       display: flex; flex-direction: column; align-items: flex-start;
-      padding: 16px; border-radius: 12px;
-      border: 1px solid rgba(15,12,8,0.07);
-      background: #F0EEE6;
-      position: relative; overflow: hidden;
-      transition: all 0.2s ease;
+      padding: 18px 16px; border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+      backdrop-filter: blur(20px); position: relative; overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
     }
     .stat-chip::before {
       content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
@@ -620,9 +676,10 @@
     }
     .stat-num {
       font-size: 2rem; font-weight: 200;
-      font-family: 'Big Shoulders Display', 'Orbitron', monospace;
+      font-family: 'Orbitron', monospace;
       letter-spacing: -1px;
-      color: var(--text-main);
+      background: linear-gradient(135deg, #fff 0%, rgba(180,210,255,0.9) 100%);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
     }
     .stat-lbl {
       font-size: 0.5rem; color: var(--text-muted);
@@ -666,22 +723,35 @@
     }
     .tl-content { flex: 1; padding: 4px 0 4px 16px; }
     .tl-card {
-      background: #FFFFFF;
-      border: 1px solid rgba(15,12,8,0.07);
-      border-radius: 12px;
-      padding: 13px 18px;
-      transition: all 0.2s ease;
+      background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 14px 20px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(20px);
       position: relative;
       overflow: hidden;
-      box-shadow: 0 1px 4px rgba(15,12,8,0.04);
     }
     .tl-card::before {
       content: ''; position: absolute; top: 0; left: 16px; right: 16px; height: 1px;
       background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
     }
-    .tl-card:hover { border-color: rgba(217,119,87,0.25); transform: translateX(2px); box-shadow: 0 2px 12px rgba(15,12,8,0.07); }
+    .tl-card:hover { 
+      border-color: rgba(77,159,255,0.25); 
+      background: linear-gradient(135deg, rgba(77,159,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+      transform: translateX(2px);
+      box-shadow: 0 4px 20px rgba(77,159,255,0.1);
+    }
     /* Active task — glowing 3D orb */
-.tl-card.active-block { border-color: rgba(217,119,87,0.4); background: rgba(217,119,87,0.05); box-shadow: 0 2px 12px rgba(217,119,87,0.15); transform: translateX(4px); }
+    .tl-card.active-block {
+      border-color: rgba(255,107,44,0.4);
+      background: linear-gradient(135deg, rgba(255,107,44,0.12) 0%, rgba(255,140,80,0.04) 100%);
+      box-shadow: 
+        0 0 30px rgba(255,107,44,0.25),
+        inset 0 0 0 1px rgba(255,107,44,0.2),
+        0 8px 32px rgba(255,107,44,0.15);
+      transform: translateX(4px);
+    }
     .tl-block.active-block .tl-dot-outer {
       border-color: rgba(255,255,255,0.4);
       background: 
@@ -729,17 +799,17 @@
     /* INPUTS */
     .form-input {
       width: 100%;
-      background: #F0EEE6;
-      border: 1px solid rgba(15,12,8,0.1);
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
       border-radius: 10px;
       padding: 11px 14px;
       color: var(--text-main);
       font-size: 0.9rem;
       outline: none;
-      transition: border-color 0.2s, background 0.2s;
+      transition: border-color 0.3s, background 0.3s;
     }
-    .form-input::placeholder { color: var(--text-muted); }
-    .form-input:focus { border-color: var(--accent); background: #FFFFFF; }
+    .form-input::placeholder { color: var(--text-dim); }
+    .form-input:focus { border-color: var(--accent-dim); background: rgba(255,255,255,0.05); }
     .form-label {
       font-size: 0.55rem; font-weight: 600; letter-spacing: 3px;
       color: var(--text-muted);
@@ -789,14 +859,13 @@
     /* TASKS */
     .task-item {
       display: flex; align-items: center; gap: 12px;
-      padding: 12px 16px; border-radius: 12px;
-      border: 1px solid rgba(15,12,8,0.07); margin-bottom: 8px;
-      background: #FFFFFF;
-      transition: all 0.2s ease;
-      box-shadow: 0 1px 3px rgba(15,12,8,0.04);
+      padding: 13px 16px; border-radius: 12px;
+      border: 1px solid var(--line); margin-bottom: 8px;
+      background: rgba(255,255,255,0.02);
+      transition: all 0.25s;
     }
-    .task-item:hover { border-color: rgba(15,12,8,0.12); box-shadow: 0 2px 8px rgba(15,12,8,0.07); }
-    .task-item.done { border-color: rgba(15,12,8,0.05); background: rgba(15,12,8,0.01); }
+    .task-item:hover { border-color: var(--line-strong); background: rgba(255,255,255,0.04); }
+    .task-item.done { border-color: rgba(255,255,255,0.20); background: rgba(255,255,255,0.03); }
     .task-item.done .task-label { text-decoration: line-through; color: var(--text-muted); }
     .task-item.non-neg { border-left: 3px solid var(--accent); }
     .task-check {
@@ -838,59 +907,72 @@
 
     /* BUTTONS */
     .glow-btn {
-      background: rgba(217,119,87,0.08);
-      border: 1px solid rgba(217,119,87,0.3);
-      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(255,107,44,0.1), rgba(77,159,255,0.04));
+      border: 1px solid var(--accent-dim);
+      border-radius: 12px;
       color: var(--accent);
-      font-size: 0.65rem; font-weight: 700; letter-spacing: 2px;
+      font-size: 0.65rem; font-weight: 600; letter-spacing: 3px;
       padding: 12px 24px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
       text-transform: uppercase;
+      backdrop-filter: blur(10px);
     }
-    .glow-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); transform: translateY(-1px); }
+    .glow-btn:hover { 
+      background: linear-gradient(135deg, rgba(255,107,44,0.18), rgba(77,159,255,0.08)); 
+      box-shadow: 0 0 24px rgba(255,107,44,0.3);
+      transform: translateY(-1px);
+    }
     .save-btn {
-      background: var(--accent);
-      border: none; border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;
       color: #fff;
-      font-size: 0.65rem; font-weight: 700; letter-spacing: 2px;
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 3px;
       padding: 13px 26px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
       text-transform: uppercase;
-      box-shadow: 0 2px 8px rgba(217,119,87,0.3);
+      box-shadow: 0 4px 16px rgba(255,107,44,0.3);
     }
-    .save-btn:hover { background: #C46A4D; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(217,119,87,0.35); }
+    .save-btn:hover { 
+      box-shadow: 0 8px 28px rgba(255,107,44,0.5); 
+      transform: translateY(-2px);
+    }
     .ghost-btn {
-      background: rgba(15,12,8,0.04);
-      border: 1px solid rgba(15,12,8,0.1);
-      border-radius: 10px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
       color: var(--text-soft);
       font-size: 0.62rem; font-weight: 600; letter-spacing: 2px;
       padding: 10px 18px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.3s;
       text-transform: uppercase;
+      backdrop-filter: blur(10px);
     }
-    .ghost-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(217,119,87,0.06); }
+    .ghost-btn:hover { 
+      border-color: var(--accent); color: var(--accent);
+      background: rgba(255,107,44,0.05);
+    }
 
     /* MISC */
     .page-section { display: none; }
     .page-section.active { display: block; animation: fadeIn 0.4s ease; }
     @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
     .prog-bar { 
-      height: 5px; background: rgba(15,12,8,0.08); 
+      height: 5px; background: rgba(255,255,255,0.04); 
       border-radius: 6px; overflow: hidden; border: none;
       position: relative;
     }
     .prog-fill { 
       height: 100%; border-radius: 6px; 
       transition: width 1s cubic-bezier(0.16,1,0.3,1);
-      background: var(--accent);
+      background: linear-gradient(90deg, var(--neural) 0%, var(--accent) 100%);
+      box-shadow: 0 0 8px rgba(255,107,44,0.3);
     }
     .toast {
       position: fixed; bottom: 28px; right: 28px;
-      background: #191915; color: #FAF9F5;
+      background: var(--accent); color: #fff;
       font-size: 0.7rem; font-weight: 700; letter-spacing: 2px;
       padding: 14px 22px; border-radius: 10px;
       z-index: 9999;
@@ -902,7 +984,7 @@
     .toast.show { transform: translateY(0); opacity: 1; }
     .modal-overlay {
       position: fixed; inset: 0;
-      background: rgba(15,12,8,0.5);
+      background: rgba(0,0,0,0.78);
       backdrop-filter: blur(8px);
       z-index: 5000;
       display: flex; align-items: center; justify-content: center;
@@ -911,16 +993,16 @@
     }
     .modal-overlay.open { opacity: 1; pointer-events: all; }
     .modal-box {
-      background: #FFFFFF;
-      border: 1px solid rgba(15,12,8,0.08);
+      background: var(--bg-elev);
+      border: 1px solid var(--line-strong);
       border-radius: 16px;
       padding: 30px;
       width: 100%; max-width: 520px;
       position: relative;
-      box-shadow: 0 20px 60px rgba(15,12,8,0.15);
+      box-shadow: 0 0 80px rgba(255,107,44,0.12);
     }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-track { background: var(--bg-deep); }
     ::-webkit-scrollbar-thumb { background: rgba(255,107,44,0.25); border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
     .divider { height: 1px; background: var(--line); margin: 18px 0; }
@@ -1057,7 +1139,7 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .loading-screen {
       position: fixed; inset: 0;
-      background: #FAF9F5;
+      background: var(--bg-deep);
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       z-index: 9999;
@@ -1171,8 +1253,8 @@
     .grid-32 { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
     /* ============ NEXUS AI AGENT ============ */
     .nexus-card {
-      border-color: rgba(15,12,8,0.1);
-      background: #191915;
+      border-color: rgba(77,159,255,0.15);
+      background: linear-gradient(135deg, rgba(20,30,50,0.5) 0%, rgba(77,159,255,0.04) 50%, rgba(255,107,44,0.04) 100%);
       position: relative; overflow: hidden;
     }
     /* Neural network animated background lines */
@@ -1278,8 +1360,8 @@
     }
     @keyframes micPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
     .nexus-chat {
-      background: rgba(0,0,0,0.35);
-      border: 1px solid rgba(255,255,255,0.07);
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.06);
       border-radius: 16px;
       padding: 16px;
       max-height: 220px;
@@ -1392,7 +1474,7 @@
             <linearGradient id="lgAuth" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stop-color="#1E5BFF"/>
               <stop offset="50%" stop-color="#4D9FFF"/>
-              <stop offset="100%" stop-color="#191915"/>
+              <stop offset="100%" stop-color="#FF6B2C"/>
             </linearGradient>
             <linearGradient id="lgAuthShine" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
@@ -1542,7 +1624,7 @@
             <linearGradient id="lgMain" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stop-color="#1E5BFF"/>
               <stop offset="50%" stop-color="#4D9FFF"/>
-              <stop offset="100%" stop-color="#191915"/>
+              <stop offset="100%" stop-color="#FF6B2C"/>
             </linearGradient>
             <linearGradient id="lgShine" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
@@ -1633,9 +1715,9 @@
           <circle id="scoreArc" cx="105" cy="105" r="88" fill="none" stroke="url(#scoreGrad)" stroke-width="10" stroke-linecap="round" stroke-dasharray="553" stroke-dashoffset="553" style="transition:stroke-dashoffset 1s ease;"/>
           <defs>
             <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#D97757"/>
-              <stop offset="60%" stop-color="#C46A4D"/>
-              <stop offset="100%" stop-color="#191915"/>
+              <stop offset="0%" stop-color="#4D9FFF"/>
+              <stop offset="60%" stop-color="#FF8B4D"/>
+              <stop offset="100%" stop-color="#FF6B2C"/>
             </linearGradient>
           </defs>
         </svg>
@@ -1707,8 +1789,8 @@
           <div class="nexus-ring"></div>
         </div>
         <div>
-          <div style="font-family:'Orbitron',monospace;font-size:0.9rem;font-weight:700;letter-spacing:3px;color:#FAF9F5;">NEXUS <span style="color:var(--accent);">AI</span></div>
-          <div style="font-size:0.62rem;color:rgba(255,255,255,0.45);letter-spacing:2px;text-transform:uppercase;" id="nexusStatusTxt">Click mic to talk · or type below</div>
+          <div style="font-family:'Orbitron',monospace;font-size:0.9rem;font-weight:700;letter-spacing:3px;color:var(--text-main);">NEXUS <span style="color:var(--accent);">AI</span></div>
+          <div style="font-size:0.62rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;" id="nexusStatusTxt">Click mic to talk · or type below</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
@@ -1741,7 +1823,7 @@
 
     <!-- TEXT INPUT -->
     <div style="display:flex;gap:10px;margin-top:14px;">
-      <input type="text" id="nexusInput" class="form-input" placeholder='Type message or click mic to speak...' style="flex:1;font-size:0.85rem;background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.1);color:#FAF9F5;" onkeydown="if(event.key==='Enter')sendToNexus()" />
+      <input type="text" id="nexusInput" class="form-input" placeholder='Type message or click mic to speak...' style="flex:1;font-size:0.85rem;" onkeydown="if(event.key==='Enter')sendToNexus()" />
       <button class="save-btn" onclick="sendToNexus()" style="padding:10px 18px;font-size:0.65rem;white-space:nowrap;"><i class="fas fa-paper-plane"></i></button>
     </div>
 
@@ -3122,12 +3204,12 @@ function renderTaskList(){
       else if(task.priority===3)prioHtml='<span style="font-size:0.55rem;background:rgba(100,200,100,0.15);color:#64c864;border:1px solid rgba(100,200,100,0.3);border-radius:4px;padding:1px 6px;letter-spacing:0.5px;font-weight:700;margin-left:4px;">P3</span>';
       var borderStyle=task.priority===1?'border-left:2px solid rgba(255,80,80,0.5);':task.priority===2?'border-left:2px solid rgba(255,165,0,0.4);':'';
       return '<div class="task-item'+(task.done?' done':'')+(task.nonNeg?' non-neg':'')+'" style="'+borderStyle+'" id="titem-'+task.id+'">'
-        +'<div class="task-check" onclick="toggleTask(this)" data-id="'+task.id+'"></div>'
+        +'<div class="task-check" onclick="toggleTask(''+task.id+'')"></div>'
         +'<div class="task-label">'+escHtml(task.name)+(task.nonNeg?' <span class="nn-badge">NON-NEG</span>':'')+prioHtml+(task.important?' <span style="font-size:0.6rem;background:rgba(255,180,0,0.12);color:#ffb400;border:1px solid rgba(255,180,0,0.3);border-radius:4px;padding:1px 5px;letter-spacing:0.5px;margin-left:4px;">ALARM</span>':'')+'</div>'
         +'<div class="task-time-badge">'+to12h(task.start)+' – '+to12h(task.end)+'</div>'
         +'<div class="task-pts-badge">+'+task.pts+'</div>'
-        +'<span onclick="openEditTask(\''+task.id+'\')" title="Edit" style="cursor:pointer;color:var(--text-muted);font-size:0.75rem;padding:4px 6px;border-radius:6px;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'"><i class="fas fa-pen"></i></span>'
-        +'<span class="task-remove" onclick="removeTask(\''+task.id+'\')" title="Remove"><i class="fas fa-trash"></i></span>'
+        +'<span onclick="openEditTask(''+task.id+'')" title="Edit" style="cursor:pointer;color:var(--text-muted);font-size:0.75rem;padding:4px 6px;border-radius:6px;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'"><i class="fas fa-pen"></i></span>'
+        +'<span class="task-remove" onclick="removeTask(''+task.id+'')" title="Remove"><i class="fas fa-trash"></i></span>'
         +'</div>';
     }).join('');
   }
@@ -3189,7 +3271,7 @@ function renderTaskTimeline(){
       +'<div style="font-family:Orbitron,monospace;font-size:0.62rem;color:'+(active?'var(--accent)':'var(--text-soft)')+';font-weight:600;letter-spacing:1px;">'+to12h(b.start)+' – '+to12h(b.end)+'</div>'
       +(active?'<div class="now-pill">● NOW</div>':'')
       +'</div>'
-      +'<div style="font-size:0.92rem;font-weight:600;">'+escHtml(b.name)+(b.priority===1?' <span style="font-size:0.5rem;background:rgba(192,57,43,0.1);color:#C0392B;border:1px solid rgba(192,57,43,0.2);border-radius:4px;padding:1px 6px;font-weight:700;margin-left:4px;">P1</span>':b.priority===2?' <span style="font-size:0.5rem;background:rgba(217,119,87,0.1);color:#D97757;border:1px solid rgba(217,119,87,0.25);border-radius:4px;padding:1px 6px;font-weight:700;margin-left:4px;">P2</span>':b.priority===3?' <span style="font-size:0.5rem;background:rgba(45,155,90,0.1);color:#2D9B5A;border:1px solid rgba(45,155,90,0.2);border-radius:4px;padding:1px 6px;font-weight:700;margin-left:4px;">P3</span>':'')+(b.nonNeg?' <span class="nn-badge">NN</span>':'')+(b.important?' <span style="font-size:0.5rem;background:rgba(184,134,11,0.08);color:#B8860B;border:1px solid rgba(184,134,11,0.2);border-radius:4px;padding:1px 5px;margin-left:4px;"><i class="fas fa-bell" style="font-size:0.5rem;margin-right:2px;"></i>ALARM</span>':'')+'</div>'
+      +'<div style="font-size:0.92rem;font-weight:600;">'+escHtml(b.icon)+' '+escHtml(b.name)+(b.nonNeg?' <span class="nn-badge">NN</span>':'')+(b.important?' <span style="font-size:0.55rem;background:rgba(255,180,0,0.15);color:#ffb400;border:1px solid rgba(255,180,0,0.35);border-radius:4px;padding:1px 5px;letter-spacing:0.5px;margin-left:4px;"><i class="fas fa-bell" style="font-size:0.55rem;margin-right:2px;"></i>ALARM</span>':'')+'</div>'
       +'</div>';
   }).join('')+'</div>';
 }
@@ -3225,7 +3307,7 @@ function renderScheduleTimeline(){
     wrap.innerHTML=
       '<div class="tl-left"><div class="tl-time">'+to12h(b.start)+'</div><div class="tl-duration">'+durText+'</div></div>'
       +'<div class="tl-spine"><div class="tl-line" style="'+(i===0?'flex:0 0 12px':'')+'"></div><div class="tl-dot-outer"></div><div class="tl-line" style="'+(isLast?'flex:0 0 0':'')+'"></div></div>'
-      +'<div class="tl-content"><div class="tl-card'+(active?' active-block':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;"><div><div style="font-size:0.95rem;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+escHtml(b.name)+(b.priority===1?' <span style="font-size:0.5rem;background:rgba(192,57,43,0.1);color:#C0392B;border:1px solid rgba(192,57,43,0.2);border-radius:4px;padding:1px 6px;font-weight:700;">P1</span>':b.priority===2?' <span style="font-size:0.5rem;background:rgba(217,119,87,0.1);color:#D97757;border:1px solid rgba(217,119,87,0.25);border-radius:4px;padding:1px 6px;font-weight:700;">P2</span>':b.priority===3?' <span style="font-size:0.5rem;background:rgba(45,155,90,0.1);color:#2D9B5A;border:1px solid rgba(45,155,90,0.2);border-radius:4px;padding:1px 6px;font-weight:700;">P3</span>':'')+(b.nonNeg?' <span class="nn-badge">NON-NEG</span>':'')+(b.important?' <span style="font-size:0.5rem;background:rgba(184,134,11,0.08);color:#B8860B;border:1px solid rgba(184,134,11,0.2);border-radius:4px;padding:2px 6px;font-weight:600;"><i class="fas fa-bell" style="font-size:0.5rem;margin-right:2px;"></i>ALARM</span>':'')+'</div><div style="font-size:0.65rem;color:var(--text-muted);margin-top:3px;font-family:Orbitron,monospace;letter-spacing:1px;">'+b.start+' – '+b.end+' · '+durText+'</div></div>'+(active?'<div class="now-pill">● NOW</div>':'')+'</div></div></div>';
+      +'<div class="tl-content"><div class="tl-card'+(active?' active-block':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;"><div><div style="font-size:0.95rem;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+escHtml(b.icon)+' '+escHtml(b.name)+(b.nonNeg?' <span class="nn-badge">NON-NEG</span>':'')+(b.important?' <span style="font-size:0.6rem;background:rgba(255,180,0,0.12);color:#ffb400;border:1px solid rgba(255,180,0,0.3);border-radius:4px;padding:2px 7px;letter-spacing:0.5px;font-weight:600;"><i class="fas fa-bell" style="font-size:0.6rem;margin-right:3px;"></i>ALARM</span>':'')+'</div><div style="font-size:0.65rem;color:var(--text-muted);margin-top:3px;font-family:Orbitron,monospace;letter-spacing:1px;">'+b.start+' – '+b.end+' · '+durText+'</div></div>'+(active?'<div class="now-pill">● NOW</div>':'')+'</div></div></div>';
     c.appendChild(wrap);
   });
   var curr=tasks.find(function(b){
@@ -3470,11 +3552,9 @@ function switchTab(name,el){
 // =============================================================
 function updateClock(){
   var n=new Date();
-  var rawH=n.getHours(),mm=String(n.getMinutes()).padStart(2,'0'),ss=String(n.getSeconds()).padStart(2,'0');
-  var ampm=rawH>=12?'PM':'AM';var h12=rawH%12||12;
-  var timeStr=h12+':'+mm+':'+ss+' '+ampm;
-  var cl=document.getElementById('liveClock');if(cl)cl.textContent=timeStr;
-  var sc=document.getElementById('schedClock');if(sc)sc.textContent=timeStr;
+  var hh=String(n.getHours()).padStart(2,'0'),mm=String(n.getMinutes()).padStart(2,'0'),ss=String(n.getSeconds()).padStart(2,'0');
+  var cl=document.getElementById('liveClock');if(cl)cl.textContent=hh+':'+mm+':'+ss;
+  var sc=document.getElementById('schedClock');if(sc)sc.textContent=hh+':'+mm+':'+ss;
   var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var dl=document.getElementById('liveDate');if(dl)dl.textContent=days[n.getDay()]+' · '+months[n.getMonth()]+' '+n.getDate();
@@ -5859,12 +5939,12 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 <!-- ===== FIXED FOOTER ===== -->
-<div id="siteFooter" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;background:rgba(250,249,245,0.97);backdrop-filter:blur(10px);border-top:1px solid rgba(15,12,8,0.07);padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:16px;">
-  <span style="font-family:'Orbitron',monospace;font-size:9px;font-weight:700;letter-spacing:2px;color:rgba(15,12,8,0.3);">© 2026 THE GRIND HQ</span>
+<div id="siteFooter" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;background:rgba(10,10,10,0.95);backdrop-filter:blur(10px);border-top:1px solid rgba(255,255,255,0.06);padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:16px;">
+  <span style="font-family:'Orbitron',monospace;font-size:9px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,0.2);">© 2026 THE GRIND HQ</span>
   <span style="color:rgba(255,255,255,0.1);font-size:10px;">·</span>
-  <a href="/legal.html" style="font-size:11px;color:rgba(15,12,8,0.4);text-decoration:none;letter-spacing:0.5px;" onmouseover="this.style.color='#FF6B2C'" onmouseout="this.style.color='rgba(255,255,255,0.3)'">Privacy Policy</a>
+  <a href="/legal.html" style="font-size:11px;color:rgba(255,255,255,0.3);text-decoration:none;letter-spacing:0.5px;" onmouseover="this.style.color='#FF6B2C'" onmouseout="this.style.color='rgba(255,255,255,0.3)'">Privacy Policy</a>
   <span style="color:rgba(255,255,255,0.1);font-size:10px;">·</span>
-  <a href="/legal.html" style="font-size:11px;color:rgba(15,12,8,0.4);text-decoration:none;letter-spacing:0.5px;" onmouseover="this.style.color='#FF6B2C'" onmouseout="this.style.color='rgba(255,255,255,0.3)'">Terms of Service</a>
+  <a href="/legal.html" style="font-size:11px;color:rgba(255,255,255,0.3);text-decoration:none;letter-spacing:0.5px;" onmouseover="this.style.color='#FF6B2C'" onmouseout="this.style.color='rgba(255,255,255,0.3)'">Terms of Service</a>
 </div>
 <div style="height:40px;"></div><!-- spacer for fixed footer -->
 
