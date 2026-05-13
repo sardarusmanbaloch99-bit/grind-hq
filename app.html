@@ -92,7 +92,8 @@
   /* ===== BACKGROUND ===== */
   .bg-stage {
     position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
-    background: radial-gradient(ellipse at 20% 0%, #f6efe1, #f1e8d7 50%, #ebdfc8);
+    background: radial-gradient(ellipse at 20% 0%, #f0f0f0, #f7f7f7 50%, #eeeeee);
+    transition: background 0.5s ease, opacity 0.5s ease;
   }
   .bg-stage::before {
     content: ''; position: absolute; inset: -50%;
@@ -142,6 +143,132 @@
   }
   .content-wrap { position: relative; z-index: 2; }
 
+
+  /* ===== LIGHT THEME (CLEAN WHITE — DEFAULT) ===== */
+  :root, [data-theme="light"] {
+    --bg-deep:  #f7f7f7;
+    --bg-mid:   #ffffff;
+    --bg-elev:  #ffffff;
+    --bg-card:  #ffffff;
+    --bg-glass: rgba(0,0,0,0.03);
+    --bg-glass-hover: rgba(0,0,0,0.06);
+    --line:     rgba(0,0,0,0.08);
+    --line-strong: rgba(0,0,0,0.16);
+    --text-main: #0f0f0f;
+    --text-soft: #1f1f1f;
+    --text-muted: #6b7280;
+    --text-dim:  #9ca3af;
+    --depth-1:  rgba(0,0,0,0.02);
+    --depth-2:  rgba(0,0,0,0.04);
+    --depth-3:  rgba(0,0,0,0.07);
+    --card-dark:  #111111;
+    --card-dark2: #1a1a1a;
+    --text-inv: #ffffff;
+    --dim-inv:  #888888;
+  }
+
+  /* ===== DARK THEME ===== */
+  [data-theme="dark"] {
+    --bg-deep:  #0d0b08;
+    --bg-mid:   #141209;
+    --bg-elev:  #1a1710;
+    --bg-card:  #1e1b12;
+    --bg-glass: rgba(255,255,255,0.04);
+    --bg-glass-hover: rgba(255,255,255,0.08);
+    --line:     rgba(255,255,255,0.08);
+    --line-strong: rgba(255,255,255,0.16);
+    --text-main: #f0ece4;
+    --text-soft: #d4cfc7;
+    --text-muted: #8a8070;
+    --text-dim:  #5a5248;
+    --depth-1:  rgba(255,255,255,0.02);
+    --depth-2:  rgba(255,255,255,0.04);
+    --depth-3:  rgba(255,255,255,0.07);
+    --card-dark:  #0d0b08;
+    --card-dark2: #111008;
+    --text-inv: #f0ece4;
+    --dim-inv:  #6a6055;
+  }
+  [data-theme="dark"] body { background: var(--bg-deep); }
+  [data-theme="dark"] .card {
+    background: linear-gradient(180deg, #1e1b12 0%, #181510 100%) !important;
+    border-color: rgba(255,255,255,0.07) !important;
+    box-shadow: 0 24px 48px -22px rgba(0,0,0,0.6), 0 8px 16px -8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+  }
+  [data-theme="dark"] .main-header { background: rgba(13,11,8,0.9) !important; border-bottom-color: rgba(255,255,255,0.07) !important; }
+  [data-theme="dark"] .nav-tabs { background: rgba(14,12,9,0.9) !important; border-bottom-color: rgba(255,255,255,0.06) !important; }
+  [data-theme="dark"] .nav-pill-wrap { background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.1) !important; }
+  [data-theme="dark"] .stat-chip { background: linear-gradient(180deg, #1e1b12, #181510) !important; border-color: rgba(255,255,255,0.07) !important; }
+  [data-theme="dark"] .auth-card { background: linear-gradient(180deg, #1e1b12, #141209) !important; border-color: rgba(255,255,255,0.08) !important; }
+  [data-theme="dark"] .auth-input { background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.1) !important; color: var(--text-main) !important; }
+  [data-theme="dark"] .google-btn { background: linear-gradient(180deg, #1e1b12, #141209) !important; border-color: rgba(255,255,255,0.1) !important; color: var(--text-main) !important; }
+  [data-theme="dark"] .refl-input { background: rgba(255,255,255,0.04) !important; border-color: rgba(255,255,255,0.08) !important; color: var(--text-main) !important; }
+  [data-theme="dark"] .loading-screen { background: var(--bg-deep) !important; }
+  [data-theme="dark"] .bg-stage { background: radial-gradient(ellipse at 20% 0%, #1a1710, #0d0b08 50%, #0a0906) !important; }
+  [data-theme="dark"] .bg-stage-grind { -webkit-text-stroke-color: rgba(255,255,255,0.03) !important; }
+  [data-theme="dark"] .nexus-bar { background: #0a0806 !important; border-top-color: rgba(255,255,255,0.06) !important; }
+  [data-theme="dark"] .nexus-input { background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.1) !important; color: var(--text-main) !important; }
+  [data-theme="dark"] .modal-box { background: #1a1710 !important; border-color: rgba(255,255,255,0.08) !important; }
+  [data-theme="dark"] .task-input-row input, [data-theme="dark"] .task-input-row select { background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.1) !important; color: var(--text-main) !important; }
+  [data-theme="dark"] .skill-input { background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.1) !important; color: var(--text-main) !important; }
+  [data-theme="dark"] .score-num { color: var(--text-inv) !important; }
+  [data-theme="dark"] ::-webkit-scrollbar-track { background: rgba(255,255,255,0.03) !important; }
+
+  /* ===== BACKGROUND CANVAS ===== */
+  #bgCanvas { position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0; transition:opacity 1s ease; }
+  #bgCanvas.active { opacity:1; }
+  [data-bg="none"] #bgCanvas { opacity:0 !important; }
+  [data-bg="none"] .bg-stage { opacity:1; }
+  [data-bg="matrix"] .bg-stage,
+  [data-bg="cosmic"] .bg-stage,
+  [data-bg="nebula"] .bg-stage { opacity:0.25 !important; }
+  [data-bg="matrix"] #bgCanvas,
+  [data-bg="cosmic"] #bgCanvas,
+  [data-bg="nebula"] #bgCanvas { opacity:1; }
+  [data-theme="dark"][data-bg="none"] .bg-stage { opacity:0.7; }
+
+  /* ===== CONTROLS PANEL ===== */
+  .ctrl-fab {
+    position:fixed; bottom:24px; left:24px; z-index:200;
+    width:46px; height:46px; border-radius:50%;
+    background:linear-gradient(135deg, var(--accent), var(--accent-soft));
+    border:none; cursor:pointer; color:#fff; font-size:1rem;
+    box-shadow:0 8px 24px rgba(255,90,31,0.35);
+    transition:all .3s ease; display:flex; align-items:center; justify-content:center;
+  }
+  .ctrl-fab:hover { transform:scale(1.1) rotate(30deg); box-shadow:0 12px 30px rgba(255,90,31,0.5); }
+  .ctrl-panel {
+    position:fixed; bottom:80px; left:24px; z-index:200;
+    background:var(--bg-card); border:1px solid var(--line);
+    border-radius:20px; padding:20px; width:260px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.2);
+    opacity:0; transform:translateY(20px) scale(0.95);
+    pointer-events:none; transition:all .3s cubic-bezier(.16,1,.3,1);
+  }
+  .ctrl-panel.open { opacity:1; transform:translateY(0) scale(1); pointer-events:all; }
+  .ctrl-section-title {
+    font-family:'JetBrains Mono',monospace; font-size:0.55rem; font-weight:700;
+    letter-spacing:3px; text-transform:uppercase; color:var(--accent);
+    margin-bottom:10px; margin-top:14px;
+  }
+  .ctrl-section-title:first-child { margin-top:0; }
+  .theme-toggle-row { display:flex; gap:8px; }
+  .theme-btn {
+    flex:1; padding:9px 0; border-radius:10px; border:1.5px solid var(--line);
+    background:var(--bg-mid); color:var(--text-muted); font-size:0.78rem; font-weight:700;
+    cursor:pointer; transition:all .2s; font-family:'Bricolage Grotesque',sans-serif;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .theme-btn.active { border-color:var(--accent); background:rgba(255,90,31,0.1); color:var(--accent); }
+  .bg-options { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .bg-btn {
+    padding:10px 8px; border-radius:10px; border:1.5px solid var(--line);
+    background:var(--bg-mid); color:var(--text-muted); font-size:0.72rem; font-weight:700;
+    cursor:pointer; transition:all .2s; font-family:'Bricolage Grotesque',sans-serif;
+    display:flex; align-items:center; justify-content:center; gap:5px; text-align:center;
+  }
+  .bg-btn.active { border-color:var(--accent); background:rgba(255,90,31,0.1); color:var(--accent); }
+
   /* ===== SCROLLBAR ===== */
   ::-webkit-scrollbar { width: 8px; height: 8px; }
   ::-webkit-scrollbar-track { background: rgba(21,16,10,0.04); }
@@ -150,7 +277,7 @@
 
   /* ===== LOADING ===== */
   .loading-screen {
-    position: fixed; inset: 0; background: #f1e8d7;
+    position: fixed; inset: 0; background: #f7f7f7;
     display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; gap: 20px;
   }
   .loading-screen .spinner { width: 40px; height: 40px; border-color: rgba(255,90,31,0.2); border-top-color: var(--accent); }
@@ -890,6 +1017,9 @@
   <div class="nav-tab" onclick="switchTab('score',this)"><i class="far fa-star"></i>Day Score</div>
   <div class="nav-tab" onclick="switchTab('reflection',this)"><i class="far fa-moon"></i>Reflection</div>
   <div class="nav-tab" onclick="switchTab('analytics',this)"><i class="fas fa-wave-square"></i>Analytics</div>
+  <div class="nav-tab" onclick="switchTab('sensei',this)"><i class="fas fa-user-ninja"></i>AI Sensei</div>
+  <div class="nav-tab" onclick="switchTab('mustdo',this)"><i class="fas fa-shield-halved"></i>Must Do</div>
+  <div class="nav-tab" onclick="switchTab('dump',this)"><i class="fas fa-bolt"></i>Brain Dump</div>
 </nav>
 
 <main style="padding:28px 32px;">
@@ -1296,6 +1426,109 @@
         <div class="stat-chip"><div class="stat-num" id="atAvg">0</div><div class="stat-lbl">All-time Avg</div></div>
         <div class="stat-chip"><div class="stat-num" id="atLegend">0</div><div class="stat-lbl">Legend Days</div></div>
         <div class="stat-chip"><div class="stat-num" id="atTotal">0</div><div class="stat-lbl">Total Days</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- AI SENSEI TAB -->
+<section id="tab-sensei" class="page-section">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;">
+    <div class="card" style="grid-column:1/-1;">
+      <div class="card-title"><span class="dot"></span>AI Sensei — Your Discipline Master</div>
+      <div style="font-size:0.88rem;color:var(--text-muted);margin-bottom:18px;line-height:1.6;">Your personal AI master analyzes your patterns, calls out your excuses, and gives you the hard truth you need. Ask anything about your performance, habits, or goals.</div>
+      <div style="background:var(--depth-1);border:1px solid var(--line);border-radius:16px;padding:18px;min-height:300px;max-height:450px;overflow-y:auto;margin-bottom:14px;display:flex;flex-direction:column;gap:12px;" id="senseiChat">
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#ff3388);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:900;color:#fff;font-family:Orbitron,monospace;flex-shrink:0;">NX</div>
+          <div style="background:rgba(255,90,31,0.08);border:1px solid rgba(255,90,31,0.15);border-radius:0 12px 12px 12px;padding:12px 16px;font-size:0.88rem;line-height:1.6;color:var(--text-main);max-width:80%;">
+            Sensei is online. I have access to your scores, tasks, and patterns. Ask me anything — I won't sugarcoat it. What do you want to know?
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <input type="text" id="senseiInput" placeholder="Ask your Sensei anything..." style="flex:1;background:var(--bg-mid);border:1px solid var(--line);border-radius:12px;padding:12px 16px;font-family:inherit;font-size:0.9rem;color:var(--text-main);outline:none;" onkeydown="if(event.key==='Enter')sendSensei()" />
+        <button onclick="sendSensei()" style="padding:12px 20px;background:linear-gradient(135deg,var(--accent),var(--accent-soft));border:none;border-radius:12px;color:#fff;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:'Big Shoulders Display',sans-serif;letter-spacing:1px;">SEND</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Sensei's Daily Read</div>
+      <div id="senseiDailyRead" style="font-size:0.9rem;color:var(--text-main);line-height:1.8;">Loading your daily analysis...</div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Quick Commands</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button onclick="setSenseiPrompt('Roast my consistency this week and tell me what to fix')" style="padding:10px 16px;background:var(--depth-2);border:1px solid var(--line);border-radius:10px;color:var(--text-main);font-size:0.85rem;cursor:pointer;text-align:left;font-family:inherit;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">🔥 Roast my consistency</button>
+        <button onclick="setSenseiPrompt('What should I focus on today to maximize my score?')" style="padding:10px 16px;background:var(--depth-2);border:1px solid var(--line);border-radius:10px;color:var(--text-main);font-size:0.85rem;cursor:pointer;text-align:left;font-family:inherit;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">🎯 Today's priority focus</button>
+        <button onclick="setSenseiPrompt('What habits am I missing that high performers have?')" style="padding:10px 16px;background:var(--depth-2);border:1px solid var(--line);border-radius:10px;color:var(--text-main);font-size:0.85rem;cursor:pointer;text-align:left;font-family:inherit;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">🧠 Missing habits check</button>
+        <button onclick="setSenseiPrompt('Give me a brutal 7-day challenge to level up')" style="padding:10px 16px;background:var(--depth-2);border:1px solid var(--line);border-radius:10px;color:var(--text-main);font-size:0.85rem;cursor:pointer;text-align:left;font-family:inherit;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">⚡ 7-day challenge</button>
+        <button onclick="setSenseiPrompt('Why am I not reaching my goals? Be honest.')" style="padding:10px 16px;background:var(--depth-2);border:1px solid var(--line);border-radius:10px;color:var(--text-main);font-size:0.85rem;cursor:pointer;text-align:left;font-family:inherit;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">💀 Why am I failing?</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MUST DO TAB -->
+<section id="tab-mustdo" class="page-section">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;">
+    <div class="card" style="grid-column:1/-1;">
+      <div class="card-title"><span class="dot"></span>Must Do — Non-Negotiables</div>
+      <div style="font-size:0.88rem;color:var(--text-muted);margin-bottom:20px;line-height:1.6;">These are the things you commit to doing <b>every single day</b>, no matter what. No excuses. Non-negotiables define who you are.</div>
+      <div style="display:flex;gap:10px;margin-bottom:20px;">
+        <input type="text" id="mustdoInput" placeholder="Add a non-negotiable commitment..." style="flex:1;background:var(--bg-mid);border:1px solid var(--line);border-radius:12px;padding:12px 16px;font-family:inherit;font-size:0.9rem;color:var(--text-main);outline:none;" onkeydown="if(event.key==='Enter')addMustDo()" />
+        <button onclick="addMustDo()" style="padding:12px 24px;background:linear-gradient(135deg,var(--accent),var(--accent-soft));border:none;border-radius:12px;color:#fff;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:'Big Shoulders Display',sans-serif;letter-spacing:1px;white-space:nowrap;">+ ADD</button>
+      </div>
+      <div id="mustdoList" style="display:flex;flex-direction:column;gap:10px;min-height:100px;">
+        <div style="color:var(--text-muted);font-size:0.88rem;text-align:center;padding:40px;" id="mustdoEmpty">No non-negotiables set. What are you committed to every day?</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Today's Completion</div>
+      <div id="mustdoProgress" style="text-align:center;padding:20px;">
+        <div style="font-size:3.5rem;font-weight:900;font-family:'Big Shoulders Display',sans-serif;color:var(--accent);" id="mustdoPct">0%</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);margin-top:6px;">of non-negotiables done today</div>
+        <div style="margin-top:16px;height:8px;background:var(--depth-2);border-radius:4px;overflow:hidden;">
+          <div id="mustdoBar" style="height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-soft));border-radius:4px;width:0%;transition:width .6s ease;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Streak Tracker</div>
+      <div style="text-align:center;padding:20px;">
+        <div style="font-size:3.5rem;font-weight:900;font-family:'Big Shoulders Display',sans-serif;color:var(--accent);" id="mustdoStreak">0</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);margin-top:6px;">consecutive days completed</div>
+        <div style="font-size:2rem;margin-top:10px;">🔥</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BRAIN DUMP TAB -->
+<section id="tab-dump" class="page-section">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;">
+    <div class="card" style="grid-column:1/-1;">
+      <div class="card-title"><span class="dot"></span>Brain Dump — Clear Your Head</div>
+      <div style="font-size:0.88rem;color:var(--text-muted);margin-bottom:14px;line-height:1.6;">Dump every thought, idea, worry, or task that's cluttering your mind. Get it out. Then sort it later. Empty head = full focus.</div>
+      <textarea id="dumpTextarea" placeholder="Type everything that's in your head right now. Ideas, worries, tasks, random thoughts — dump it all here..." style="width:100%;background:var(--depth-1);border:1px solid var(--line);border-radius:14px;padding:18px;font-family:inherit;font-size:0.92rem;color:var(--text-main);outline:none;resize:vertical;min-height:200px;line-height:1.8;transition:border-color .3s;" onfocus="this.style.borderColor='var(--accent-dim)'" onblur="this.style.borderColor='var(--line)'"></textarea>
+      <div style="display:flex;gap:10px;margin-top:12px;justify-content:flex-end;">
+        <button onclick="saveDump()" style="padding:11px 24px;background:linear-gradient(135deg,var(--accent),var(--accent-soft));border:none;border-radius:12px;color:#fff;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:'Big Shoulders Display',sans-serif;letter-spacing:1px;">SAVE DUMP</button>
+        <button onclick="clearDump()" style="padding:11px 24px;background:var(--depth-2);border:1px solid var(--line);border-radius:12px;color:var(--text-muted);font-weight:700;font-size:0.85rem;cursor:pointer;font-family:'Big Shoulders Display',sans-serif;letter-spacing:1px;">CLEAR</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Quick Capture — Ideas</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <input type="text" id="ideaInput" placeholder="Quick idea..." style="flex:1;background:var(--bg-mid);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-family:inherit;font-size:0.88rem;color:var(--text-main);outline:none;" onkeydown="if(event.key==='Enter')addIdea()" />
+        <button onclick="addIdea()" style="padding:10px 16px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-weight:800;font-size:0.8rem;cursor:pointer;font-family:'Big Shoulders Display',sans-serif;">+</button>
+      </div>
+      <div id="ideaList" style="display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto;">
+        <div style="color:var(--text-muted);font-size:0.82rem;text-align:center;padding:20px;" id="ideaEmpty">No ideas captured yet. Start dumping 💡</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Saved Dumps</div>
+      <div id="dumpHistory" style="display:flex;flex-direction:column;gap:10px;max-height:300px;overflow-y:auto;">
+        <div style="color:var(--text-muted);font-size:0.82rem;text-align:center;padding:20px;">No saved dumps yet.</div>
       </div>
     </div>
   </div>
@@ -5192,6 +5425,398 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 })();
 
+</script>
+
+<!-- Background canvas -->
+<canvas id="bgCanvas"></canvas>
+
+<!-- Controls FAB -->
+<button class="ctrl-fab" id="ctrlFab" title="Appearance Settings" onclick="toggleCtrlPanel()">
+  <i class="fas fa-sliders"></i>
+</button>
+
+<!-- Controls Panel -->
+<div class="ctrl-panel" id="ctrlPanel">
+  <div class="ctrl-section-title">Theme</div>
+  <div class="theme-toggle-row">
+    <button class="theme-btn active" id="themeLight" onclick="setTheme('light')">☀️ Light</button>
+    <button class="theme-btn" id="themeDark" onclick="setTheme('dark')">🌙 Dark</button>
+  </div>
+  <div class="ctrl-section-title">Background</div>
+  <div class="bg-options">
+    <button class="bg-btn active" id="bg-none" onclick="setBg('none')">✦ Clean</button>
+    <button class="bg-btn" id="bg-matrix" onclick="setBg('matrix')">⌨️ Matrix</button>
+    <button class="bg-btn" id="bg-cosmic" onclick="setBg('cosmic')">✦ Cosmic</button>
+    <button class="bg-btn" id="bg-nebula" onclick="setBg('nebula')">🌌 Nebula</button>
+  </div>
+</div>
+
+<script>
+// ===== THEME SYSTEM =====
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('grind-theme', t);
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById('theme' + t.charAt(0).toUpperCase() + t.slice(1));
+  if (el) el.classList.add('active');
+}
+
+// ===== BACKGROUND SYSTEM =====
+var bgAnim = null;
+function setBg(type) {
+  document.documentElement.setAttribute('data-bg', type);
+  localStorage.setItem('grind-bg', type);
+  document.querySelectorAll('.bg-btn').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById('bg-' + type);
+  if (el) el.classList.add('active');
+  if (bgAnim) { cancelAnimationFrame(bgAnim); bgAnim = null; }
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (type === 'matrix') startMatrix(canvas, ctx);
+  else if (type === 'cosmic') startCosmic(canvas, ctx);
+  else if (type === 'nebula') startNebula(canvas, ctx);
+}
+
+// ── MATRIX RAIN ──────────────────────────────────────────────────────────
+function startMatrix(canvas, ctx) {
+  const cols = Math.floor(canvas.width / 18);
+  const drops = Array(cols).fill(1);
+  const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ01アイウエオカキクケコサシスセソタチツテトナニヌネノ';
+  const theme = document.documentElement.getAttribute('data-theme') || 'light';
+  function draw() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    ctx.fillStyle = isDark ? 'rgba(13,11,8,0.07)' : 'rgba(247,247,247,0.08)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.font = '14px JetBrains Mono, monospace';
+    for (let i = 0; i < drops.length; i++) {
+      const c = chars[Math.floor(Math.random() * chars.length)];
+      const x = i * 18;
+      const y = drops[i] * 18;
+      // Bright lead char
+      ctx.fillStyle = isDark ? 'rgba(255,138,77,0.95)' : 'rgba(255,90,31,0.9)';
+      ctx.fillText(c, x, y);
+      // Trail
+      ctx.fillStyle = isDark ? 'rgba(255,90,31,0.3)' : 'rgba(255,90,31,0.25)';
+      ctx.fillText(chars[Math.floor(Math.random() * chars.length)], x, y - 18);
+      if (y > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    }
+    bgAnim = requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ── COSMIC PARTICLES ─────────────────────────────────────────────────────
+function startCosmic(canvas, ctx) {
+  const particles = [];
+  const streams = [];
+  const N = 200;
+  for (let i = 0; i < N; i++) {
+    particles.push({
+      x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4,
+      r: Math.random() * 2.5 + 0.5, alpha: Math.random() * 0.8 + 0.2,
+      hue: Math.random() > 0.5 ? 20 : 200,
+    });
+  }
+  for (let i = 0; i < 6; i++) {
+    streams.push({
+      x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+      angle: Math.random() * Math.PI * 2, length: 0, maxLen: 200 + Math.random() * 300,
+      speed: 1 + Math.random() * 2, width: 1 + Math.random() * 2,
+    });
+  }
+  function draw() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    ctx.fillStyle = isDark ? 'rgba(13,11,8,0.08)' : 'rgba(247,247,247,0.08)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Streams
+    streams.forEach(s => {
+      const ex = s.x + Math.cos(s.angle) * s.length;
+      const ey = s.y + Math.sin(s.angle) * s.length;
+      const grad = ctx.createLinearGradient(s.x, s.y, ex, ey);
+      grad.addColorStop(0, 'rgba(255,90,31,0)');
+      grad.addColorStop(0.5, isDark ? 'rgba(255,138,77,0.5)' : 'rgba(255,90,31,0.35)');
+      grad.addColorStop(1, 'rgba(255,90,31,0)');
+      ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(ex, ey);
+      ctx.strokeStyle = grad; ctx.lineWidth = s.width; ctx.stroke();
+      s.length += s.speed;
+      if (s.length > s.maxLen) {
+        s.x = Math.random() * canvas.width; s.y = Math.random() * canvas.height;
+        s.angle = Math.random() * Math.PI * 2; s.length = 0;
+        s.maxLen = 150 + Math.random() * 300;
+      }
+    });
+    // Particles
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = canvas.width; if (p.x > canvas.width) p.x = 0;
+      if (p.y < 0) p.y = canvas.height; if (p.y > canvas.height) p.y = 0;
+      p.alpha = 0.3 + 0.4 * Math.sin(Date.now() * 0.001 + p.x);
+      const col = p.hue === 20
+        ? `rgba(255,90,31,${p.alpha * (isDark ? 0.6 : 0.4)})`
+        : `rgba(60,150,255,${p.alpha * (isDark ? 0.4 : 0.25)})`;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = col; ctx.fill();
+    });
+    bgAnim = requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ── NEBULA ───────────────────────────────────────────────────────────────
+function startNebula(canvas, ctx) {
+  const stars = [];
+  for (let i = 0; i < 300; i++) {
+    stars.push({
+      x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+      r: Math.random() * 1.8 + 0.2, speed: 0.1 + Math.random() * 0.3,
+      twinkle: Math.random() * Math.PI * 2,
+    });
+  }
+  const orbs = [
+    { x: canvas.width * 0.2, y: canvas.height * 0.3, r: 200, color: [255, 90, 31], speed: 0.0005 },
+    { x: canvas.width * 0.8, y: canvas.height * 0.6, r: 250, color: [30, 91, 255], speed: 0.0007 },
+    { x: canvas.width * 0.5, y: canvas.height * 0.8, r: 180, color: [255, 90, 31], speed: 0.0004 },
+  ];
+  let t = 0;
+  function draw() {
+    t += 0.5;
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    ctx.fillStyle = isDark ? 'rgba(10,8,5,0.15)' : 'rgba(245,245,245,0.12)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Nebula orbs
+    orbs.forEach((orb, i) => {
+      const ox = orb.x + Math.sin(t * orb.speed + i) * 80;
+      const oy = orb.y + Math.cos(t * orb.speed * 0.7 + i) * 60;
+      const grad = ctx.createRadialGradient(ox, oy, 0, ox, oy, orb.r);
+      const alpha = isDark ? 0.12 : 0.08;
+      grad.addColorStop(0, `rgba(${orb.color.join(',')},${alpha})`);
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.beginPath(); ctx.arc(ox, oy, orb.r, 0, Math.PI * 2);
+      ctx.fillStyle = grad; ctx.fill();
+    });
+    // Stars
+    stars.forEach(s => {
+      s.twinkle += 0.02;
+      const alpha = (0.4 + 0.5 * Math.sin(s.twinkle)) * (isDark ? 0.9 : 0.5);
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${alpha})`; ctx.fill();
+      s.y -= s.speed;
+      if (s.y < 0) { s.y = canvas.height; s.x = Math.random() * canvas.width; }
+    });
+    bgAnim = requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ===== CONTROLS PANEL =====
+function toggleCtrlPanel() {
+  document.getElementById('ctrlPanel').classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  const panel = document.getElementById('ctrlPanel');
+  const fab = document.getElementById('ctrlFab');
+  if (!panel.contains(e.target) && !fab.contains(e.target)) {
+    panel.classList.remove('open');
+  }
+});
+window.addEventListener('resize', function() {
+  const canvas = document.getElementById('bgCanvas');
+  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+  const bg = document.documentElement.getAttribute('data-bg') || 'none';
+  if (bg !== 'none') setBg(bg);
+});
+
+// ===== NEW TAB FUNCTIONS =====
+function setSenseiPrompt(text) {
+  document.getElementById('senseiInput').value = text;
+  document.getElementById('senseiInput').focus();
+}
+function sendSensei() {
+  const input = document.getElementById('senseiInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  const chat = document.getElementById('senseiChat');
+  // User bubble
+  const userBubble = document.createElement('div');
+  userBubble.style.cssText = 'display:flex;gap:10px;align-items:flex-start;justify-content:flex-end;';
+  userBubble.innerHTML = '<div style="background:rgba(255,90,31,0.1);border:1px solid rgba(255,90,31,0.2);border-radius:12px 0 12px 12px;padding:12px 16px;font-size:0.88rem;line-height:1.6;color:var(--text-main);max-width:80%;">'+escHtml(msg)+'</div>';
+  chat.appendChild(userBubble);
+  // Typing indicator
+  const typing = document.createElement('div');
+  typing.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
+  typing.innerHTML = '<div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#ff3388);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:900;color:#fff;font-family:Orbitron,monospace;flex-shrink:0;">NX</div><div style="background:rgba(255,90,31,0.08);border:1px solid rgba(255,90,31,0.15);border-radius:0 12px 12px 12px;padding:12px 16px;font-size:0.88rem;color:var(--text-muted);">Analyzing...</div>';
+  chat.appendChild(typing);
+  chat.scrollTop = chat.scrollHeight;
+  // Call NEXUS AI (reuse existing function)
+  if (typeof sendNexus === 'function') {
+    sendNexus(msg, function(reply) {
+      typing.remove();
+      const replyBubble = document.createElement('div');
+      replyBubble.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
+      replyBubble.innerHTML = '<div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#ff3388);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:900;color:#fff;font-family:Orbitron,monospace;flex-shrink:0;">NX</div><div style="background:rgba(255,90,31,0.08);border:1px solid rgba(255,90,31,0.15);border-radius:0 12px 12px 12px;padding:12px 16px;font-size:0.88rem;line-height:1.6;color:var(--text-main);max-width:80%;">'+reply+'</div>';
+      chat.appendChild(replyBubble);
+      chat.scrollTop = chat.scrollHeight;
+    });
+  } else {
+    typing.remove();
+    const replyBubble = document.createElement('div');
+    replyBubble.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
+    replyBubble.innerHTML = '<div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#ff3388);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:900;color:#fff;font-family:Orbitron,monospace;flex-shrink:0;">NX</div><div style="background:rgba(255,90,31,0.08);border:1px solid rgba(255,90,31,0.15);border-radius:0 12px 12px 12px;padding:12px 16px;font-size:0.88rem;line-height:1.6;color:var(--text-main);max-width:80%;">Sensei is processing your request. Stay patient — good answers take a moment.</div>';
+    chat.appendChild(replyBubble);
+    chat.scrollTop = chat.scrollHeight;
+  }
+}
+
+// Must Do
+var mustDoItems = JSON.parse(localStorage.getItem('grind-mustdo') || '[]');
+function renderMustDo() {
+  const list = document.getElementById('mustdoList');
+  const empty = document.getElementById('mustdoEmpty');
+  if (!list) return;
+  const items = list.querySelectorAll('.mustdo-item');
+  items.forEach(i => i.remove());
+  if (mustDoItems.length === 0) { if(empty) empty.style.display='block'; }
+  else {
+    if(empty) empty.style.display='none';
+    let done = 0;
+    mustDoItems.forEach(function(item, idx) {
+      const today = new Date().toDateString();
+      const isDone = item.doneDate === today;
+      if (isDone) done++;
+      const el = document.createElement('div');
+      el.className = 'mustdo-item';
+      el.style.cssText = 'display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--depth-1);border:1px solid var(--line);border-radius:12px;transition:all .2s;';
+      el.innerHTML = '<div onclick="toggleMustDo('+idx+')" style="width:22px;height:22px;border-radius:7px;border:2px solid '+(isDone?'var(--accent)':'var(--line)')+';background:'+(isDone?'var(--accent)':'transparent')+';display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:0.7rem;color:#fff;transition:all .2s;">'+(isDone?'✓':'')+'</div>'
+        +'<span style="flex:1;font-size:0.9rem;color:var(--text-main);'+(isDone?'text-decoration:line-through;opacity:0.5;':'')+'">'+escHtml(item.text)+'</span>'
+        +'<div onclick="deleteMustDo('+idx+')" style="cursor:pointer;color:var(--text-dim);font-size:0.75rem;padding:4px;transition:color .2s;" onmouseover="this.style.color='var(--error)'" onmouseout="this.style.color='var(--text-dim)'">✕</div>';
+      list.appendChild(el);
+    });
+    const pct = mustDoItems.length ? Math.round(done / mustDoItems.length * 100) : 0;
+    const pctEl = document.getElementById('mustdoPct');
+    const barEl = document.getElementById('mustdoBar');
+    if(pctEl) pctEl.textContent = pct + '%';
+    if(barEl) barEl.style.width = pct + '%';
+  }
+}
+function addMustDo() {
+  const inp = document.getElementById('mustdoInput');
+  if (!inp || !inp.value.trim()) return;
+  mustDoItems.push({ text: inp.value.trim(), doneDate: null });
+  inp.value = '';
+  localStorage.setItem('grind-mustdo', JSON.stringify(mustDoItems));
+  renderMustDo();
+}
+function toggleMustDo(idx) {
+  const today = new Date().toDateString();
+  mustDoItems[idx].doneDate = mustDoItems[idx].doneDate === today ? null : today;
+  localStorage.setItem('grind-mustdo', JSON.stringify(mustDoItems));
+  renderMustDo();
+}
+function deleteMustDo(idx) {
+  mustDoItems.splice(idx, 1);
+  localStorage.setItem('grind-mustdo', JSON.stringify(mustDoItems));
+  renderMustDo();
+}
+
+// Brain Dump
+var ideas = JSON.parse(localStorage.getItem('grind-ideas') || '[]');
+function renderIdeas() {
+  const list = document.getElementById('ideaList');
+  const empty = document.getElementById('ideaEmpty');
+  if (!list) return;
+  list.querySelectorAll('.idea-item').forEach(i => i.remove());
+  if (ideas.length === 0) { if(empty) empty.style.display='block'; }
+  else {
+    if(empty) empty.style.display='none';
+    ideas.forEach(function(idea, idx) {
+      const el = document.createElement('div');
+      el.className = 'idea-item';
+      el.style.cssText = 'display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--depth-1);border:1px solid var(--line);border-radius:10px;';
+      el.innerHTML = '<span style="font-size:0.85rem;color:var(--text-main);flex:1;">💡 '+escHtml(idea)+'</span>'
+        +'<div onclick="deleteIdea('+idx+')" style="cursor:pointer;color:var(--text-dim);font-size:0.7rem;" onmouseover="this.style.color='var(--error)'" onmouseout="this.style.color='var(--text-dim)'">✕</div>';
+      list.appendChild(el);
+    });
+  }
+}
+function addIdea() {
+  const inp = document.getElementById('ideaInput');
+  if (!inp || !inp.value.trim()) return;
+  ideas.unshift(inp.value.trim());
+  inp.value = '';
+  localStorage.setItem('grind-ideas', JSON.stringify(ideas));
+  renderIdeas();
+}
+function deleteIdea(idx) {
+  ideas.splice(idx, 1);
+  localStorage.setItem('grind-ideas', JSON.stringify(ideas));
+  renderIdeas();
+}
+function saveDump() {
+  const ta = document.getElementById('dumpTextarea');
+  if (!ta || !ta.value.trim()) return;
+  const dumps = JSON.parse(localStorage.getItem('grind-dumps') || '[]');
+  dumps.unshift({ text: ta.value.trim(), date: new Date().toLocaleString() });
+  if (dumps.length > 20) dumps.pop();
+  localStorage.setItem('grind-dumps', JSON.stringify(dumps));
+  ta.value = '';
+  renderDumps();
+}
+function clearDump() { const ta=document.getElementById('dumpTextarea'); if(ta) ta.value=''; }
+function renderDumps() {
+  const el = document.getElementById('dumpHistory');
+  if (!el) return;
+  const dumps = JSON.parse(localStorage.getItem('grind-dumps') || '[]');
+  if (dumps.length === 0) { el.innerHTML='<div style="color:var(--text-muted);font-size:0.82rem;text-align:center;padding:20px;">No saved dumps yet.</div>'; return; }
+  el.innerHTML = dumps.map(d => '<div style="padding:12px;background:var(--depth-1);border:1px solid var(--line);border-radius:10px;margin-bottom:8px;"><div style="font-size:0.6rem;color:var(--accent);font-weight:700;margin-bottom:6px;letter-spacing:1px;">'+d.date+'</div><div style="font-size:0.82rem;color:var(--text-main);line-height:1.6;white-space:pre-wrap;">'+escHtml(d.text.substring(0,150))+(d.text.length>150?'...':'')+'</div></div>').join('');
+}
+
+// Sensei daily read
+function loadSenseiDailyRead() {
+  const el = document.getElementById('senseiDailyRead');
+  if (!el) return;
+  const msgs = [
+    "You're tracking your days — that already puts you ahead of 95% of people. But tracking without action is just data. What will you actually change today?",
+    "Winners don't wait to feel motivated. They build systems and execute regardless. Your non-negotiables must become as automatic as breathing.",
+    "Every task you skip is a vote against the person you're trying to become. Stop negotiating with yourself. Discipline is a practice, not a trait.",
+    "Consistency beats intensity every time. A 70% day every day destroys a perfect day once a week. Show up. Always show up.",
+    "Your brain will lie to you. It will say you're tired, you deserve a break, tomorrow is better. The Sensei sees through it. Execute today.",
+  ];
+  const today = new Date().getDay();
+  el.innerHTML = '<div style="font-size:1.1rem;font-weight:700;color:var(--accent);margin-bottom:10px;">📖 Sensei Speaks</div><div style="line-height:1.9;color:var(--text-main);">'+msgs[today % msgs.length]+'</div>';
+}
+
+// ===== INIT ON LOAD =====
+(function initAppearance() {
+  const savedTheme = localStorage.getItem('grind-theme') || 'light';
+  const savedBg = localStorage.getItem('grind-bg') || 'none';
+  setTheme(savedTheme);
+  document.documentElement.setAttribute('data-bg', savedBg);
+  // Activate correct bg buttons
+  document.querySelectorAll('.bg-btn').forEach(b => b.classList.remove('active'));
+  const bgEl = document.getElementById('bg-' + savedBg);
+  if (bgEl) bgEl.classList.add('active');
+  // Init canvas
+  const canvas = document.getElementById('bgCanvas');
+  if (canvas) {
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    if (savedBg !== 'none') {
+      setTimeout(() => setBg(savedBg), 100);
+    }
+  }
+  // Render new tabs
+  setTimeout(() => {
+    renderMustDo();
+    renderIdeas();
+    renderDumps();
+    loadSenseiDailyRead();
+  }, 800);
+})();
 </script>
 </body>
 </html>
