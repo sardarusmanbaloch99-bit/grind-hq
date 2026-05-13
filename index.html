@@ -3,777 +3,566 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>THE GRIND — Personal Command Center | Master Your Discipline</title>
-  <meta name="description" content="Master your discipline with THE GRIND. Track tasks, build unstoppable habits, achieve measurable skill growth. Your ADHD-friendly command center for winners who take no excuses." />
-
-  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@400;600;700;800;900&family=Bricolage+Grotesque:opsz,wght@10..48,400;10..48,500;10..48,600;10..48,700;10..48,800&family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
+  <title>THE GRIND — Personal Command Center | No Excuses. Only Results.</title>
+  <meta name="description" content="Master your discipline. Track tasks, build skills, reflect daily. An ADHD-friendly personal command center built for winners." />
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@400;600;700;800;900&family=Bricolage+Grotesque:opsz,wght@10..48,400;10..48,500;10..48,600;10..48,700;10..48,800&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    :root {
-      --bg-deep: #f1e8d7;
-      --bg-light: #faf3e3;
-      --accent: #ff5a1f;
-      --accent-soft: #ff8a4d;
-      --text-main: #15100a;
-      --text-soft: #4a3c2a;
-      --text-muted: #7a6a55;
-      --card-bg: #ffffff;
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    :root{
+      --accent:#ff5a1f;--accent2:#ff8a4d;--accent3:#ffb347;
+      --dark:#0d0b08;--dark2:#151209;--dark3:#1e1810;
+      --text-muted:rgba(241,232,215,0.6);--card-border:rgba(255,255,255,0.08);
     }
+    body{font-family:'Bricolage Grotesque',system-ui,sans-serif;background:var(--dark);color:#fff;overflow-x:hidden;line-height:1.6}
 
-    body {
-      font-family: 'Bricolage Grotesque', system-ui, sans-serif;
-      background: linear-gradient(180deg, var(--bg-deep), #ebe3d0);
-      color: var(--text-main);
-      line-height: 1.6;
-      overflow-x: hidden;
+    /* SCROLL REVEAL */
+    .reveal{opacity:0;transform:translateY(70px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)}
+    .reveal.from-left{transform:translateX(-80px)}
+    .reveal.from-right{transform:translateX(80px)}
+    .reveal.scale-up{transform:scale(.88)}
+    .reveal.visible{opacity:1!important;transform:translateY(0) translateX(0) scale(1)!important}
+    .d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}.d5{transition-delay:.5s}
+
+    /* SCROLL LINE */
+    #scrollLine{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:9999;width:0;transition:width .1s}
+
+    /* HEADER */
+    header{position:fixed;top:0;left:0;right:0;z-index:1000;padding:22px 60px;display:flex;justify-content:space-between;align-items:center;transition:all .4s ease}
+    header.scrolled{background:rgba(13,11,8,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--card-border);padding:16px 60px}
+    .logo{display:flex;align-items:center;gap:12px;text-decoration:none}
+    .logo-icon{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#1E5BFF,#FF6B2C);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1rem;font-family:'Big Shoulders Display',sans-serif;color:#fff;box-shadow:0 4px 15px rgba(255,90,31,.3)}
+    .logo-text{font-family:'Big Shoulders Display',sans-serif;font-size:1.4rem;font-weight:900;background:linear-gradient(135deg,#fff,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    nav{display:flex;gap:35px}
+    nav a{color:rgba(255,255,255,.75);text-decoration:none;font-weight:500;font-size:.95rem;transition:color .3s}
+    nav a:hover{color:#fff}
+    .nav-ctas{display:flex;gap:12px}
+    .btn-ghost{padding:10px 24px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;border-radius:50px;font-weight:600;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;font-size:.9rem;transition:all .3s ease}
+    .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-nav{padding:10px 24px;background:var(--accent);color:#fff;border:none;border-radius:50px;font-weight:700;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;font-size:.9rem;transition:all .3s ease}
+    .btn-nav:hover{background:var(--accent2);transform:translateY(-2px);box-shadow:0 8px 20px rgba(255,90,31,.3)}
+
+    /* HERO */
+    .hero{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:140px 60px 80px;overflow:hidden}
+    .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,90,31,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,90,31,.04) 1px,transparent 1px);background-size:60px 60px;animation:gridMove 20s linear infinite}
+    @keyframes gridMove{0%{background-position:0 0}100%{background-position:60px 60px}}
+    .hero-glow{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(255,90,31,.15) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);animation:glowPulse 4s ease-in-out infinite}
+    @keyframes glowPulse{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}}
+    .hero-content{position:relative;z-index:2;max-width:900px}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;background:rgba(255,90,31,.12);border:1px solid rgba(255,90,31,.25);border-radius:50px;color:var(--accent2);font-weight:600;font-size:.85rem;margin-bottom:35px;letter-spacing:.5px}
+    .hero-badge span{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:blink 1.5s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+    .hero h1{font-family:'Big Shoulders Display',sans-serif;font-size:5.5rem;font-weight:900;line-height:1;letter-spacing:-3px;margin-bottom:25px}
+    .hero h1 .accent{background:linear-gradient(135deg,var(--accent) 0%,var(--accent3) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero-sub{font-size:1.2rem;color:var(--text-muted);max-width:600px;margin:0 auto 45px;line-height:1.8}
+    .hero-cta{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:60px}
+    .btn-primary{padding:18px 45px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:50px;font-weight:800;font-size:1rem;cursor:pointer;font-family:'Big Shoulders Display',sans-serif;letter-spacing:1px;transition:all .3s ease;box-shadow:0 15px 40px rgba(255,90,31,.3)}
+    .btn-primary:hover{transform:translateY(-4px);box-shadow:0 20px 50px rgba(255,90,31,.45)}
+    .btn-outline{padding:18px 45px;background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.25);border-radius:50px;font-weight:700;font-size:1rem;cursor:pointer;font-family:'Big Shoulders Display',sans-serif;letter-spacing:1px;transition:all .3s ease}
+    .btn-outline:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-4px)}
+    .hero-cards{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;position:relative;z-index:2}
+    .hcard{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(20px);padding:20px 28px;border-radius:16px;text-align:center;animation:hfloat 4s ease-in-out infinite;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+    .hcard:nth-child(2){animation-delay:.8s}.hcard:nth-child(3){animation-delay:1.6s}
+    @keyframes hfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+    .hcard-val{font-family:'Big Shoulders Display',sans-serif;font-size:2rem;font-weight:900;color:var(--accent2)}
+    .hcard-label{font-size:.8rem;color:var(--text-muted)}
+
+    /* BRAND STRIP */
+    .brand-strip{padding:40px 60px;border-top:1px solid var(--card-border);border-bottom:1px solid var(--card-border);display:flex;align-items:center;justify-content:center;gap:20px;background:rgba(255,255,255,.02)}
+    .brand-text{font-size:.8rem;color:rgba(255,255,255,.3);letter-spacing:2px;text-transform:uppercase}
+    .brand-pills{display:flex;gap:15px;flex-wrap:wrap;justify-content:center}
+    .brand-pill{padding:8px 20px;background:rgba(255,255,255,.04);border:1px solid var(--card-border);border-radius:50px;font-size:.85rem;color:rgba(255,255,255,.5);font-weight:600}
+
+    /* SECTION COMMON */
+    .section-label{font-size:.78rem;color:var(--accent);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+    .section-title{font-family:'Big Shoulders Display',sans-serif;font-size:3.2rem;font-weight:900;letter-spacing:-1.5px;line-height:1.1;margin-bottom:18px}
+    .section-desc{font-size:1.05rem;color:var(--text-muted);line-height:1.8}
+
+    /* SHOWCASE */
+    .showcase{padding:120px 60px;background:linear-gradient(180deg,var(--dark) 0%,var(--dark2) 100%);position:relative;overflow:hidden}
+    .showcase::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+    .showcase-header{text-align:center;margin-bottom:70px;max-width:700px;margin-left:auto;margin-right:auto}
+
+    /* LAPTOP */
+    .laptop-wrap{max-width:960px;margin:0 auto}
+    .laptop-frame{background:#1a1a1a;border-radius:18px 18px 0 0;padding:18px 18px 0;box-shadow:0 60px 120px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.08),inset 0 1px 0 rgba(255,255,255,.1)}
+    .laptop-dots{display:flex;align-items:center;padding:6px 0 12px;gap:6px}
+    .ldot{width:10px;height:10px;border-radius:50%}
+    .ldot.r{background:#ff5f57}.ldot.y{background:#ffbd2e}.ldot.g{background:#28c840}
+    .laptop-screen{background:var(--dark2);border-radius:8px 8px 0 0;height:480px;overflow:hidden;display:flex}
+    .laptop-base{background:linear-gradient(180deg,#2a2a2a,#1a1a1a);height:26px;border-radius:0 0 8px 8px}
+    .laptop-foot{background:linear-gradient(180deg,#111,#0a0a0a);height:7px;border-radius:0 0 18px 18px;margin:0 70px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+
+    /* DASH INSIDE LAPTOP */
+    .d-sidebar{width:190px;background:#0d0b08;padding:14px 10px;border-right:1px solid rgba(255,255,255,.05);flex-shrink:0}
+    .d-logo{display:flex;align-items:center;gap:6px;margin-bottom:18px;padding:2px}
+    .d-logo-icon{width:22px;height:22px;border-radius:5px;background:linear-gradient(135deg,#1E5BFF,#FF6B2C);display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:900;color:#fff}
+    .d-logo-text{font-size:.65rem;font-weight:900;color:var(--accent);font-family:'Big Shoulders Display',sans-serif}
+    .d-nav{padding:6px 8px;border-radius:6px;font-size:.62rem;color:rgba(255,255,255,.45);cursor:pointer;margin-bottom:2px;display:flex;align-items:center;gap:6px}
+    .d-nav.active{background:rgba(255,90,31,.15);color:var(--accent)}
+    .d-main{flex:1;padding:16px;overflow:hidden}
+    .d-toprow{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .d-greet{font-size:.72rem;font-weight:700;color:#fff;font-family:'Big Shoulders Display',sans-serif}
+    .d-streak{font-size:.58rem;color:rgba(255,90,31,.9);font-weight:700;background:rgba(255,90,31,.1);padding:4px 10px;border-radius:20px}
+    .d-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
+    .d-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:9px}
+    .dc-label{font-size:.52rem;color:rgba(255,255,255,.4);margin-bottom:3px}
+    .dc-val{font-size:1rem;font-weight:900;color:var(--accent);font-family:'Big Shoulders Display',sans-serif}
+    .dc-sub{font-size:.48rem;color:rgba(255,255,255,.3)}
+    .d-ttitle{font-size:.62rem;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:6px}
+    .d-task{display:flex;align-items:center;gap:6px;padding:6px 8px;background:rgba(255,255,255,.03);border-radius:5px;margin-bottom:3px}
+    .tc{width:11px;height:11px;border-radius:3px;flex-shrink:0}
+    .tc.done{background:var(--accent)}
+    .tc.todo{border:1.5px solid rgba(255,255,255,.2)}
+    .ttxt{font-size:.58rem;color:rgba(255,255,255,.7)}
+    .ttxt.done{text-decoration:line-through;color:rgba(255,255,255,.3)}
+    .tpts{font-size:.54rem;color:var(--accent2);margin-left:auto;font-weight:700}
+    .d-ring-area{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px}
+    .d-ring{width:90px;height:90px;border-radius:50%;border:6px solid rgba(255,90,31,.2);position:relative;display:flex;align-items:center;justify-content:center}
+    .d-ring::before{content:'';position:absolute;inset:0;border-radius:50%;border:6px solid transparent;border-top-color:var(--accent);border-right-color:var(--accent);animation:spin 3s linear infinite}
+    @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    .d-ring-val{font-size:1.3rem;font-weight:900;color:var(--accent);font-family:'Big Shoulders Display',sans-serif}
+
+    /* FEATURE SECTIONS */
+    .feature{padding:120px 60px;position:relative;overflow:hidden}
+    .feature.f-dark{background:var(--dark2)}
+    .feature.f-darker{background:var(--dark3)}
+    .feature.f-accent{background:linear-gradient(135deg,#1a0800,var(--dark2))}
+    .feature-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+    .feature-inner.rev{direction:rtl}
+    .feature-inner.rev>*{direction:ltr}
+    .feat-tag{display:inline-block;padding:5px 14px;background:rgba(255,90,31,.12);border:1px solid rgba(255,90,31,.2);border-radius:50px;color:var(--accent2);font-size:.78rem;font-weight:700;margin-bottom:20px;letter-spacing:.5px}
+    .feat-title{font-family:'Big Shoulders Display',sans-serif;font-size:3rem;font-weight:900;letter-spacing:-1.5px;line-height:1.05;margin-bottom:18px}
+    .feat-desc{font-size:1rem;color:var(--text-muted);line-height:1.85;margin-bottom:28px}
+    .feat-bullets{list-style:none;display:flex;flex-direction:column;gap:10px}
+    .feat-bullets li{display:flex;align-items:center;gap:10px;font-size:.95rem;color:#f1e8d7}
+    .feat-bullets li::before{content:'✓';width:20px;height:20px;border-radius:50%;background:rgba(255,90,31,.15);border:1px solid rgba(255,90,31,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.6rem;color:var(--accent);text-align:center;line-height:20px}
+
+    /* TASKS CARD */
+    .tasks-card{background:var(--dark);border:1px solid var(--card-border);border-radius:24px;padding:28px;box-shadow:0 40px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,90,31,.06);position:relative}
+    .tasks-card::before{content:'';position:absolute;top:0;left:40px;right:40px;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+    .tc-head{font-size:.85rem;font-weight:700;color:rgba(255,255,255,.45);margin-bottom:18px;text-transform:uppercase;letter-spacing:1px}
+    .tc-date{font-size:1.3rem;font-weight:900;font-family:'Big Shoulders Display',sans-serif;margin-bottom:4px}
+    .tc-score{color:var(--accent);font-size:.8rem;font-weight:600;margin-bottom:18px}
+    .tm-task{display:flex;align-items:center;gap:12px;padding:13px 15px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:12px;margin-bottom:7px;transition:all .3s}
+    .tm-task:hover{background:rgba(255,90,31,.06);border-color:rgba(255,90,31,.2)}
+    .tm-chk{width:20px;height:20px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:#fff}
+    .tm-chk.done{background:var(--accent)}
+    .tm-chk.todo{border:2px solid rgba(255,255,255,.15)}
+    .tm-name{font-size:.88rem;color:rgba(255,255,255,.82);flex:1}
+    .tm-name.done{text-decoration:line-through;color:rgba(255,255,255,.3)}
+    .tm-pts{font-size:.8rem;color:var(--accent2);font-weight:700}
+    .tm-bar-row{display:flex;align-items:center;gap:12px;margin-top:14px}
+    .tm-bar{flex:1;height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+    .tm-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;width:60%;animation:barFill 2s ease-out}
+    @keyframes barFill{from{width:0}}
+    .tm-pct{font-size:.8rem;color:var(--accent);font-weight:700}
+
+    /* AI CARD */
+    .ai-card{background:linear-gradient(135deg,#0d0b08,#1a1000);border:1px solid rgba(255,90,31,.15);border-radius:24px;padding:28px;box-shadow:0 40px 80px rgba(0,0,0,.6),0 0 60px rgba(255,90,31,.05)}
+    .ai-head{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.05)}
+    .ai-avatar{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#ff3388);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.9rem;font-family:'Orbitron',sans-serif;position:relative}
+    .ai-avatar::after{content:'';position:absolute;inset:-2px;border-radius:14px;border:1px solid rgba(255,90,31,.4)}
+    .ai-name{font-weight:800;font-size:1rem}
+    .ai-status{font-size:.75rem;color:#4cff91}
+    .ai-msg{padding:14px 16px;border-radius:12px;margin-bottom:10px;font-size:.88rem;line-height:1.6;max-width:85%}
+    .ai-msg.nx{background:rgba(255,90,31,.1);border:1px solid rgba(255,90,31,.15);color:rgba(255,255,255,.9)}
+    .ai-msg.us{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.8);margin-left:auto}
+    .ai-typing{display:flex;gap:4px;padding:14px 16px}
+    .ai-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:tdot 1.2s infinite}
+    .ai-dot:nth-child(2){animation-delay:.2s}.ai-dot:nth-child(3){animation-delay:.4s}
+    @keyframes tdot{0%,100%{transform:translateY(0);opacity:.3}50%{transform:translateY(-5px);opacity:1}}
+
+    /* ANALYTICS CARD */
+    .analytics-card{background:var(--dark);border:1px solid var(--card-border);border-radius:24px;padding:28px;box-shadow:0 40px 80px rgba(0,0,0,.5)}
+    .chart-area{display:flex;align-items:flex-end;gap:8px;height:140px;margin:20px 0}
+    .bar-group{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+    .bar{width:100%;border-radius:4px 4px 0 0;animation:barGrow 1.5s ease-out both}
+    @keyframes barGrow{from{height:0!important}}
+    .bar.p{background:linear-gradient(180deg,var(--accent),rgba(255,90,31,.3))}
+    .bday{font-size:.55rem;color:rgba(255,255,255,.3)}
+    .a-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .am{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:12px;text-align:center}
+    .am-v{font-size:1.4rem;font-weight:900;color:var(--accent);font-family:'Big Shoulders Display',sans-serif}
+    .am-l{font-size:.6rem;color:rgba(255,255,255,.35);margin-top:2px}
+
+    /* SKILLS CARD */
+    .skills-card{background:var(--dark);border:1px solid var(--card-border);border-radius:24px;padding:28px;box-shadow:0 40px 80px rgba(0,0,0,.5)}
+    .skill-row{margin-bottom:18px}
+    .skill-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+    .skill-name{font-size:.9rem;font-weight:600;color:rgba(255,255,255,.85)}
+    .skill-hrs{font-size:.8rem;color:var(--accent);font-weight:700}
+    .skill-bar{height:8px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden}
+    .skill-fill{height:100%;border-radius:4px;animation:barFill 1.5s ease-out both}
+
+    /* STATS */
+    .stats-strip{padding:80px 60px;background:linear-gradient(135deg,rgba(255,90,31,.15),rgba(255,138,77,.1));border-top:1px solid rgba(255,90,31,.2);border-bottom:1px solid rgba(255,90,31,.2)}
+    .stats-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:40px;text-align:center}
+    .stat-num{font-family:'Big Shoulders Display',sans-serif;font-size:3.5rem;font-weight:900;color:var(--accent2);letter-spacing:-2px;line-height:1;margin-bottom:8px}
+    .stat-lbl{font-size:.9rem;color:var(--text-muted)}
+
+    /* TESTIMONIALS */
+    .testimonials{padding:120px 60px;background:var(--dark2)}
+    .testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:60px;max-width:1200px;margin-left:auto;margin-right:auto}
+    .tcard{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:28px;transition:all .3s ease}
+    .tcard:hover{border-color:rgba(255,90,31,.25);background:rgba(255,90,31,.04);transform:translateY(-6px);box-shadow:0 20px 50px rgba(0,0,0,.3)}
+    .tcard-stars{color:var(--accent2);font-size:.9rem;margin-bottom:14px}
+    .tcard-quote{font-size:.95rem;color:rgba(255,255,255,.8);line-height:1.7;margin-bottom:20px}
+    .tcard-author{display:flex;align-items:center;gap:12px}
+    .tcard-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#ff3388);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.95rem}
+    .tcard-name{font-weight:700;font-size:.9rem}
+    .tcard-role{font-size:.78rem;color:var(--text-muted)}
+
+    /* FINAL CTA */
+    .final-cta{padding:130px 60px;text-align:center;background:radial-gradient(circle at center,rgba(255,90,31,.12) 0%,transparent 70%);position:relative}
+    .final-cta::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,90,31,.4),transparent)}
+    .final-h{font-family:'Big Shoulders Display',sans-serif;font-size:4rem;font-weight:900;letter-spacing:-2px;line-height:1.05;margin-bottom:20px}
+    .final-p{font-size:1.1rem;color:var(--text-muted);max-width:500px;margin:0 auto 45px;line-height:1.8}
+    .cta-sub{margin-top:20px;font-size:.85rem;color:var(--text-muted)}
+
+    /* FOOTER */
+    footer{padding:50px 60px;border-top:1px solid var(--card-border);display:flex;justify-content:space-between;align-items:center}
+    .f-brand{font-family:'Big Shoulders Display',sans-serif;font-weight:900;font-size:1.2rem;background:linear-gradient(135deg,#fff,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .f-motto{font-size:.85rem;color:var(--text-muted);margin-top:4px}
+    footer p{color:var(--text-muted);font-size:.85rem}
+
+    /* RESPONSIVE */
+    @media(max-width:1024px){
+      .feature-inner{grid-template-columns:1fr;gap:50px}
+      .feature-inner.rev{direction:ltr}
+      .stats-inner{grid-template-columns:repeat(2,1fr)}
+      .testi-grid{grid-template-columns:repeat(2,1fr)}
     }
-
-    /* ===== ANIMATED BACKGROUND ORBS ===== */
-    .bg-orb {
-      position: fixed;
-      border-radius: 50%;
-      mix-blend-mode: screen;
-      pointer-events: none;
-      z-index: 0;
+    @media(max-width:768px){
+      header,header.scrolled{padding:18px 30px}
+      nav{display:none}
+      .hero{padding:120px 30px 60px}
+      .hero h1{font-size:2.8rem;letter-spacing:-1px}
+      .showcase,.feature,.final-cta,.testimonials,.stats-strip{padding:70px 30px}
+      .stats-inner{grid-template-columns:repeat(2,1fr)}
+      .testi-grid{grid-template-columns:1fr}
+      footer{flex-direction:column;gap:20px;text-align:center;padding:40px 30px}
+      .laptop-screen{height:300px}
+      .d-sidebar{display:none}
+      .final-h{font-size:2.5rem}
     }
-
-    .orb-1 {
-      width: 400px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(255,90,31,0.12), transparent);
-      top: -150px;
-      right: -150px;
-      animation: float 25s ease-in-out infinite;
-    }
-
-    .orb-2 {
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, rgba(255,138,77,0.08), transparent);
-      bottom: -200px;
-      left: -200px;
-      animation: float 30s ease-in-out infinite reverse;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      25% { transform: translate(60px, 40px) scale(1.08); }
-      50% { transform: translate(-40px, 80px) scale(0.93); }
-      75% { transform: translate(40px, -50px) scale(1.05); }
-    }
-
-    .content {
-      position: relative;
-      z-index: 1;
-    }
-
-    /* ===== HEADER ===== */
-    header {
-      padding: 25px 60px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      backdrop-filter: blur(10px);
-      background: rgba(241, 232, 215, 0.75);
-      border-bottom: 1px solid rgba(21,16,10,0.1);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 1.6rem;
-      font-weight: 900;
-      font-family: 'Big Shoulders Display', Impact, sans-serif;
-      letter-spacing: -1px;
-    }
-
-    .logo-icon {
-      width: 45px;
-      height: 45px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #1E5BFF, #FF6B2C);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 900;
-      font-size: 1.2rem;
-      box-shadow: 0 8px 20px rgba(255,90,31,0.25);
-    }
-
-    .logo-text {
-      background: linear-gradient(135deg, var(--accent), #ff3388);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .nav-buttons {
-      display: flex;
-      gap: 15px;
-      align-items: center;
-    }
-
-    .btn-login {
-      padding: 12px 28px;
-      border: 2px solid var(--accent);
-      background: transparent;
-      color: var(--accent);
-      border-radius: 50px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: 'Bricolage Grotesque', sans-serif;
-      transition: all 0.3s ease;
-      font-size: 0.95rem;
-    }
-
-    .btn-login:hover {
-      background: var(--accent);
-      color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(255,90,31,0.3);
-    }
-
-    .btn-start {
-      padding: 12px 32px;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 50px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: 'Bricolage Grotesque', sans-serif;
-      transition: all 0.3s ease;
-      font-size: 0.95rem;
-    }
-
-    .btn-start:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 30px rgba(255,90,31,0.4);
-    }
-
-    /* ===== HERO SECTION ===== */
-    .hero {
-      padding: 100px 60px;
-      text-align: center;
-      min-height: 600px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .hero-badge {
-      display: inline-block;
-      padding: 10px 24px;
-      background: rgba(255,90,31,0.12);
-      border: 1px solid rgba(255,90,31,0.3);
-      border-radius: 50px;
-      color: var(--accent);
-      font-weight: 600;
-      font-size: 0.85rem;
-      margin-bottom: 30px;
-      letter-spacing: 0.5px;
-    }
-
-    .hero h1 {
-      font-family: 'Big Shoulders Display', Impact, sans-serif;
-      font-size: 4rem;
-      font-weight: 900;
-      line-height: 1.1;
-      margin-bottom: 20px;
-      letter-spacing: -2px;
-    }
-
-    .hero-highlight {
-      background: linear-gradient(135deg, var(--accent), #ff3388);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .hero-subtitle {
-      font-size: 1.3rem;
-      color: var(--text-soft);
-      margin-bottom: 40px;
-      max-width: 700px;
-      margin-left: auto;
-      margin-right: auto;
-      line-height: 1.7;
-    }
-
-    .hero-cta {
-      display: flex;
-      gap: 20px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 60px;
-    }
-
-    .btn-primary {
-      padding: 15px 40px;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 50px;
-      font-weight: 800;
-      font-size: 1rem;
-      cursor: pointer;
-      font-family: 'Big Shoulders Display', Impact, sans-serif;
-      transition: all 0.3s ease;
-      letter-spacing: 0.5px;
-      box-shadow: 0 12px 30px rgba(255,90,31,0.25);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 16px 40px rgba(255,90,31,0.35);
-    }
-
-    .btn-secondary {
-      padding: 15px 40px;
-      background: transparent;
-      color: var(--text-main);
-      border: 2px solid var(--text-muted);
-      border-radius: 50px;
-      font-weight: 800;
-      font-size: 1rem;
-      cursor: pointer;
-      font-family: 'Big Shoulders Display', Impact, sans-serif;
-      transition: all 0.3s ease;
-      letter-spacing: 0.5px;
-    }
-
-    .btn-secondary:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      transform: translateY(-4px);
-    }
-
-    /* ===== WHAT IS GRIND SECTION ===== */
-    .what-is {
-      padding: 100px 60px;
-      background: rgba(255,255,255,0.3);
-      backdrop-filter: blur(10px);
-      border-top: 1px solid rgba(21,16,10,0.1);
-      border-bottom: 1px solid rgba(21,16,10,0.1);
-    }
-
-    .section-header {
-      text-align: center;
-      margin-bottom: 80px;
-    }
-
-    .section-label {
-      font-size: 0.85rem;
-      color: var(--accent);
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-
-    .section-title {
-      font-family: 'Big Shoulders Display', Impact, sans-serif;
-      font-size: 3rem;
-      font-weight: 900;
-      margin-bottom: 20px;
-      letter-spacing: -1px;
-    }
-
-    .section-desc {
-      font-size: 1.1rem;
-      color: var(--text-soft);
-      max-width: 600px;
-      margin: 0 auto;
-      line-height: 1.8;
-    }
-
-    .what-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 40px;
-      margin-bottom: 60px;
-    }
-
-    .what-card {
-      background: var(--card-bg);
-      padding: 40px;
-      border-radius: 24px;
-      border: 1px solid rgba(21,16,10,0.1);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.05);
-      transition: all 0.3s ease;
-    }
-
-    .what-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 20px 60px rgba(255,90,31,0.15);
-      border-color: rgba(255,90,31,0.3);
-    }
-
-    .what-card h3 {
-      font-size: 1.5rem;
-      margin-bottom: 12px;
-      color: var(--text-main);
-    }
-
-    .what-card p {
-      color: var(--text-muted);
-      line-height: 1.7;
-      font-size: 1rem;
-    }
-
-    /* ===== FEATURES SECTION ===== */
-    .features {
-      padding: 100px 60px;
-    }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 30px;
-    }
-
-    .feature-card {
-      background: var(--card-bg);
-      padding: 35px;
-      border-radius: 20px;
-      border: 1px solid rgba(21,16,10,0.1);
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s ease;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.04);
-    }
-
-    .feature-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
-      animation: slideTop 2s infinite;
-    }
-
-    @keyframes slideTop {
-      0% { left: -100%; }
-      50% { left: 100%; }
-      100% { left: 100%; }
-    }
-
-    .feature-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 20px 50px rgba(255,90,31,0.15);
-      border-color: rgba(255,90,31,0.3);
-    }
-
-    .feature-icon {
-      font-size: 2.5rem;
-      color: var(--accent);
-      margin-bottom: 15px;
-    }
-
-    .feature-card h3 {
-      font-size: 1.3rem;
-      margin-bottom: 10px;
-      color: var(--text-main);
-    }
-
-    .feature-card p {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      line-height: 1.6;
-    }
-
-    /* ===== HOW IT WORKS ===== */
-    .how-it-works {
-      padding: 100px 60px;
-      background: rgba(255,255,255,0.3);
-      backdrop-filter: blur(10px);
-      border-top: 1px solid rgba(21,16,10,0.1);
-    }
-
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 30px;
-      margin-top: 60px;
-    }
-
-    .step {
-      text-align: center;
-      position: relative;
-    }
-
-    .step-number {
-      width: 60px;
-      height: 60px;
-      background: linear-gradient(135deg, var(--accent), #ff8a4d);
-      color: white;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.8rem;
-      font-weight: 900;
-      margin: 0 auto 20px;
-      box-shadow: 0 8px 20px rgba(255,90,31,0.3);
-    }
-
-    .step h3 {
-      font-size: 1.2rem;
-      margin-bottom: 10px;
-    }
-
-    .step p {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      line-height: 1.6;
-    }
-
-    /* ===== STATS SECTION ===== */
-    .stats {
-      padding: 80px 60px;
-      background: linear-gradient(135deg, var(--accent), #ff8a4d);
-      color: white;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 40px;
-      text-align: center;
-    }
-
-    .stat-item {
-      backdrop-filter: blur(10px);
-      background: rgba(255,255,255,0.1);
-      padding: 35px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.2);
-    }
-
-    .stat-number {
-      font-size: 2.8rem;
-      font-weight: 900;
-      font-family: 'Big Shoulders Display', Impact, sans-serif;
-      margin-bottom: 10px;
-      letter-spacing: -1px;
-    }
-
-    .stat-label {
-      font-size: 1rem;
-      opacity: 0.95;
-    }
-
-    /* ===== CTA SECTION ===== */
-    .cta-section {
-      padding: 100px 60px;
-      text-align: center;
-    }
-
-    .cta-card {
-      background: var(--card-bg);
-      padding: 60px;
-      border-radius: 30px;
-      border: 1px solid rgba(21,16,10,0.1);
-      box-shadow: 0 15px 50px rgba(0,0,0,0.08);
-    }
-
-    .cta-card h2 {
-      font-family: 'Big Shoulders Display', Impact, sans-serif;
-      font-size: 2.5rem;
-      margin-bottom: 20px;
-      letter-spacing: -1px;
-    }
-
-    .cta-card p {
-      font-size: 1.1rem;
-      color: var(--text-soft);
-      margin-bottom: 40px;
-      max-width: 500px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    /* ===== FOOTER ===== */
-    footer {
-      padding: 50px 60px;
-      background: var(--text-main);
-      color: white;
-      text-align: center;
-      border-top: 1px solid rgba(255,255,255,0.1);
-    }
-
-    footer p {
-      opacity: 0.8;
-      margin-bottom: 10px;
-    }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      header {
-        padding: 20px 30px;
-        flex-direction: column;
-        gap: 20px;
-      }
-
-      .nav-buttons {
-        width: 100%;
-        justify-content: center;
-      }
-
-      .hero {
-        padding: 60px 30px;
-      }
-
-      .hero h1 {
-        font-size: 2.5rem;
-      }
-
-      .hero-subtitle {
-        font-size: 1.1rem;
-      }
-
-      .what-is, .features, .how-it-works, .cta-section {
-        padding: 60px 30px;
-      }
-
-      .section-title {
-        font-size: 2rem;
-      }
-
-      .what-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .features-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .steps {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .cta-card {
-        padding: 40px;
-      }
-
-      .cta-card h2 {
-        font-size: 1.8rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .hero h1 {
-        font-size: 1.8rem;
-      }
-
-      .hero-subtitle {
-        font-size: 1rem;
-      }
-
-      .features-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .steps {
-        grid-template-columns: 1fr;
-      }
-
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .btn-primary, .btn-secondary {
-        width: 100%;
-      }
+    @media(max-width:480px){
+      .hero h1{font-size:2rem}
+      .section-title,.feat-title{font-size:2.2rem}
+      .stat-num{font-size:2.5rem}
+      .btn-primary,.btn-outline{width:100%}
+      .hero-cta{flex-direction:column}
     }
   </style>
 </head>
 <body>
-  <div class="bg-orb orb-1"></div>
-  <div class="bg-orb orb-2"></div>
 
-  <div class="content">
-    <!-- HEADER -->
-    <header>
-      <div class="logo">
-        <div class="logo-icon">TG</div>
-        <span class="logo-text">THE GRIND</span>
-      </div>
-      <div class="nav-buttons">
-        <button class="btn-login" onclick="window.location.href='app.html'">Log In</button>
-        <button class="btn-start" onclick="window.location.href='app.html'">Get Started</button>
-      </div>
-    </header>
+<div id="scrollLine"></div>
 
-    <!-- HERO SECTION -->
-    <section class="hero">
-      <div class="hero-badge">🚀 MASTER YOUR DISCIPLINE</div>
-      <h1>Stop Making <span class="hero-highlight">Excuses.</span><br>Start Building <span class="hero-highlight">Results.</span></h1>
-      <p class="hero-subtitle">THE GRIND is your personal command center. Track tasks, build unstoppable habits, measure skill growth, and achieve extraordinary results through disciplined execution.</p>
-      <div class="hero-cta">
-        <button class="btn-primary" onclick="window.location.href='app.html'">Enter The Grind</button>
-        <button class="btn-secondary">Learn More</button>
-      </div>
-    </section>
-
-    <!-- WHAT IS GRIND SECTION -->
-    <section class="what-is">
-      <div class="section-header">
-        <div class="section-label">ABOUT THE GRIND</div>
-        <h2 class="section-title">Your Personal Command Center</h2>
-        <p class="section-desc">THE GRIND is purpose-built for high performers who demand measurable progress. No fluff. No distractions. Just results.</p>
-      </div>
-
-      <div class="what-grid">
-        <div class="what-card">
-          <h3>📊 Task Mastery</h3>
-          <p>Break down your goals into actionable tasks. Track completion, measure consistency, and watch your discipline compound daily. Every task completed is a win recorded.</p>
-        </div>
-        <div class="what-card">
-          <h3>📈 Skill Building</h3>
-          <p>Systematically develop skills across multiple domains. Log hours, track progress, and visualize your growth with real-time analytics that prove your advancement.</p>
-        </div>
-        <div class="what-card">
-          <h3>🧠 NEXUS AI Coach</h3>
-          <p>Your personal AI coach that understands your goals. Get daily motivation, actionable insights, and personalized strategies to keep you grinding toward excellence.</p>
-        </div>
-        <div class="what-card">
-          <h3>📝 Daily Reflection</h3>
-          <p>Capture wins, analyze failures, and extract lessons. Reflect daily to strengthen your self-awareness and continuously refine your path to greatness.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- FEATURES SECTION -->
-    <section class="features">
-      <div class="section-header">
-        <div class="section-label">CORE FEATURES</div>
-        <h2 class="section-title">Everything You Need</h2>
-        <p class="section-desc">Powerful tools designed for serious grinders</p>
-      </div>
-
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">✓</div>
-          <h3>Daily Task Tracking</h3>
-          <p>Organize your day, prioritize ruthlessly, and execute with precision. Check off every win and watch your motivation grow.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">📊</div>
-          <h3>Advanced Analytics</h3>
-          <p>Real-time dashboards showing your consistency, streaks, skill progress, and performance metrics. Data-driven motivation.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">⚡</div>
-          <h3>Scoring System</h3>
-          <p>Earn points for every task completed, every habit crushed, every skill hour logged. Gamified progress toward your goals.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🎯</div>
-          <h3>Skill Tracking</h3>
-          <p>Monitor hours, measure growth, and see tangible proof of your development across all disciplines you're mastering.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">💬</div>
-          <h3>AI Coaching</h3>
-          <p>NEXUS AI provides personalized guidance, motivation, and strategies based on your performance and goals.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">📱</div>
-          <h3>Responsive Design</h3>
-          <p>Your command center works seamlessly across all devices. Stay connected to your goals anywhere, anytime.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- HOW IT WORKS -->
-    <section class="how-it-works">
-      <div class="section-header">
-        <div class="section-label">GETTING STARTED</div>
-        <h2 class="section-title">Simple 4-Step Setup</h2>
-        <p class="section-desc">Start grinding in minutes</p>
-      </div>
-
-      <div class="steps">
-        <div class="step">
-          <div class="step-number">1</div>
-          <h3>Sign Up</h3>
-          <p>Create your account and set up your profile in under 2 minutes.</p>
-        </div>
-        <div class="step">
-          <div class="step-number">2</div>
-          <h3>Define Goals</h3>
-          <p>Tell us what you want to achieve and we'll help you break it down.</p>
-        </div>
-        <div class="step">
-          <div class="step-number">3</div>
-          <h3>Start Grinding</h3>
-          <p>Create tasks, track skills, and log your daily progress and reflections.</p>
-        </div>
-        <div class="step">
-          <div class="step-number">4</div>
-          <h3>Measure Growth</h3>
-          <p>Watch your analytics improve and your discipline compound over time.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- STATS SECTION -->
-    <section class="stats">
-      <div class="section-header">
-        <h2 class="section-title" style="color: white;">Grinders Achieve More</h2>
-        <p class="section-desc" style="color: rgba(255,255,255,0.9);">Real results from users who committed to the grind</p>
-      </div>
-
-      <div class="stats-grid">
-        <div class="stat-item">
-          <div class="stat-number">92%</div>
-          <div class="stat-label">Consistency Rate</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-number">2.3x</div>
-          <div class="stat-label">Task Completion</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-number">156h</div>
-          <div class="stat-label">Avg Skill Hours</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-number">1000%</div>
-          <div class="stat-label">Discipline Gain</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- CTA SECTION -->
-    <section class="cta-section">
-      <div class="cta-card">
-        <h2>Ready to Start Grinding?</h2>
-        <p>Join thousands of high performers who are crushing their goals with measurable, daily progress. No excuses. Only results.</p>
-        <button class="btn-primary" onclick="window.location.href='app.html'">Enter The Grind Now</button>
-      </div>
-    </section>
-
-    <!-- FOOTER -->
-    <footer>
-      <p>&copy; 2025 THE GRIND. All rights reserved.</p>
-      <p style="font-size: 0.9rem; opacity: 0.7;">No Excuses. No Shortcuts. Only Results.</p>
-    </footer>
+<!-- HEADER -->
+<header id="hdr">
+  <a class="logo" href="#">
+    <div class="logo-icon">TG</div>
+    <span class="logo-text">THE GRIND</span>
+  </a>
+  <nav>
+    <a href="#features">Features</a>
+    <a href="#ai">AI Coach</a>
+    <a href="#analytics">Analytics</a>
+    <a href="#start">Get Started</a>
+  </nav>
+  <div class="nav-ctas">
+    <button class="btn-ghost" onclick="location.href='app.html'">Log In</button>
+    <button class="btn-nav" onclick="location.href='app.html'">Enter The Grind</button>
   </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-badge reveal"><span></span> YOUR PERSONAL COMMAND CENTER IS HERE</div>
+    <h1 class="reveal d1">Master Your<br><span class="accent">Discipline.</span></h1>
+    <p class="hero-sub reveal d2">Track every task. Build unstoppable habits. Measure real skill growth. THE GRIND is your all-in-one command center for people who refuse to make excuses.</p>
+    <div class="hero-cta reveal d3">
+      <button class="btn-primary" onclick="location.href='app.html'">Start Grinding — It's Free</button>
+      <button class="btn-outline" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">See How It Works</button>
+    </div>
+  </div>
+  <div class="hero-cards reveal d4">
+    <div class="hcard"><div class="hcard-val">87</div><div class="hcard-label">Today's Score</div></div>
+    <div class="hcard"><div class="hcard-val">14 🔥</div><div class="hcard-label">Day Streak</div></div>
+    <div class="hcard"><div class="hcard-val">94%</div><div class="hcard-label">Consistency</div></div>
+  </div>
+</section>
+
+<!-- BRAND STRIP -->
+<div class="brand-strip">
+  <span class="brand-text">Built for</span>
+  <div class="brand-pills">
+    <span class="brand-pill">🎯 High Performers</span>
+    <span class="brand-pill">🧠 ADHD Warriors</span>
+    <span class="brand-pill">⚡ Entrepreneurs</span>
+    <span class="brand-pill">💪 Athletes</span>
+    <span class="brand-pill">📚 Students</span>
+  </div>
+</div>
+
+<!-- DASHBOARD SHOWCASE -->
+<section class="showcase" id="features">
+  <div class="showcase-header">
+    <div class="section-label reveal">THE DASHBOARD</div>
+    <h2 class="section-title reveal d1">Your Command Center<br>At A Glance</h2>
+    <p class="section-desc reveal d2">Everything you need to dominate your day — tasks, scores, streaks, and AI insights — on one powerful screen.</p>
+  </div>
+  <div class="laptop-wrap reveal scale-up">
+    <div class="laptop-frame">
+      <div class="laptop-dots">
+        <div class="ldot r"></div><div class="ldot y"></div><div class="ldot g"></div>
+      </div>
+      <div class="laptop-screen">
+        <div class="d-sidebar">
+          <div class="d-logo"><div class="d-logo-icon">TG</div><div class="d-logo-text">THE GRIND</div></div>
+          <div class="d-nav active"><i class="fa fa-home" style="font-size:.55rem"></i> Dashboard</div>
+          <div class="d-nav"><i class="fa fa-check" style="font-size:.55rem"></i> Tasks</div>
+          <div class="d-nav"><i class="fa fa-star" style="font-size:.55rem"></i> Skills</div>
+          <div class="d-nav"><i class="fa fa-chart-bar" style="font-size:.55rem"></i> Analytics</div>
+          <div class="d-nav"><i class="fa fa-robot" style="font-size:.55rem"></i> NEXUS AI</div>
+          <div class="d-nav"><i class="fa fa-book" style="font-size:.55rem"></i> Reflections</div>
+          <div class="d-nav"><i class="fa fa-calendar" style="font-size:.55rem"></i> Schedule</div>
+        </div>
+        <div class="d-main">
+          <div class="d-toprow">
+            <div><div class="d-greet">GREAT DAY, USMAN 🔥</div><div style="font-size:.55rem;color:rgba(255,255,255,.35)">WEDNESDAY — MAY 13, 2025</div></div>
+            <div class="d-streak">STREAK: 14 DAYS</div>
+          </div>
+          <div class="d-cards">
+            <div class="d-card"><div class="dc-label">TODAY'S SCORE</div><div class="dc-val">87</div><div class="dc-sub">↑ Great Progress</div></div>
+            <div class="d-card"><div class="dc-label">TASKS DONE</div><div class="dc-val">6/9</div><div class="dc-sub">67% Complete</div></div>
+            <div class="d-card"><div class="dc-label">SKILL HOURS</div><div class="dc-val">2.5h</div><div class="dc-sub">This Session</div></div>
+          </div>
+          <div class="d-ttitle">TODAY'S PRIORITY TASKS</div>
+          <div class="d-task"><div class="tc done"></div><span class="ttxt done">Morning workout (30 min)</span><span class="tpts">+10</span></div>
+          <div class="d-task"><div class="tc done"></div><span class="ttxt done">Read 20 pages</span><span class="tpts">+8</span></div>
+          <div class="d-task"><div class="tc done"></div><span class="ttxt done">Cold shower</span><span class="tpts">+5</span></div>
+          <div class="d-task"><div class="tc todo"></div><span class="ttxt">Complete project module</span><span class="tpts">+15</span></div>
+          <div class="d-task"><div class="tc todo"></div><span class="ttxt">Evening reflection</span><span class="tpts">+12</span></div>
+        </div>
+        <div style="width:130px;background:#0d0b08;border-left:1px solid rgba(255,255,255,.04);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px;gap:12px">
+          <div style="text-align:center">
+            <div style="font-size:.52rem;color:rgba(255,255,255,.35);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Performance</div>
+            <div class="d-ring">
+              <div class="d-ring-val">87</div>
+            </div>
+            <div style="font-size:.55rem;color:var(--accent);margin-top:6px;font-weight:700">GREAT DAY</div>
+          </div>
+          <div style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:8px;text-align:center">
+            <div style="font-size:.5rem;color:rgba(255,255,255,.35);margin-bottom:3px">NEXUS AI</div>
+            <div style="font-size:.6rem;color:rgba(255,255,255,.7);line-height:1.4">"Your consistency is elite. Push for 100% today!"</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="laptop-base"></div>
+    <div class="laptop-foot"></div>
+  </div>
+</section>
+
+<!-- FEATURE: TASKS -->
+<section class="feature f-dark">
+  <div class="feature-inner">
+    <div class="reveal from-left">
+      <div class="feat-tag">TASK MASTERY</div>
+      <h2 class="feat-title">Turn Goals Into Daily Non-Negotiables</h2>
+      <p class="feat-desc">Break any goal into clear daily tasks with a scoring system that rewards every win. Stay accountable with streaks, points, and real-time progress tracking.</p>
+      <ul class="feat-bullets">
+        <li>Create tasks with custom point values</li>
+        <li>Earn score points for every task completed</li>
+        <li>Track daily completion rates and streaks</li>
+        <li>See weekly progress charts automatically</li>
+        <li>ADHD-friendly design keeps you laser focused</li>
+      </ul>
+    </div>
+    <div class="reveal from-right">
+      <div class="tasks-card">
+        <div class="tc-head">Today's Tasks</div>
+        <div class="tc-date">Wednesday, May 13</div>
+        <div class="tc-score">Daily Score: 87 pts · Streak: 14 🔥</div>
+        <div class="tm-task"><div class="tm-chk done">✓</div><span class="tm-name done">Morning workout (30 min)</span><span class="tm-pts">+10 pts</span></div>
+        <div class="tm-task"><div class="tm-chk done">✓</div><span class="tm-name done">Read 20 pages</span><span class="tm-pts">+8 pts</span></div>
+        <div class="tm-task"><div class="tm-chk done">✓</div><span class="tm-name done">Cold shower</span><span class="tm-pts">+5 pts</span></div>
+        <div class="tm-task"><div class="tm-chk todo"></div><span class="tm-name">Complete project module</span><span class="tm-pts">+15 pts</span></div>
+        <div class="tm-task"><div class="tm-chk todo"></div><span class="tm-name">Evening reflection</span><span class="tm-pts">+12 pts</span></div>
+        <div class="tm-bar-row"><div class="tm-bar"><div class="tm-fill"></div></div><div class="tm-pct">60% done</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE: AI -->
+<section class="feature f-accent" id="ai">
+  <div class="feature-inner rev">
+    <div class="reveal from-right">
+      <div class="feat-tag">NEXUS AI COACH</div>
+      <h2 class="feat-title">Your AI Coach That Never Sleeps</h2>
+      <p class="feat-desc">NEXUS AI understands your performance patterns, knows your goals, and delivers real coaching every day. Not generic motivation — personalized strategy built for you.</p>
+      <ul class="feat-bullets">
+        <li>Daily personalized motivational messages</li>
+        <li>Intelligent analysis of your performance trends</li>
+        <li>Ask anything — get real, actionable advice</li>
+        <li>Helps you overcome slumps and plateaus</li>
+        <li>Adapts to your style and goals over time</li>
+      </ul>
+    </div>
+    <div class="reveal from-left">
+      <div class="ai-card">
+        <div class="ai-head">
+          <div class="ai-avatar">NX</div>
+          <div><div class="ai-name">NEXUS AI Coach</div><div class="ai-status">● Active · Ready to coach</div></div>
+        </div>
+        <div class="ai-msg nx">Today you scored 87 — solid. I noticed your evening tasks go incomplete most days. Try blocking 7–8 PM specifically for your final 2 tasks. Discipline is built in the small windows. 🔥</div>
+        <div class="ai-msg us">How can I improve my consistency this week?</div>
+        <div class="ai-msg nx">Your consistency rate is 94% — elite level. To push it to 100%, focus on the 3 tasks you skip most. Want me to create a micro-challenge for those specific tasks?</div>
+        <div class="ai-typing"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE: ANALYTICS -->
+<section class="feature f-darker" id="analytics">
+  <div class="feature-inner">
+    <div class="reveal from-left">
+      <div class="feat-tag">ANALYTICS HUB</div>
+      <h2 class="feat-title">Data That Proves Your Growth</h2>
+      <p class="feat-desc">Real-time charts and dashboards give you undeniable proof of your progress. Watch your discipline compound week after week with data you can actually trust.</p>
+      <ul class="feat-bullets">
+        <li>Weekly and monthly performance bar charts</li>
+        <li>Consistency score tracked across time</li>
+        <li>Task completion rate trend analysis</li>
+        <li>Skill hours logged and mapped visually</li>
+        <li>Compare best weeks vs average performance</li>
+      </ul>
+    </div>
+    <div class="reveal from-right">
+      <div class="analytics-card">
+        <div class="section-label">Performance Overview — Last 7 Days</div>
+        <div class="chart-area">
+          <div class="bar-group"><div class="bar p" style="height:60%"></div><div class="bday">Mon</div></div>
+          <div class="bar-group"><div class="bar p" style="height:82%"></div><div class="bday">Tue</div></div>
+          <div class="bar-group"><div class="bar p" style="height:50%"></div><div class="bday">Wed</div></div>
+          <div class="bar-group"><div class="bar p" style="height:92%"></div><div class="bday">Thu</div></div>
+          <div class="bar-group"><div class="bar p" style="height:68%"></div><div class="bday">Fri</div></div>
+          <div class="bar-group"><div class="bar p" style="height:45%"></div><div class="bday">Sat</div></div>
+          <div class="bar-group"><div class="bar p" style="height:87%"></div><div class="bday">Sun</div></div>
+        </div>
+        <div class="a-metrics">
+          <div class="am"><div class="am-v">87</div><div class="am-l">Avg Score</div></div>
+          <div class="am"><div class="am-v">94%</div><div class="am-l">Consistency</div></div>
+          <div class="am"><div class="am-v">14🔥</div><div class="am-l">Day Streak</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE: SKILLS -->
+<section class="feature f-dark">
+  <div class="feature-inner rev">
+    <div class="reveal from-right">
+      <div class="feat-tag">SKILL BUILDING</div>
+      <h2 class="feat-title">Track Every Hour You Invest In Yourself</h2>
+      <p class="feat-desc">Develop skills systematically across every domain. Log hours, see cumulative investment, and watch undeniable proof that you're becoming better every single day.</p>
+      <ul class="feat-bullets">
+        <li>Create skills across any category you choose</li>
+        <li>Log hours and see your total investment grow</li>
+        <li>Milestone alerts at 10h, 50h, 100h, 1000h</li>
+        <li>Compare growth across different skill areas</li>
+        <li>Visual progress bars that never lie to you</li>
+      </ul>
+    </div>
+    <div class="reveal from-left">
+      <div class="skills-card">
+        <div style="font-size:.85rem;font-weight:700;color:rgba(255,255,255,.45);margin-bottom:22px;text-transform:uppercase;letter-spacing:1px">Skill Progress Tracker</div>
+        <div class="skill-row"><div class="skill-top"><span class="skill-name">⌨️ Coding</span><span class="skill-hrs">156 hrs</span></div><div class="skill-bar"><div class="skill-fill" style="width:78%;background:linear-gradient(90deg,#ff5a1f,#ff8a4d)"></div></div></div>
+        <div class="skill-row"><div class="skill-top"><span class="skill-name">📚 Reading</span><span class="skill-hrs">89 hrs</span></div><div class="skill-bar"><div class="skill-fill" style="width:55%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div></div>
+        <div class="skill-row"><div class="skill-top"><span class="skill-name">💪 Fitness</span><span class="skill-hrs">210 hrs</span></div><div class="skill-bar"><div class="skill-fill" style="width:92%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div></div>
+        <div class="skill-row"><div class="skill-top"><span class="skill-name">🧠 Study</span><span class="skill-hrs">120 hrs</span></div><div class="skill-bar"><div class="skill-fill" style="width:65%;background:linear-gradient(90deg,#8b5cf6,#a78bfa)"></div></div></div>
+        <div class="skill-row" style="margin-bottom:0"><div class="skill-top"><span class="skill-name">🎯 Deep Work</span><span class="skill-hrs">44 hrs</span></div><div class="skill-bar"><div class="skill-fill" style="width:35%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS STRIP -->
+<div class="stats-strip">
+  <div class="stats-inner">
+    <div class="reveal"><div class="stat-num">92%</div><div class="stat-lbl">Avg Consistency Rate</div></div>
+    <div class="reveal d1"><div class="stat-num">2.3x</div><div class="stat-lbl">Task Completion Boost</div></div>
+    <div class="reveal d2"><div class="stat-num">156h</div><div class="stat-lbl">Avg Skill Hours Tracked</div></div>
+    <div class="reveal d3"><div class="stat-num">∞</div><div class="stat-lbl">Excuses Eliminated</div></div>
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div style="text-align:center;max-width:1200px;margin:0 auto 60px">
+    <div class="section-label reveal">REAL RESULTS</div>
+    <h2 class="section-title reveal d1">Grinders Don't Just Talk.<br>They Deliver.</h2>
+  </div>
+  <div class="testi-grid">
+    <div class="tcard reveal">
+      <div class="tcard-stars">★★★★★</div>
+      <p class="tcard-quote">"I went from inconsistent and scattered to hitting 90%+ task completion every single week. THE GRIND made my progress visible and that changed everything."</p>
+      <div class="tcard-author"><div class="tcard-avatar">A</div><div><div class="tcard-name">Ahmed K.</div><div class="tcard-role">Software Engineer</div></div></div>
+    </div>
+    <div class="tcard reveal d1">
+      <div class="tcard-stars">★★★★★</div>
+      <p class="tcard-quote">"NEXUS AI coach is insane. It actually understands what I'm struggling with and gives me real advice, not generic tips. My streak is at 31 days and counting."</p>
+      <div class="tcard-author"><div class="tcard-avatar">S</div><div><div class="tcard-name">Sarah M.</div><div class="tcard-role">Entrepreneur</div></div></div>
+    </div>
+    <div class="tcard reveal d2">
+      <div class="tcard-stars">★★★★★</div>
+      <p class="tcard-quote">"The skill tracking alone is worth it. Seeing 200+ hours logged in fitness and coding proved I'm serious. Data doesn't lie. The Grind doesn't lie."</p>
+      <div class="tcard-author"><div class="tcard-avatar">M</div><div><div class="tcard-name">Mikael R.</div><div class="tcard-role">Student & Athlete</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta" id="start">
+  <h2 class="final-h reveal">No More Excuses.<br><span style="background:linear-gradient(135deg,var(--accent),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Start Today.</span></h2>
+  <p class="final-p reveal d1">Your competitors are grinding right now. Every day you wait, they pull further ahead. Enter THE GRIND and start building the discipline that creates real, measurable results.</p>
+  <div class="reveal d2">
+    <button class="btn-primary" onclick="location.href='app.html'" style="font-size:1.1rem;padding:20px 55px">Enter The Grind — It's Free</button>
+    <p class="cta-sub">No credit card required. No excuses. Only results.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div><div class="f-brand">THE GRIND</div><div class="f-motto">No Excuses. No Shortcuts. Only Results.</div></div>
+  <p>© 2025 THE GRIND · Personal Command Center</p>
+</footer>
+
+<script>
+  // Scroll progress line
+  window.addEventListener('scroll', () => {
+    const st = document.documentElement.scrollTop;
+    const sh = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    document.getElementById('scrollLine').style.width = (st / sh * 100) + '%';
+    const hdr = document.getElementById('hdr');
+    st > 50 ? hdr.classList.add('scrolled') : hdr.classList.remove('scrolled');
+  });
+
+  // Scroll reveal via IntersectionObserver
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
 </body>
 </html>
