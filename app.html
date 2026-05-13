@@ -215,7 +215,7 @@
   [data-theme="dark"] ::-webkit-scrollbar-track { background: rgba(255,255,255,0.03) !important; }
 
   /* ===== BACKGROUND CANVAS ===== */
-  #bgCanvas { position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0; transition:opacity 1s ease; }
+  #bgCanvas { position:fixed; inset:0; z-index:1; pointer-events:none; opacity:0; transition:opacity 1s ease; }
   #bgCanvas.active { opacity:1; }
   [data-bg="none"] #bgCanvas { opacity:0 !important; }
   [data-bg="none"] .bg-stage { opacity:1; }
@@ -229,16 +229,18 @@
 
   /* ===== CONTROLS PANEL ===== */
   .ctrl-fab {
-    position:fixed; bottom:24px; left:24px; z-index:200;
-    width:46px; height:46px; border-radius:50%;
+    position:fixed; top:18px; right:24px; z-index:500;
+    height:36px; border-radius:50px;
     background:linear-gradient(135deg, var(--accent), var(--accent-soft));
-    border:none; cursor:pointer; color:#fff; font-size:1rem;
-    box-shadow:0 8px 24px rgba(255,90,31,0.35);
+    border:none; cursor:pointer; color:#fff; font-size:0.78rem;
+    box-shadow:0 4px 16px rgba(255,90,31,0.35);
     transition:all .3s ease; display:flex; align-items:center; justify-content:center;
+    padding:0 16px; gap:7px; font-family:'Big Shoulders Display',sans-serif;
+    font-weight:700; letter-spacing:.5px; white-space:nowrap;
   }
-  .ctrl-fab:hover { transform:scale(1.1) rotate(30deg); box-shadow:0 12px 30px rgba(255,90,31,0.5); }
+  .ctrl-fab:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(255,90,31,0.5); }
   .ctrl-panel {
-    position:fixed; bottom:80px; left:24px; z-index:200;
+    position:fixed; top:70px; right:24px; z-index:500;
     background:var(--bg-card); border:1px solid var(--line);
     border-radius:20px; padding:20px; width:260px;
     box-shadow:0 20px 60px rgba(0,0,0,0.2);
@@ -289,8 +291,8 @@
   .auth-shell { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 30px 20px; position: relative; z-index: 2; }
   .auth-card {
     width: 100%; max-width: 440px;
-    background: linear-gradient(180deg, #ffffff, #faf3e3);
-    border: 1px solid rgba(21,16,10,0.12); border-radius: 28px;
+    background: linear-gradient(180deg, var(--bg-card), var(--bg-mid));
+    border: 1px solid var(--line); border-radius: 28px;
     padding: 40px 36px;
     box-shadow: 0 30px 80px rgba(21,16,10,0.18), 0 8px 24px rgba(21,16,10,0.1), inset 0 1px 0 rgba(255,255,255,0.9);
     position: relative;
@@ -418,7 +420,7 @@
   /* ===== NAV — SLIDING PILL ===== */
   .nav-tabs {
     display: flex; align-items: center; gap: 0;
-    background: rgba(241,232,215,0.85); border-bottom: 1px solid var(--line);
+    background: rgba(247,247,247,0.92); border-bottom: 1px solid var(--line);
     padding: 12px 28px; overflow-x: auto; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     scrollbar-width: none; position: sticky; top: 70px; z-index: 40;
     box-shadow: 0 1px 0 rgba(255,255,255,0.8) inset;
@@ -465,8 +467,8 @@
 
   /* ===== CARDS ===== */
   .card {
-    background: linear-gradient(180deg, #ffffff 0%, #faf3e3 100%);
-    border: 1px solid rgba(21,16,10,0.1);
+    background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-mid) 100%);
+    border: 1px solid var(--line);
     border-radius: 28px; padding: 28px;
     transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
     position: relative; overflow: hidden;
@@ -508,8 +510,8 @@
     display: flex; flex-direction: column; align-items: flex-start;
     padding: 18px 16px; border-radius: 18px;
     border: 1px solid var(--line);
-    background: linear-gradient(180deg, #ffffff, #faf3e3);
-    box-shadow: 0 4px 12px rgba(21,16,10,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+    background: linear-gradient(180deg, var(--bg-card), var(--bg-mid));
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
     transition: all 0.3s; position: relative; overflow: hidden;
   }
   .stat-chip::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent); }
@@ -1432,39 +1434,89 @@
 </section>
 
 
-<!-- AI SENSEI TAB -->
+<!-- AI SENSEI TAB — Full NEXUS experience -->
 <section id="tab-sensei" class="page-section">
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;">
-    <div class="card" style="grid-column:1/-1;">
-      <div class="card-title"><span class="dot"></span>AI Sensei — Your Discipline Master</div>
-      <div style="font-size:0.88rem;color:var(--text-muted);margin-bottom:18px;line-height:1.6;">Your personal AI master analyzes your patterns, calls out your excuses, and gives you the hard truth you need. Ask anything about your performance, habits, or goals.</div>
-      <div style="background:var(--depth-1);border:1px solid var(--line);border-radius:16px;padding:18px;min-height:300px;max-height:450px;overflow-y:auto;margin-bottom:14px;display:flex;flex-direction:column;gap:12px;" id="senseiChat">
-        <div style="display:flex;gap:10px;align-items:flex-start;">
-          <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#ff3388);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:900;color:#fff;font-family:Orbitron,monospace;flex-shrink:0;">NX</div>
-          <div style="background:rgba(255,90,31,0.08);border:1px solid rgba(255,90,31,0.15);border-radius:0 12px 12px 12px;padding:12px 16px;font-size:0.88rem;line-height:1.6;color:var(--text-main);max-width:80%;">
-            Sensei is online. I have access to your scores, tasks, and patterns. Ask me anything — I won't sugarcoat it. What do you want to know?
+
+    <!-- FULL NEXUS CLONE — all features -->
+    <div class="card nexus-card" id="senseiCard" style="grid-column:1/-1;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div class="nexus-orb" id="senseiOrb">
+            <div class="nexus-orb-inner">AI</div>
+            <div class="nexus-ring"></div>
+          </div>
+          <div>
+            <div style="font-family:'Orbitron',monospace;font-size:0.9rem;font-weight:700;letter-spacing:3px;color:#ffffff;">NEXUS <span style="color:var(--accent);">SENSEI</span></div>
+            <div style="font-size:0.62rem;color:#ffffff;letter-spacing:2px;text-transform:uppercase;" id="senseiStatusTxt">Your Dedicated AI Coach — Always On</div>
           </div>
         </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div id="senseiLangBadge" onclick="cycleNexusLang()" style="font-size:0.55rem;padding:5px 11px;border-radius:20px;border:1px solid var(--accent-dim);color:var(--accent);letter-spacing:2px;text-transform:uppercase;background:var(--accent-faint);cursor:pointer;user-select:none;" title="Click to change language">AUTO</div>
+          <div onclick="clearSenseiHistory()" style="font-size:0.55rem;padding:5px 11px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;background:rgba(255,255,255,0.03);cursor:pointer;user-select:none;">CLEAR</div>
+          <button class="nexus-mic-btn" id="senseiMicBtn" onclick="toggleSenseiRecording()" title="Voice input">
+            <i class="fas fa-microphone" id="senseiMicIcon"></i>
+          </button>
+        </div>
       </div>
-      <div style="display:flex;gap:10px;">
-        <input type="text" id="senseiInput" placeholder="Ask your Sensei anything..." style="flex:1;background:var(--bg-mid);border:1px solid var(--line);border-radius:12px;padding:12px 16px;font-family:inherit;font-size:0.9rem;color:var(--text-main);outline:none;" onkeydown="if(event.key==='Enter')sendSensei()" />
-        <button onclick="sendSensei()" style="padding:12px 20px;background:linear-gradient(135deg,var(--accent),var(--accent-soft));border:none;border-radius:12px;color:#fff;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:'Big Shoulders Display',sans-serif;letter-spacing:1px;">SEND</button>
+
+      <!-- CHAT AREA -->
+      <div class="nexus-chat" id="senseiChat" style="max-height:320px;">
+        <div class="nexus-msg nexus-agent">
+          <div class="nexus-msg-avatar">AI</div>
+          <div class="nexus-msg-bubble">Salam. I am your dedicated Sensei — a full AI coach powered by NEXUS. I have access to your tasks, scores, and habits. Speak or type. No sugarcoating here.</div>
+        </div>
+      </div>
+
+      <!-- WAVE VISUALIZER -->
+      <div class="nexus-wave" id="senseiWave">
+        <div class="nexus-wave-bar"></div><div class="nexus-wave-bar"></div><div class="nexus-wave-bar"></div>
+        <div class="nexus-wave-bar"></div><div class="nexus-wave-bar"></div><div class="nexus-wave-bar"></div>
+        <div class="nexus-wave-bar"></div>
+      </div>
+
+      <!-- TEXT INPUT -->
+      <div style="display:flex;gap:10px;margin-top:14px;">
+        <input type="text" id="senseiInput" class="form-input" placeholder="Type or use mic — ask anything about your grind..." style="flex:1;font-size:0.85rem;" onkeydown="if(event.key==='Enter')sendToSensei()" />
+        <button class="save-btn" onclick="sendToSensei()" style="padding:10px 18px;font-size:0.65rem;white-space:nowrap;"><i class="fas fa-paper-plane"></i></button>
+      </div>
+
+      <!-- QUICK ACTIONS -->
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+        <span class="nexus-quick" onclick="quickSensei('Roast my consistency this week. Be brutal.')">🔥 Roast Me</span>
+        <span class="nexus-quick" onclick="quickSensei('How am I doing today? Full breakdown.')">📊 Today's Breakdown</span>
+        <span class="nexus-quick" onclick="quickSensei('Give me a 7-day challenge to level up fast')">⚡ 7-Day Challenge</span>
+        <span class="nexus-quick" onclick="quickSensei('What should I prioritize to hit 100 score?')">🎯 Hit 100 Score</span>
+        <span class="nexus-quick" onclick="quickSensei('Why am I not reaching my goals? Be completely honest.')">💀 Why Am I Failing?</span>
+        <span class="nexus-quick" onclick="quickSensei('What habits are elite performers doing that I'm missing?')">🧠 Elite Habits</span>
       </div>
     </div>
+
+    <!-- SENSEI DAILY READ -->
     <div class="card">
       <div class="card-title"><span class="dot"></span>Sensei's Daily Read</div>
-      <div id="senseiDailyRead" style="font-size:0.9rem;color:var(--text-main);line-height:1.8;">Loading your daily analysis...</div>
+      <div id="senseiDailyRead" style="font-size:0.9rem;color:var(--text-main);line-height:1.9;">Loading...</div>
     </div>
+
+    <!-- SENSEI TIPS -->
     <div class="card">
-      <div class="card-title"><span class="dot"></span>Quick Commands</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <button onclick="setSenseiPrompt('Roast my consistency this week and tell me what to fix')" style="padding:10px 16px;background:var(--depth-2);border:1px solid var(--line);border-radius:10px;color:var(--text-main);font-size:0.85rem;cursor:pointer;text-align:left;font-family:inherit;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">🔥 Roast my consistency</button>
-        <button onclick="setSenseiPrompt('What should I focus on today to maximize my score?')" style="padding:10px 16px;background:var(--depth-2);border:1px solid var(--line);border-radius:10px;color:var(--text-main);font-size:0.85rem;cursor:pointer;text-align:left;font-family:inherit;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">🎯 Today's priority focus</button>
-        <button onclick="setSenseiPrompt('What habits am I missing that high performers have?')" style="padding:10px 16px;background:var(--depth-2);border:1px solid var(--line);border-radius:10px;color:var(--text-main);font-size:0.85rem;cursor:pointer;text-align:left;font-family:inherit;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">🧠 Missing habits check</button>
-        <button onclick="setSenseiPrompt('Give me a brutal 7-day challenge to level up')" style="padding:10px 16px;background:var(--depth-2);border:1px solid var(--line);border-radius:10px;color:var(--text-main);font-size:0.85rem;cursor:pointer;text-align:left;font-family:inherit;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">⚡ 7-day challenge</button>
-        <button onclick="setSenseiPrompt('Why am I not reaching my goals? Be honest.')" style="padding:10px 16px;background:var(--depth-2);border:1px solid var(--line);border-radius:10px;color:var(--text-main);font-size:0.85rem;cursor:pointer;text-align:left;font-family:inherit;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">💀 Why am I failing?</button>
+      <div class="card-title"><span class="dot"></span>High-Performance Protocols</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="padding:14px;background:var(--depth-1);border:1px solid var(--line);border-radius:12px;">
+          <div style="font-size:0.7rem;font-weight:800;color:var(--accent);margin-bottom:6px;letter-spacing:1px;">⏰ WIN THE MORNING</div>
+          <div style="font-size:0.82rem;color:var(--text-soft);line-height:1.7;">Your first 90 minutes determine the entire day. No phone. No news. Execute your top 3 tasks before 10 AM.</div>
+        </div>
+        <div style="padding:14px;background:var(--depth-1);border:1px solid var(--line);border-radius:12px;">
+          <div style="font-size:0.7rem;font-weight:800;color:var(--accent);margin-bottom:6px;letter-spacing:1px;">🧠 DEEP WORK BLOCKS</div>
+          <div style="font-size:0.82rem;color:var(--text-soft);line-height:1.7;">Schedule 2–3 hour deep work blocks. Phone off. One task. No multitasking. This is where real progress happens.</div>
+        </div>
+        <div style="padding:14px;background:var(--depth-1);border:1px solid var(--line);border-radius:12px;">
+          <div style="font-size:0.7rem;font-weight:800;color:var(--accent);margin-bottom:6px;letter-spacing:1px;">🔥 THE 5-SECOND RULE</div>
+          <div style="font-size:0.82rem;color:var(--text-soft);line-height:1.7;">When you don't feel like doing a task, count 5-4-3-2-1 and move. Your brain will talk you out of everything. Override it.</div>
+        </div>
       </div>
     </div>
+
   </div>
 </section>
 
@@ -5431,9 +5483,7 @@ document.addEventListener('DOMContentLoaded', function(){
 <canvas id="bgCanvas"></canvas>
 
 <!-- Controls FAB -->
-<button class="ctrl-fab" id="ctrlFab" title="Appearance Settings" onclick="toggleCtrlPanel()">
-  <i class="fas fa-sliders"></i>
-</button>
+<button class="ctrl-fab" id="ctrlFab" title="Appearance Settings" onclick="toggleCtrlPanel()"><i class="fas fa-sliders"></i> Appearance</button>
 
 <!-- Controls Panel -->
 <div class="ctrl-panel" id="ctrlPanel">
@@ -5632,45 +5682,128 @@ window.addEventListener('resize', function() {
 });
 
 // ===== NEW TAB FUNCTIONS =====
-function setSenseiPrompt(text) {
-  document.getElementById('senseiInput').value = text;
-  document.getElementById('senseiInput').focus();
+// ===== SHARED NEXUS API HELPER (used by both Dashboard and Sensei tab) =====
+async function callNexusAPI(userMessage) {
+  var messages = nexusConversationHistory.slice(-6).map(function(m) {
+    return { role: m.role, content: m.content };
+  });
+  while (messages.length && messages[messages.length-1].role === 'assistant') messages.pop();
+  messages.push({ role: 'user', content: userMessage });
+  var response = await fetch('/api/nexus', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 400,
+      system: getNexusSystemPrompt(),
+      tools: NEXUS_TOOLS,
+      messages: messages
+    })
+  });
+  var data = await response.json();
+  if (data.error) throw new Error(data.error.message || 'API error');
+  var text = '';
+  if (data.content && Array.isArray(data.content)) {
+    data.content.forEach(function(b){ if(b.type==='text') text += b.text; });
+  }
+  // save to nexus history
+  nexusConversationHistory.push({role:'user',content:userMessage});
+  nexusConversationHistory.push({role:'assistant',content:text});
+  return text || 'Done.';
 }
-function sendSensei() {
-  const input = document.getElementById('senseiInput');
-  const msg = input.value.trim();
-  if (!msg) return;
-  input.value = '';
+
+// ===== SENSEI TAB — mirrors NEXUS with own chat panel =====
+function quickSensei(msg) {
+  document.getElementById('senseiInput').value = msg;
+  sendToSensei();
+}
+function clearSenseiHistory() {
   const chat = document.getElementById('senseiChat');
-  // User bubble
-  const userBubble = document.createElement('div');
-  userBubble.style.cssText = 'display:flex;gap:10px;align-items:flex-start;justify-content:flex-end;';
-  userBubble.innerHTML = '<div style="background:rgba(255,90,31,0.1);border:1px solid rgba(255,90,31,0.2);border-radius:12px 0 12px 12px;padding:12px 16px;font-size:0.88rem;line-height:1.6;color:var(--text-main);max-width:80%;">'+escHtml(msg)+'</div>';
-  chat.appendChild(userBubble);
-  // Typing indicator
+  if (!chat) return;
+  chat.innerHTML = '<div class="nexus-msg nexus-agent"><div class="nexus-msg-avatar">AI</div><div class="nexus-msg-bubble">Chat cleared. What do you need, warrior?</div></div>';
+}
+function addSenseiMsg(role, text) {
+  const chat = document.getElementById('senseiChat');
+  if (!chat) return;
+  const div = document.createElement('div');
+  div.className = 'nexus-msg ' + (role === 'user' ? 'nexus-user' : 'nexus-agent');
+  div.innerHTML = '<div class="nexus-msg-avatar">'+(role==='user'?'U':'AI')+'</div><div class="nexus-msg-bubble">'+text+'</div>';
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+function sendToSensei() {
+  const inp = document.getElementById('senseiInput');
+  if (!inp) return;
+  const msg = inp.value.trim();
+  if (!msg) return;
+  inp.value = '';
+  addSenseiMsg('user', escHtml(msg));
+  // Show typing
+  const chat = document.getElementById('senseiChat');
   const typing = document.createElement('div');
-  typing.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
-  typing.innerHTML = '<div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#ff3388);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:900;color:#fff;font-family:Orbitron,monospace;flex-shrink:0;">NX</div><div style="background:rgba(255,90,31,0.08);border:1px solid rgba(255,90,31,0.15);border-radius:0 12px 12px 12px;padding:12px 16px;font-size:0.88rem;color:var(--text-muted);">Analyzing...</div>';
+  typing.className = 'nexus-msg nexus-agent';
+  typing.id = 'senseiTyping';
+  typing.innerHTML = '<div class="nexus-msg-avatar">AI</div><div class="nexus-typing"><span></span><span></span><span></span></div>';
   chat.appendChild(typing);
   chat.scrollTop = chat.scrollHeight;
-  // Call NEXUS AI (reuse existing function)
-  if (typeof sendNexus === 'function') {
-    sendNexus(msg, function(reply) {
-      typing.remove();
-      const replyBubble = document.createElement('div');
-      replyBubble.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
-      replyBubble.innerHTML = '<div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#ff3388);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:900;color:#fff;font-family:Orbitron,monospace;flex-shrink:0;">NX</div><div style="background:rgba(255,90,31,0.08);border:1px solid rgba(255,90,31,0.15);border-radius:0 12px 12px 12px;padding:12px 16px;font-size:0.88rem;line-height:1.6;color:var(--text-main);max-width:80%;">'+reply+'</div>';
-      chat.appendChild(replyBubble);
-      chat.scrollTop = chat.scrollHeight;
-    });
-  } else {
-    typing.remove();
-    const replyBubble = document.createElement('div');
-    replyBubble.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
-    replyBubble.innerHTML = '<div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#ff3388);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:900;color:#fff;font-family:Orbitron,monospace;flex-shrink:0;">NX</div><div style="background:rgba(255,90,31,0.08);border:1px solid rgba(255,90,31,0.15);border-radius:0 12px 12px 12px;padding:12px 16px;font-size:0.88rem;line-height:1.6;color:var(--text-main);max-width:80%;">Sensei is processing your request. Stay patient — good answers take a moment.</div>';
-    chat.appendChild(replyBubble);
-    chat.scrollTop = chat.scrollHeight;
+  // Reuse NEXUS sendToNexus mechanism — call API directly
+  callNexusAPI(msg).then(reply => {
+    const t = document.getElementById('senseiTyping');
+    if (t) t.remove();
+    addSenseiMsg('agent', reply);
+  }).catch(() => {
+    const t = document.getElementById('senseiTyping');
+    if (t) t.remove();
+    addSenseiMsg('agent', 'Sensei had a moment. Try again.');
+  });
+}
+var senseiRecognition = null;
+var senseiRecording = false;
+function toggleSenseiRecording() {
+  const btn = document.getElementById('senseiMicBtn');
+  const icon = document.getElementById('senseiMicIcon');
+  const status = document.getElementById('senseiStatusTxt');
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    showToast('Voice not supported in this browser.'); return;
   }
+  if (senseiRecording) {
+    if (senseiRecognition) senseiRecognition.stop();
+    senseiRecording = false;
+    btn.classList.remove('listening');
+    icon.className = 'fas fa-microphone';
+    if (status) status.textContent = 'Your Dedicated AI Coach — Always On';
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  senseiRecognition = new SR();
+  senseiRecognition.continuous = false;
+  senseiRecognition.interimResults = false;
+  senseiRecognition.lang = (window.nexusLang || 'en-US');
+  senseiRecording = true;
+  btn.classList.add('listening');
+  icon.className = 'fas fa-stop';
+  if (status) status.textContent = 'Listening...';
+  senseiRecognition.onresult = function(e) {
+    const txt = e.results[0][0].transcript;
+    document.getElementById('senseiInput').value = txt;
+    senseiRecording = false;
+    btn.classList.remove('listening');
+    icon.className = 'fas fa-microphone';
+    if (status) status.textContent = 'Your Dedicated AI Coach — Always On';
+    sendToSensei();
+  };
+  senseiRecognition.onerror = function() {
+    senseiRecording = false;
+    btn.classList.remove('listening');
+    icon.className = 'fas fa-microphone';
+    if (status) status.textContent = 'Voice error — try again';
+  };
+  senseiRecognition.onend = function() {
+    senseiRecording = false;
+    btn.classList.remove('listening');
+    icon.className = 'fas fa-microphone';
+  };
+  senseiRecognition.start();
 }
 
 // Must Do
@@ -5792,7 +5925,7 @@ function loadSenseiDailyRead() {
 }
 
 // ===== INIT ON LOAD =====
-(function initAppearance() {
+window.addEventListener('load', function initAppearance() {
   const savedTheme = localStorage.getItem('grind-theme') || 'light';
   const savedBg = localStorage.getItem('grind-bg') || 'none';
   setTheme(savedTheme);
@@ -5810,13 +5943,13 @@ function loadSenseiDailyRead() {
     }
   }
   // Render new tabs
-  setTimeout(() => {
+  setTimeout(function() {
     renderMustDo();
     renderIdeas();
     renderDumps();
     loadSenseiDailyRead();
   }, 800);
-})();
+});
 </script>
 </body>
 </html>
