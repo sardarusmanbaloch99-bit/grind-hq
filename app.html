@@ -229,6 +229,66 @@
   [data-bg="code"] #bgCanvas { opacity:1; }
   [data-theme="dark"][data-bg="none"] .bg-stage { opacity:0.7; }
 
+  /* ===== CUSTOM IMAGE/VIDEO BACKGROUND LAYER ===== */
+  #customBgLayer {
+    position:fixed; inset:0; z-index:1; pointer-events:none;
+    opacity:0; transition:opacity 1.2s ease;
+    background-size:cover; background-position:center; background-repeat:no-repeat;
+  }
+  #customBgLayer.active { opacity:1; animation: kenBurns 28s ease-in-out infinite alternate; }
+  #customBgVideo { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none; }
+  #customBgVideo.show { display:block; }
+  #customBgOverlay { position:absolute; inset:0; background:rgba(0,0,0,0.28); pointer-events:none; }
+  @keyframes kenBurns {
+    0%   { transform:scale(1)    translate(0%,0%); }
+    33%  { transform:scale(1.07) translate(-1.5%,1%); }
+    66%  { transform:scale(1.12) translate(1%,-1.5%); }
+    100% { transform:scale(1.05) translate(-0.5%,0.5%); }
+  }
+  [data-bg^="img"] .bg-stage,[data-bg="vid"] .bg-stage { opacity:0.07 !important; }
+  [data-bg^="img"] #bgCanvas,[data-bg="vid"] #bgCanvas { opacity:0 !important; }
+  [data-bg^="img"] #customBgLayer,[data-bg="vid"] #customBgLayer { opacity:1 !important; animation:kenBurns 28s ease-in-out infinite alternate; }
+  [data-bg="vid"] #customBgLayer { animation:none; }
+
+  /* ===== WALLPAPER CARDS ===== */
+  .wp-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:14px; margin-bottom:28px; }
+  .wp-card {
+    border-radius:18px; overflow:hidden; cursor:pointer; position:relative;
+    border:2.5px solid var(--line); aspect-ratio:9/16; min-height:190px;
+    background-size:cover; background-position:center;
+    transition:all 0.35s cubic-bezier(0.16,1,0.3,1);
+  }
+  .wp-card:hover { border-color:var(--accent); transform:translateY(-4px) scale(1.02); box-shadow:0 20px 40px rgba(0,0,0,0.35); }
+  .wp-card.wp-active { border-color:var(--accent) !important; box-shadow:0 0 0 2px var(--accent),0 16px 36px rgba(255,90,31,0.45) !important; }
+  .wp-overlay { position:absolute; inset:0; background:linear-gradient(to top,rgba(0,0,0,0.82) 0%,transparent 55%); display:flex; flex-direction:column; justify-content:flex-end; padding:14px; }
+  .wp-name { font-family:'Big Shoulders Display',Impact,sans-serif; font-size:0.95rem; font-weight:900; color:#fff; letter-spacing:0.04em; text-shadow:0 2px 8px rgba(0,0,0,0.9); }
+  .wp-tag { font-family:'JetBrains Mono',monospace; font-size:0.5rem; color:rgba(255,255,255,0.65); letter-spacing:2px; text-transform:uppercase; margin-top:3px; }
+  .wp-badge { position:absolute; top:9px; left:9px; font-family:'JetBrains Mono',monospace; font-size:0.48rem; font-weight:700; padding:3px 8px; border-radius:6px; letter-spacing:1px; text-transform:uppercase; }
+  .wp-badge-live { background:rgba(255,90,31,0.92); color:#fff; }
+  .wp-badge-custom { background:rgba(0,0,0,0.5); backdrop-filter:blur(6px); color:rgba(255,255,255,0.85); border:1px solid rgba(255,255,255,0.25); }
+  .wp-actions { position:absolute; top:9px; right:9px; display:flex; gap:5px; opacity:0; transition:opacity 0.2s; }
+  .wp-card:hover .wp-actions { opacity:1; }
+  .wp-btn { width:30px; height:30px; border-radius:50%; background:rgba(0,0,0,0.65); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:0.65rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+  .wp-btn:hover { background:var(--accent); border-color:var(--accent); transform:scale(1.15); }
+  .wp-thumb { position:absolute; inset:0; background-size:cover; background-position:center; border-radius:15px; display:none; }
+  .wp-empty-hint { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; opacity:0.45; }
+  .wp-empty-hint i { font-size:1.8rem; color:#fff; }
+  .wp-empty-hint span { font-family:'JetBrains Mono',monospace; font-size:0.5rem; color:#fff; letter-spacing:2px; text-transform:uppercase; }
+  .wp-card.has-image .wp-empty-hint { display:none; }
+
+  /* ===== BG PREVIEW MODAL ===== */
+  #wpPreviewModal { position:fixed; inset:0; z-index:99999; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.88); backdrop-filter:blur(16px); opacity:0; pointer-events:none; transition:opacity 0.3s; }
+  #wpPreviewModal.open { opacity:1; pointer-events:all; }
+  .wp-preview-inner { position:relative; width:min(92vw,420px); height:min(85vh,700px); border-radius:22px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.9); }
+  .wp-preview-inner img { width:100%; height:100%; object-fit:cover; display:block; }
+  .wp-preview-inner video { width:100%; height:100%; object-fit:cover; display:block; }
+  .wp-preview-bar { position:absolute; top:0; inset-x:0; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(to bottom,rgba(0,0,0,0.75),transparent); }
+  .wp-preview-bottom { position:absolute; bottom:0; inset-x:0; padding:20px 16px; background:linear-gradient(to top,rgba(0,0,0,0.88),transparent); display:flex; gap:10px; }
+
+  /* APPEARANCE SECTION LABEL */
+  .appear-section-label { font-family:'JetBrains Mono',monospace; font-size:0.55rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+  .appear-section-label::after { content:''; flex:1; height:1px; background:var(--accent-dim); }
+
   /* ===== CONTROLS PANEL ===== */
   .ctrl-fab {
     position:fixed; bottom:24px; left:24px; z-index:9999;
@@ -828,6 +888,28 @@
 <div class="bg-stage"></div>
 <div class="brain-wrap"><canvas id="brainCanvas"></canvas></div>
 <div class="brain-vignette"></div>
+
+<!-- CUSTOM LIVE WALLPAPER LAYER -->
+<div id="customBgLayer">
+  <video id="customBgVideo" loop muted playsinline></video>
+  <div id="customBgOverlay"></div>
+</div>
+
+<!-- BG PREVIEW MODAL -->
+<div id="wpPreviewModal" onclick="if(event.target===this)closeWpPreview()">
+  <div class="wp-preview-inner" id="wpPreviewInner">
+    <img id="wpPreviewImg" src="" alt="Preview" style="display:none;">
+    <video id="wpPreviewVid" loop muted playsinline autoplay style="display:none;"></video>
+    <div class="wp-preview-bar">
+      <div style="font-family:'Big Shoulders Display',sans-serif;font-size:0.9rem;font-weight:900;color:#fff;letter-spacing:0.05em;" id="wpPreviewName">Preview</div>
+      <div class="wp-btn" onclick="closeWpPreview()" style="opacity:1;"><i class="fas fa-times"></i></div>
+    </div>
+    <div class="wp-preview-bottom">
+      <button onclick="applyPreviewedBg()" style="flex:1;padding:13px;background:linear-gradient(135deg,var(--accent),var(--orange-lt));border:none;border-radius:12px;color:#111;font-family:'Big Shoulders Display',sans-serif;font-size:0.8rem;font-weight:900;letter-spacing:0.1em;cursor:pointer;text-transform:uppercase;">⚡ Apply This Background</button>
+      <button onclick="closeWpPreview()" style="padding:13px 18px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:12px;color:#fff;font-family:'Big Shoulders Display',sans-serif;font-size:0.8rem;font-weight:800;cursor:pointer;letter-spacing:0.1em;">CLOSE</button>
+    </div>
+  </div>
+</div>
 
 <!-- LOADING SCREEN -->
 <div class="loading-screen" id="loadingScreen">
@@ -1692,45 +1774,90 @@
 
 <!-- APPEARANCE TAB -->
 <section id="tab-appearance" class="page-section">
-  <div class="grid-2">
-    <div class="card" style="grid-column: 1/-1;">
-      <div class="card-title"><span class="dot"></span>Motion Backgrounds</div>
-      <div style="font-size:0.88rem;color:var(--text-muted);margin-bottom:20px;line-height:1.6;">
-        Select a 4K quality interactive background motion for your command center. Live preview on click.
+
+  <!-- MOTION BACKGROUNDS (existing) -->
+  <div class="card" style="margin-bottom:22px;">
+    <div class="card-title"><span class="dot"></span>Motion Backgrounds</div>
+    <div style="font-size:0.88rem;color:var(--text-muted);margin-bottom:20px;line-height:1.6;">
+      Select a 4K quality interactive background motion for your command center. Live preview on click.
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;">
+      <div onclick="setBg('none')" style="background:linear-gradient(180deg, var(--bg-mid), var(--bg-deep)); border:2px solid var(--line); border-radius:16px; padding:20px; cursor:pointer; transition:all 0.3s; text-align:center;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">
+        <i class="fas fa-circle" style="font-size:2rem;color:var(--text-muted);margin-bottom:10px;"></i>
+        <div style="font-family:'Big Shoulders Display',sans-serif;font-size:1.2rem;font-weight:800;color:var(--text-main);">Minimal Clean</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Zero distractions.</div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;">
-        <!-- Option 1: Solid Clean (None) -->
-        <div onclick="setBg('none')" style="background:linear-gradient(180deg, var(--bg-mid), var(--bg-deep)); border:2px solid var(--line); border-radius:16px; padding:20px; cursor:pointer; transition:all 0.3s; text-align:center;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">
-          <i class="fas fa-circle" style="font-size:2rem;color:var(--text-muted);margin-bottom:10px;"></i>
-          <div style="font-family:'Big Shoulders Display',sans-serif;font-size:1.2rem;font-weight:800;color:var(--text-main);">Minimal Clean</div>
-          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Zero distractions.</div>
-        </div>
-        <!-- Option 2: Liquid Aura (Matrix replaced) -->
-        <div onclick="setBg('matrix')" style="background:radial-gradient(circle at center, #FF5A1F 0%, #111 100%); border:2px solid var(--line); border-radius:16px; padding:20px; cursor:pointer; transition:all 0.3s; text-align:center;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">
-          <i class="fas fa-wave-square" style="font-size:2rem;color:#fff;margin-bottom:10px;"></i>
-          <div style="font-family:'Big Shoulders Display',sans-serif;font-size:1.2rem;font-weight:800;color:#fff;">Liquid Aura</div>
-          <div style="font-size:0.75rem;color:rgba(255,255,255,0.7);margin-top:4px;">Smooth flowing energy.</div>
-        </div>
-        <!-- Option 3: Quantum Particles (Nebula replaced) -->
-        <div onclick="setBg('nebula')" style="background:radial-gradient(circle at center, #3C96FF 0%, #000 100%); border:2px solid var(--line); border-radius:16px; padding:20px; cursor:pointer; transition:all 0.3s; text-align:center;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">
-          <i class="fas fa-atom" style="font-size:2rem;color:#fff;margin-bottom:10px;"></i>
-          <div style="font-family:'Big Shoulders Display',sans-serif;font-size:1.2rem;font-weight:800;color:#fff;">Quantum Stars</div>
-          <div style="font-size:0.75rem;color:rgba(255,255,255,0.7);margin-top:4px;">Deep space particles.</div>
-        </div>
-        <!-- Option 4: Pure Glass (Cosmic replaced) -->
-        <div onclick="setBg('cosmic')" style="background:linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.1)); backdrop-filter:blur(10px); border:2px solid var(--line); border-radius:16px; padding:20px; cursor:pointer; transition:all 0.3s; text-align:center;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">
-          <i class="fas fa-gem" style="font-size:2rem;color:var(--accent);margin-bottom:10px;"></i>
-          <div style="font-family:'Big Shoulders Display',sans-serif;font-size:1.2rem;font-weight:800;color:var(--text-main);">Premium Glass</div>
-          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Bright, blurred glassmorphism.</div>
-        </div>
+      <div onclick="setBg('matrix')" style="background:radial-gradient(circle at center, #FF5A1F 0%, #111 100%); border:2px solid var(--line); border-radius:16px; padding:20px; cursor:pointer; transition:all 0.3s; text-align:center;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">
+        <i class="fas fa-wave-square" style="font-size:2rem;color:#fff;margin-bottom:10px;"></i>
+        <div style="font-family:'Big Shoulders Display',sans-serif;font-size:1.2rem;font-weight:800;color:#fff;">Liquid Aura</div>
+        <div style="font-size:0.75rem;color:rgba(255,255,255,0.7);margin-top:4px;">Smooth flowing energy.</div>
+      </div>
+      <div onclick="setBg('nebula')" style="background:radial-gradient(circle at center, #3C96FF 0%, #000 100%); border:2px solid var(--line); border-radius:16px; padding:20px; cursor:pointer; transition:all 0.3s; text-align:center;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">
+        <i class="fas fa-atom" style="font-size:2rem;color:#fff;margin-bottom:10px;"></i>
+        <div style="font-family:'Big Shoulders Display',sans-serif;font-size:1.2rem;font-weight:800;color:#fff;">Quantum Stars</div>
+        <div style="font-size:0.75rem;color:rgba(255,255,255,0.7);margin-top:4px;">Deep space particles.</div>
+      </div>
+      <div onclick="setBg('cosmic')" style="background:linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.1)); backdrop-filter:blur(10px); border:2px solid var(--line); border-radius:16px; padding:20px; cursor:pointer; transition:all 0.3s; text-align:center;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">
+        <i class="fas fa-gem" style="font-size:2rem;color:var(--accent);margin-bottom:10px;"></i>
+        <div style="font-family:'Big Shoulders Display',sans-serif;font-size:1.2rem;font-weight:800;color:var(--text-main);">Premium Glass</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Bright, blurred glassmorphism.</div>
       </div>
     </div>
+  </div>
+
+  <!-- CUSTOM WALLPAPERS — IMAGE & VIDEO -->
+  <div class="card" style="margin-bottom:22px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
+      <div>
+        <div class="card-title" style="margin-bottom:4px;"><span class="dot"></span>Custom Live Wallpapers</div>
+        <div style="font-size:0.85rem;color:var(--text-muted);line-height:1.5;">Upload your own images or videos. Images get a cinematic Ken Burns effect. Videos loop seamlessly.</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <label style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:linear-gradient(135deg,var(--accent),var(--orange-lt));border:none;border-radius:999px;color:#111;font-family:'Big Shoulders Display',sans-serif;font-size:0.72rem;font-weight:900;letter-spacing:0.12em;cursor:pointer;text-transform:uppercase;box-shadow:0 8px 22px rgba(255,90,31,0.35);transition:all 0.3s;">
+          <i class="fas fa-image"></i> UPLOAD IMAGE
+          <input type="file" accept="image/*" onchange="handleWpUpload(event,'image')" style="display:none;" />
+        </label>
+        <label style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:linear-gradient(180deg,var(--card-dark2),var(--card-dark));border:1px solid rgba(255,255,255,0.1);border-radius:999px;color:#fff;font-family:'Big Shoulders Display',sans-serif;font-size:0.72rem;font-weight:900;letter-spacing:0.12em;cursor:pointer;text-transform:uppercase;box-shadow:0 8px 22px rgba(0,0,0,0.3);transition:all 0.3s;">
+          <i class="fas fa-video"></i> UPLOAD VIDEO
+          <input type="file" accept="video/mp4,video/webm,video/ogg" onchange="handleWpUpload(event,'video')" style="display:none;" />
+        </label>
+      </div>
+    </div>
+
+    <!-- Wallpaper Grid -->
+    <div class="wp-grid" id="wpGrid">
+      <!-- Cards are dynamically rendered by JS -->
+      <div id="wpEmptyState" style="grid-column:1/-1;text-align:center;padding:48px 20px;color:var(--text-muted);">
+        <i class="fas fa-cloud-arrow-up" style="font-size:2.5rem;opacity:0.25;margin-bottom:12px;display:block;"></i>
+        <div style="font-family:'Big Shoulders Display',sans-serif;font-size:1.1rem;font-weight:900;letter-spacing:1px;color:var(--text-soft);margin-bottom:6px;">NO CUSTOM WALLPAPERS YET</div>
+        <div style="font-size:0.82rem;max-width:360px;margin:0 auto;">Upload your favorite images or short videos above. They'll become cinematic live wallpapers with Ken Burns animation.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COLOR THEME -->
+  <div class="grid-2">
     <div class="card">
       <div class="card-title"><span class="dot"></span>Color Theme</div>
       <div style="display:flex;gap:12px;margin-top:10px;">
         <button onclick="setTheme('light')" style="flex:1;padding:14px;border-radius:12px;background:#fff;border:1px solid #ccc;color:#111;font-weight:800;cursor:pointer;">Bright White (Premium)</button>
         <button onclick="setTheme('dark')" style="flex:1;padding:14px;border-radius:12px;background:#111;border:1px solid #333;color:#fff;font-weight:800;cursor:pointer;">Deep Dark</button>
       </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Active Background</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
+        <div id="activeBgThumb" style="width:60px;height:60px;border-radius:14px;background:var(--depth-2);border:1.5px solid var(--line);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+          <i class="fas fa-circle" style="color:var(--text-dim);font-size:1rem;"></i>
+        </div>
+        <div>
+          <div style="font-family:'Big Shoulders Display',sans-serif;font-size:1rem;font-weight:900;color:var(--text-main);letter-spacing:0.03em;" id="activeBgName">Minimal Clean</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.55rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-top:3px;" id="activeBgType">DEFAULT</div>
+        </div>
+      </div>
+      <button onclick="setBg('none')" style="margin-top:14px;width:100%;padding:10px;border-radius:10px;background:var(--depth-2);border:1px solid var(--line);color:var(--text-muted);font-family:'Big Shoulders Display',sans-serif;font-size:0.7rem;font-weight:800;letter-spacing:0.1em;cursor:pointer;text-transform:uppercase;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--text-muted)'">
+        <i class="fas fa-rotate-left" style="margin-right:6px;"></i>Reset to Clean
+      </button>
     </div>
   </div>
 </section>
@@ -5773,10 +5900,42 @@ function setBg(type) {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Clear custom wallpaper layer
+  var cbl = document.getElementById('customBgLayer');
+  var cbv = document.getElementById('customBgVideo');
+  if (cbl) { cbl.style.backgroundImage = 'none'; cbl.classList.remove('active'); }
+  if (cbv) { cbv.pause(); cbv.src = ''; cbv.classList.remove('show'); }
+
+  // Check if custom wallpaper type
+  if (type.startsWith('img-') || type.startsWith('vid-')) {
+    var wps = JSON.parse(localStorage.getItem('grind-wallpapers') || '[]');
+    var idx = parseInt(type.split('-')[1]);
+    var wp = wps[idx];
+    if (wp && cbl) {
+      if (wp.type === 'image') {
+        cbl.style.backgroundImage = 'url(' + wp.data + ')';
+        cbl.classList.add('active');
+      } else if (wp.type === 'video' && cbv) {
+        cbl.style.backgroundImage = 'none';
+        cbv.src = wp.data;
+        cbv.classList.add('show');
+        cbv.play().catch(function(){});
+        cbl.classList.add('active');
+      }
+    }
+    updateActiveBgCard(type);
+    renderWpGrid();
+    return;
+  }
+
+  // Standard canvas backgrounds
   if (type === 'matrix') startMatrix(canvas, ctx);
   else if (type === 'cosmic') startCosmic(canvas, ctx);
   else if (type === 'nebula') startNebula(canvas, ctx);
   else if (type === 'code') startCode(canvas, ctx);
+  updateActiveBgCard(type);
+  renderWpGrid();
 }
 
 function startCode(canvas, ctx) {
@@ -6268,8 +6427,230 @@ window.addEventListener('load', function initAppearance() {
     renderIdeas();
     renderDumps();
     loadSenseiDailyRead();
+    renderWpGrid();
+    updateActiveBgCard(savedBg);
   }, 800);
 });
+
+// ===== CUSTOM WALLPAPER SYSTEM =====
+var _wpPreviewType = null;
+var _wpPreviewIdx = null;
+
+function handleWpUpload(event, mediaType) {
+  var file = event.target.files[0];
+  if (!file) return;
+  // Limit: images 5MB, videos 30MB
+  var maxSize = mediaType === 'image' ? 5 * 1024 * 1024 : 30 * 1024 * 1024;
+  if (file.size > maxSize) {
+    showToast('File too large. Max ' + (mediaType === 'image' ? '5MB' : '30MB'));
+    event.target.value = '';
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    if (mediaType === 'image') {
+      // Compress image via canvas
+      var img = new Image();
+      img.onload = function() {
+        var canvas = document.createElement('canvas');
+        var maxDim = 1920;
+        var ratio = Math.min(maxDim / img.width, maxDim / img.height, 1);
+        canvas.width = img.width * ratio;
+        canvas.height = img.height * ratio;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        var dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+        saveWallpaper(file.name, 'image', dataUrl);
+      };
+      img.src = e.target.result;
+    } else {
+      saveWallpaper(file.name, 'video', e.target.result);
+    }
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function saveWallpaper(name, type, data) {
+  var wps = JSON.parse(localStorage.getItem('grind-wallpapers') || '[]');
+  // Check storage limits
+  try {
+    var testSize = JSON.stringify(wps).length + data.length;
+    if (testSize > 45 * 1024 * 1024) {
+      showToast('Storage full. Delete some wallpapers first.');
+      return;
+    }
+  } catch(e) {}
+  var cleanName = name.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ');
+  cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+  wps.push({ name: cleanName, type: type, data: data, added: Date.now() });
+  try {
+    localStorage.setItem('grind-wallpapers', JSON.stringify(wps));
+  } catch(e) {
+    showToast('Storage quota exceeded. Try a smaller file or delete existing wallpapers.');
+    wps.pop();
+    return;
+  }
+  showToast((type === 'image' ? '🖼️' : '🎬') + ' Wallpaper added: ' + cleanName);
+  renderWpGrid();
+}
+
+function renderWpGrid() {
+  var grid = document.getElementById('wpGrid');
+  if (!grid) return;
+  var wps = JSON.parse(localStorage.getItem('grind-wallpapers') || '[]');
+  var currentBg = localStorage.getItem('grind-bg') || 'none';
+  var html = '';
+  if (wps.length === 0) {
+    html = '<div id="wpEmptyState" style="grid-column:1/-1;text-align:center;padding:48px 20px;color:var(--text-muted);">' +
+      '<i class="fas fa-cloud-arrow-up" style="font-size:2.5rem;opacity:0.25;margin-bottom:12px;display:block;"></i>' +
+      '<div style="font-family:\'Big Shoulders Display\',sans-serif;font-size:1.1rem;font-weight:900;letter-spacing:1px;color:var(--text-soft);margin-bottom:6px;">NO CUSTOM WALLPAPERS YET</div>' +
+      '<div style="font-size:0.82rem;max-width:360px;margin:0 auto;">Upload your favorite images or short videos above. They\'ll become cinematic live wallpapers with Ken Burns animation.</div>' +
+      '</div>';
+  } else {
+    for (var i = 0; i < wps.length; i++) {
+      var wp = wps[i];
+      var bgKey = (wp.type === 'image' ? 'img-' : 'vid-') + i;
+      var isActive = currentBg === bgKey;
+      var thumbStyle = '';
+      if (wp.type === 'image') {
+        thumbStyle = 'background-image:url(' + wp.data + ');background-size:cover;background-position:center;';
+      } else {
+        thumbStyle = 'background:#111;';
+      }
+      html += '<div class="wp-card' + (isActive ? ' wp-active' : '') + '" style="' + thumbStyle + '" onclick="previewWallpaper(' + i + ')">';
+      // Video poster overlay
+      if (wp.type === 'video') {
+        html += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(0,0,0,0.3),rgba(0,0,0,0.7));">';
+        html += '<i class="fas fa-play-circle" style="font-size:2.5rem;color:rgba(255,255,255,0.8);text-shadow:0 4px 20px rgba(0,0,0,0.5);"></i>';
+        html += '</div>';
+      }
+      // Badge
+      if (wp.type === 'video') {
+        html += '<div class="wp-badge wp-badge-live"><i class="fas fa-video" style="margin-right:3px;font-size:0.4rem;"></i> VIDEO</div>';
+      } else {
+        html += '<div class="wp-badge wp-badge-custom"><i class="fas fa-image" style="margin-right:3px;font-size:0.4rem;"></i> IMAGE</div>';
+      }
+      // Active indicator
+      if (isActive) {
+        html += '<div style="position:absolute;top:9px;right:9px;width:24px;height:24px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px var(--accent);"><i class="fas fa-check" style="font-size:0.55rem;color:#111;"></i></div>';
+      }
+      // Actions on hover (not active indicator)
+      if (!isActive) {
+        html += '<div class="wp-actions">';
+        html += '<div class="wp-btn" onclick="event.stopPropagation();deleteWallpaper(' + i + ')" title="Delete"><i class="fas fa-trash-alt"></i></div>';
+        html += '</div>';
+      } else {
+        html += '<div class="wp-actions">';
+        html += '<div class="wp-btn" onclick="event.stopPropagation();deleteWallpaper(' + i + ')" title="Delete"><i class="fas fa-trash-alt"></i></div>';
+        html += '</div>';
+      }
+      // Overlay with name
+      html += '<div class="wp-overlay">';
+      html += '<div class="wp-name">' + wp.name + '</div>';
+      html += '<div class="wp-tag">' + (wp.type === 'image' ? 'ken burns · live' : 'looping video') + '</div>';
+      if (isActive) {
+        html += '<div style="font-family:\'JetBrains Mono\',monospace;font-size:0.48rem;color:var(--accent);letter-spacing:2px;margin-top:4px;text-transform:uppercase;">● ACTIVE</div>';
+      }
+      html += '</div>';
+      html += '</div>';
+    }
+  }
+  grid.innerHTML = html;
+}
+
+function previewWallpaper(idx) {
+  var wps = JSON.parse(localStorage.getItem('grind-wallpapers') || '[]');
+  var wp = wps[idx];
+  if (!wp) return;
+  _wpPreviewType = wp.type;
+  _wpPreviewIdx = idx;
+  var modal = document.getElementById('wpPreviewModal');
+  var img = document.getElementById('wpPreviewImg');
+  var vid = document.getElementById('wpPreviewVid');
+  var name = document.getElementById('wpPreviewName');
+  name.textContent = wp.name;
+  if (wp.type === 'image') {
+    img.src = wp.data;
+    img.style.display = 'block';
+    vid.style.display = 'none';
+    vid.pause();
+  } else {
+    vid.src = wp.data;
+    vid.style.display = 'block';
+    img.style.display = 'none';
+    vid.play().catch(function(){});
+  }
+  modal.classList.add('open');
+}
+
+function closeWpPreview() {
+  var modal = document.getElementById('wpPreviewModal');
+  var vid = document.getElementById('wpPreviewVid');
+  modal.classList.remove('open');
+  if (vid) { vid.pause(); }
+  _wpPreviewType = null;
+  _wpPreviewIdx = null;
+}
+
+function applyPreviewedBg() {
+  if (_wpPreviewIdx === null) return;
+  var wps = JSON.parse(localStorage.getItem('grind-wallpapers') || '[]');
+  var wp = wps[_wpPreviewIdx];
+  if (!wp) return;
+  var bgKey = (wp.type === 'image' ? 'img-' : 'vid-') + _wpPreviewIdx;
+  closeWpPreview();
+  setBg(bgKey);
+  showToast('🎨 Background applied: ' + wp.name);
+}
+
+function deleteWallpaper(idx) {
+  if (!confirm('Delete this wallpaper?')) return;
+  var wps = JSON.parse(localStorage.getItem('grind-wallpapers') || '[]');
+  var currentBg = localStorage.getItem('grind-bg') || 'none';
+  // Check if this wallpaper is currently active
+  var bgKey = (wps[idx].type === 'image' ? 'img-' : 'vid-') + idx;
+  wps.splice(idx, 1);
+  localStorage.setItem('grind-wallpapers', JSON.stringify(wps));
+  // If the deleted one was active, reset to clean
+  if (currentBg === bgKey || currentBg.startsWith('img-') || currentBg.startsWith('vid-')) {
+    // Recalculate — indices shifted
+    setBg('none');
+  }
+  renderWpGrid();
+  showToast('Wallpaper deleted');
+}
+
+function updateActiveBgCard(type) {
+  var nameEl = document.getElementById('activeBgName');
+  var typeEl = document.getElementById('activeBgType');
+  var thumbEl = document.getElementById('activeBgThumb');
+  if (!nameEl || !typeEl || !thumbEl) return;
+  var names = { none:'Minimal Clean', matrix:'Liquid Aura', cosmic:'Premium Glass', nebula:'Quantum Stars', code:'Code Rain' };
+  if (names[type]) {
+    nameEl.textContent = names[type];
+    typeEl.textContent = 'MOTION BACKGROUND';
+    thumbEl.innerHTML = '<i class="fas fa-circle" style="color:var(--text-dim);font-size:1rem;"></i>';
+    thumbEl.style.backgroundImage = 'none';
+  } else if (type.startsWith('img-') || type.startsWith('vid-')) {
+    var wps = JSON.parse(localStorage.getItem('grind-wallpapers') || '[]');
+    var idx = parseInt(type.split('-')[1]);
+    var wp = wps[idx];
+    if (wp) {
+      nameEl.textContent = wp.name;
+      typeEl.textContent = wp.type === 'image' ? 'CUSTOM IMAGE · KEN BURNS' : 'CUSTOM VIDEO · LOOPING';
+      if (wp.type === 'image') {
+        thumbEl.innerHTML = '';
+        thumbEl.style.backgroundImage = 'url(' + wp.data + ')';
+        thumbEl.style.backgroundSize = 'cover';
+        thumbEl.style.backgroundPosition = 'center';
+      } else {
+        thumbEl.innerHTML = '<i class="fas fa-video" style="color:var(--accent);font-size:0.9rem;"></i>';
+        thumbEl.style.backgroundImage = 'none';
+      }
+    }
+  }
+}
 </script>
 </body>
 </html>
