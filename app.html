@@ -40,9 +40,9 @@
 
   /* ===== FORGE PRO DESIGN SYSTEM ===== */
   :root {
-    --bg-deep:       #f1e8d7;
-    --bg-mid:        #f6efe1;
-    --bg-elev:       #faf3e3;
+    --bg-deep:       #f7f7f7;
+    --bg-mid:        #ffffff;
+    --bg-elev:       #ffffff;
     --bg-card:       #ffffff;
     --bg-glass:      rgba(21,16,10,0.04);
     --bg-glass-hover: rgba(21,16,10,0.07);
@@ -61,10 +61,10 @@
     --depth-1:       rgba(21,16,10,0.02);
     --depth-2:       rgba(21,16,10,0.04);
     --depth-3:       rgba(21,16,10,0.07);
-    --text-main:     #15100a;
-    --text-soft:     #4a3c2a;
-    --text-muted:    #7a6a55;
-    --text-dim:      #b3a285;
+    --text-main:     #0f0f0f;
+    --text-soft:     #1f1f1f;
+    --text-muted:    #6b7280;
+    --text-dim:      #9ca3af;
     --success:       #3ec97f;
     --error:         #e23e3e;
     --blur-sm:       blur(8px);
@@ -92,7 +92,7 @@
   /* ===== BACKGROUND ===== */
   .bg-stage {
     position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
-    background: radial-gradient(ellipse at 20% 0%, #f0f0f0, #f7f7f7 50%, #eeeeee);
+    background: radial-gradient(ellipse at 20% 0%, #f5f5f5, #f7f7f7 50%, #efefef);
     transition: background 0.5s ease, opacity 0.5s ease;
   }
   .bg-stage::before {
@@ -221,10 +221,12 @@
   [data-bg="none"] .bg-stage { opacity:1; }
   [data-bg="matrix"] .bg-stage,
   [data-bg="cosmic"] .bg-stage,
-  [data-bg="nebula"] .bg-stage { opacity:0.25 !important; }
+  [data-bg="nebula"] .bg-stage,
+  [data-bg="code"] .bg-stage { opacity:0.25 !important; }
   [data-bg="matrix"] #bgCanvas,
   [data-bg="cosmic"] #bgCanvas,
-  [data-bg="nebula"] #bgCanvas { opacity:1; }
+  [data-bg="nebula"] #bgCanvas,
+  [data-bg="code"] #bgCanvas { opacity:1; }
   [data-theme="dark"][data-bg="none"] .bg-stage { opacity:0.7; }
 
   /* ===== CONTROLS PANEL ===== */
@@ -766,6 +768,15 @@
   }
 
   </style>
+<script>
+// Apply saved theme IMMEDIATELY before render to prevent flash
+(function(){
+  var t = localStorage.getItem('grind-theme') || 'light';
+  var b = localStorage.getItem('grind-bg') || 'none';
+  document.documentElement.setAttribute('data-theme', t);
+  document.documentElement.setAttribute('data-bg', b);
+})();
+</script>
 </head>
 <body>
 
@@ -5498,6 +5509,7 @@ document.addEventListener('DOMContentLoaded', function(){
     <button class="bg-btn" id="bg-matrix" onclick="setBg('matrix')">⌨️ Matrix</button>
     <button class="bg-btn" id="bg-cosmic" onclick="setBg('cosmic')">✦ Cosmic</button>
     <button class="bg-btn" id="bg-nebula" onclick="setBg('nebula')">🌌 Nebula</button>
+    <button class="bg-btn" id="bg-code" onclick="setBg('code')" style="grid-column:1/-1">{ } Code Overlay</button>
   </div>
 </div>
 
@@ -5528,6 +5540,54 @@ function setBg(type) {
   if (type === 'matrix') startMatrix(canvas, ctx);
   else if (type === 'cosmic') startCosmic(canvas, ctx);
   else if (type === 'nebula') startNebula(canvas, ctx);
+  else if (type === 'code') startCode(canvas, ctx);
+}
+
+// ── CODE OVERLAY ────────────────────────────────────────────────────────
+function startCode(canvas, ctx) {
+  const snippets = [
+    'def grind():','  if discipline >= 100:','    return results()',
+    'while alive:','  improve(+1)','streak += 1',
+    'class Winner:','  def __init__(self):','    self.excuses = 0',
+    'for day in life:','  if hard_work:','    success = True',
+    'import discipline','from self import growth',
+    'if lazy: del lazy','score = effort * focus',
+    '{consistency}','[no_excuses]','// GRIND MODE ON',
+    'push(limits)','commit("today")','merge(goals)',
+    'const win = grind()','let fear = null','var excuse = undefined',
+    'git commit -m "show up"','npm run grind','python discipline.py'
+  ];
+  const particles = Array.from({length: 30}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    text: snippets[Math.floor(Math.random() * snippets.length)],
+    speed: 0.12 + Math.random() * 0.28,
+    alpha: 0.05 + Math.random() * 0.15,
+    size: 11 + Math.random() * 5,
+    color: Math.random() > 0.55 ? '#ff5a1f' : (Math.random() > 0.5 ? '#3b82f6' : '#10b981'),
+    drift: (Math.random() - 0.5) * 0.25
+  }));
+  function draw() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      ctx.font = p.size + 'px "JetBrains Mono", monospace';
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = isDark ? p.alpha * 1.8 : p.alpha;
+      ctx.fillText(p.text, p.x, p.y);
+      ctx.globalAlpha = 1;
+      p.y -= p.speed;
+      p.x += p.drift;
+      if (p.y < -20) {
+        p.y = canvas.height + 10;
+        p.x = Math.random() * canvas.width;
+        p.text = snippets[Math.floor(Math.random() * snippets.length)];
+      }
+      if (p.x < -200 || p.x > canvas.width + 200) p.x = Math.random() * canvas.width;
+    });
+    bgAnim = requestAnimationFrame(draw);
+  }
+  draw();
 }
 
 // ── MATRIX RAIN ──────────────────────────────────────────────────────────
