@@ -144,25 +144,25 @@
   .content-wrap { position: relative; z-index: 2; }
 
 
-  /* ===== LIGHT THEME (CLEAN WHITE — DEFAULT) ===== */
+  /* ===== LIGHT THEME (PREMIUM WHITE) ===== */
   :root, [data-theme="light"] {
-    --bg-deep:  #f7f7f7;
+    --bg-deep:  #F2F4F8;
     --bg-mid:   #ffffff;
-    --bg-elev:  #ffffff;
+    --bg-elev:  rgba(255, 255, 255, 0.95);
     --bg-card:  #ffffff;
-    --bg-glass: rgba(0,0,0,0.03);
-    --bg-glass-hover: rgba(0,0,0,0.06);
-    --line:     rgba(0,0,0,0.08);
-    --line-strong: rgba(0,0,0,0.16);
-    --text-main: #0f0f0f;
-    --text-soft: #1f1f1f;
-    --text-muted: #6b7280;
-    --text-dim:  #9ca3af;
-    --depth-1:  rgba(0,0,0,0.02);
-    --depth-2:  rgba(0,0,0,0.04);
-    --depth-3:  rgba(0,0,0,0.07);
-    --card-dark:  #111111;
-    --card-dark2: #1a1a1a;
+    --bg-glass: rgba(255,255,255,0.7);
+    --bg-glass-hover: rgba(255,255,255,0.9);
+    --line:     rgba(0,0,0,0.05);
+    --line-strong: rgba(0,0,0,0.12);
+    --text-main: #0a0a0f;
+    --text-soft: #2c3140;
+    --text-muted: #667085;
+    --text-dim:  #a1a1aa;
+    --depth-1:  rgba(10, 10, 15, 0.03);
+    --depth-2:  rgba(10, 10, 15, 0.05);
+    --depth-3:  rgba(10, 10, 15, 0.08);
+    --card-dark:  #101015;
+    --card-dark2: #1A1A24;
     --text-inv: #ffffff;
     --dim-inv:  #888888;
   }
@@ -518,7 +518,7 @@
   }
   .stat-chip::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent); }
   .stat-chip:hover { border-color: rgba(255,90,31,0.25); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(21,16,10,0.12), inset 0 1px 0 rgba(255,255,255,0.9); }
-  .stat-num { font-size: 2rem; font-weight: 900; font-family: 'Big Shoulders Display', Impact, sans-serif; letter-spacing: -1px; color: var(--text-main); -webkit-text-fill-color: var(--text-main); background: none; -webkit-background-clip: unset; }
+  .stat-num { font-size: 2rem; font-weight: 900; font-family: 'Big Shoulders Display', Impact, sans-serif; letter-spacing: -1px; color: var(--text-main); -webkit-text-fill-color: var(--text-main); background: none; -webkit-background-clip: unset; background-clip: unset; }
   .stat-lbl { font-size: 0.5rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-weight: 700; margin-top: 4px; letter-spacing: 2px; text-transform: uppercase; }
 
   /* ===== TIMELINE ===== */
@@ -616,16 +616,16 @@
 
   /* ===== MISC ===== */
   .page-section { display: none; opacity: 0; }
-  .page-section.active { display: block; animation: tabEnter 0.38s cubic-bezier(.16,1,.3,1) forwards; }
+  .page-section.active { display: block; animation: tabEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
   @keyframes tabEnter { 
-    from { opacity:0; transform:translateY(18px) scale(0.99); }
-    to   { opacity:1; transform:translateY(0)    scale(1);    }
+    0% { opacity:0; transform: translateY(30px) scale(0.97) rotateX(-4deg); perspective: 1000px; filter: blur(5px); }
+    100% { opacity:1; transform: translateY(0) scale(1) rotateX(0deg); perspective: 1000px; filter: blur(0px); }
   }
-  .nav-tab { transition: all 0.22s cubic-bezier(.16,1,.3,1); }
-  .nav-tab.active { animation: tabPop 0.25s cubic-bezier(.34,1.56,.64,1); }
-  @keyframes tabPop { from{transform:scale(0.93)} to{transform:scale(1)} }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-  @keyframes fadeInUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .nav-tab { transition: all 0.3s cubic-bezier(0.16,1,0.3,1); }
+  .nav-tab.active { animation: tabPop 0.4s cubic-bezier(0.34,1.56,0.64,1); background: rgba(255,90,31,0.1); border-radius: 999px; color: var(--accent) !important; }
+  @keyframes tabPop { 0% {transform:scale(0.9) translateY(2px);} 100% {transform:scale(1) translateY(0);} }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeInUp { from{opacity:0;transform:translateY(15px); filter:blur(4px)} to{opacity:1;transform:translateY(0); filter:blur(0)} }
   .prog-bar { height: 8px; background: rgba(21,16,10,0.06); border-radius: 999px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(21,16,10,0.08); }
   .prog-fill { height: 100%; border-radius: 999px; transition: width 1s cubic-bezier(0.16,1,0.3,1); background: linear-gradient(90deg, var(--yellow), var(--accent)); box-shadow: 0 0 8px rgba(255,90,31,0.3); }
   .divider { height: 1px; background: var(--line); margin: 18px 0; }
@@ -1075,6 +1075,7 @@
   <div class="nav-tab" onclick="switchTab('sensei',this)"><i class="fas fa-user-ninja"></i>AI Sensei</div>
   <div class="nav-tab" onclick="switchTab('mustdo',this)"><i class="fas fa-shield-halved"></i>Must Do</div>
   <div class="nav-tab" onclick="switchTab('dump',this)"><i class="fas fa-bolt"></i>Brain Dump</div>
+  <div class="nav-tab" onclick="switchTab('appearance',this)"><i class="fas fa-paint-roller"></i>Appearance</div>
 </nav>
 
 <main style="padding:28px 32px;">
@@ -1082,38 +1083,69 @@
 <!-- DASHBOARD -->
 <section id="tab-dashboard" class="page-section active">
   <div class="grid-3" style="margin-bottom:22px;">
-    <div class="card">
-      <div class="card-title"><span class="dot"></span>Today's Performance</div>
-      <div class="score-ring">
-        <svg width="210" height="210" viewBox="0 0 210 210">
-          <circle cx="105" cy="105" r="97" fill="none" stroke="rgba(77,159,255,0.05)" stroke-width="1"/>
-          <circle cx="105" cy="105" r="88" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="10"/>
-          <circle id="scoreArcBlue" cx="105" cy="105" r="88" fill="none" stroke="rgba(77,159,255,0.2)" stroke-width="2" stroke-linecap="round" stroke-dasharray="553" stroke-dashoffset="553" style="transition:stroke-dashoffset 1.5s ease 0.2s;"/>
-          <circle id="scoreArc" cx="105" cy="105" r="88" fill="none" stroke="url(#scoreGrad)" stroke-width="10" stroke-linecap="round" stroke-dasharray="553" stroke-dashoffset="553" style="transition:stroke-dashoffset 1s ease;"/>
-          <defs>
-            <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#4D9FFF"/>
-              <stop offset="60%" stop-color="#FF8B4D"/>
-              <stop offset="100%" stop-color="#FF6B2C"/>
-            </linearGradient>
-          </defs>
-        </svg>
-        <div class="score-num">
-          <span id="scoreDisp">0</span>
-          <small id="scoreTierLbl">Start your day</small>
+    <div class="card" style="background: linear-gradient(145deg, #1A1A24 0%, #101015 100%); border: 1px solid rgba(255,255,255,0.05); overflow: hidden; padding: 32px; position: relative; border-radius: 28px;">
+      <!-- Glowing background behind the orb -->
+      <div style="position: absolute; right: -50px; top: -50px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(255, 90, 31, 0.45) 0%, rgba(255, 90, 31, 0) 70%); filter: blur(40px); pointer-events: none; z-index: 0;"></div>
+      
+      <div style="position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center;">
+        <!-- Left Side: Text -->
+        <div style="flex: 1; padding-right: 20px; display: flex; flex-direction: column; justify-content: center;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+            <div style="width: 6px; height: 6px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent); animation: pulseDot 2s ease-in-out infinite;"></div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #fff; letter-spacing: 3px; font-weight: 700;">TODAY &bull; LIVE</div>
+          </div>
+          <h2 style="font-family: 'Big Shoulders Display', Impact, sans-serif; font-size: 4.5rem; font-weight: 900; color: #fff; line-height: 0.9; margin-bottom: 16px; letter-spacing: -1px; text-transform: uppercase;">
+            Solid<br><span style="color: rgba(255,255,255,0.6);">Start.</span>
+          </h2>
+          <p style="font-size: 0.95rem; color: rgba(255,255,255,0.7); max-width: 280px; line-height: 1.5; margin-bottom: 0;" id="scoreStatusText">
+            No tasks yet. Add your first task to start tracking your score.
+          </p>
+        </div>
+
+        <!-- Right Side: Orb -->
+        <div style="width: 220px; height: 220px; position: relative; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <div style="width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, #FF8A4D, #FF5A1F); box-shadow: inset -10px -10px 20px rgba(0,0,0,0.2), inset 10px 10px 20px rgba(255,255,255,0.4), 0 0 40px rgba(255,90,31,0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; position: relative; overflow: hidden; transform: rotate(-5deg); transition: transform 0.3s ease;">
+            <svg style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.2; pointer-events: none;" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="none" stroke="#000" stroke-width="0.5" stroke-dasharray="2 4"/></svg>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; font-weight: 700; color: rgba(0,0,0,0.6); letter-spacing: 3px; margin-bottom: -5px; z-index: 2;">NO EXCUSES</div>
+            <div style="font-family: 'Big Shoulders Display', Impact, sans-serif; font-size: 5.5rem; font-weight: 900; color: #111; line-height: 1; letter-spacing: -3px; z-index: 2;" id="scoreDispMain">00</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; font-weight: 700; color: rgba(0,0,0,0.6); letter-spacing: 2px; margin-top: -5px; z-index: 2;">OF ONE HUNDRED</div>
+          </div>
         </div>
       </div>
-      <div class="divider"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
-        <span style="font-size:0.7rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;">Self Dev</span>
-        <span id="dashHabitTxt" style="font-family:Orbitron,monospace;font-size:0.72rem;color:var(--text-soft);">0 / 0</span>
+
+      <!-- Bottom Stats Row -->
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; display: flex; justify-content: space-between; padding: 16px 24px; margin-top: 32px; position: relative; z-index: 1;">
+        <div style="display: flex; flex-direction: column;">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; color: rgba(255,255,255,0.5); letter-spacing: 2px; font-weight: 700; margin-bottom: 4px;">TASKS</div>
+          <div style="font-family: 'Big Shoulders Display', sans-serif; font-size: 1.8rem; font-weight: 900; color: var(--accent);"><span id="dashTaskTxt2">0/-</span></div>
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; color: rgba(255,255,255,0.5); letter-spacing: 2px; font-weight: 700; margin-bottom: 4px;">SCORE</div>
+          <div style="font-family: 'Big Shoulders Display', sans-serif; font-size: 1.8rem; font-weight: 900; color: #fff;" id="scoreDispMini">0</div>
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; color: rgba(255,255,255,0.5); letter-spacing: 2px; font-weight: 700; margin-bottom: 4px;">STREAK</div>
+          <div style="font-family: 'Big Shoulders Display', sans-serif; font-size: 1.8rem; font-weight: 900; color: #3C96FF;"><span id="dashStreakTxt">0</span>d</div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end;">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; color: rgba(255,255,255,0.5); letter-spacing: 2px; font-weight: 700; margin-bottom: 4px;">TIER</div>
+          <div style="font-family: 'Big Shoulders Display', sans-serif; font-size: 1.5rem; font-weight: 900; color: var(--success); letter-spacing: 1px;" id="dashTierTxt">STARTER</div>
+        </div>
       </div>
-      <div class="prog-bar" style="margin-bottom:12px;"><div class="prog-fill" id="dashHabitBar" style="width:0%;"></div></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
-        <span style="font-size:0.7rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;">Tasks</span>
-        <span id="dashTaskTxt" style="font-family:Orbitron,monospace;font-size:0.72rem;color:var(--text-soft);">0 / 0</span>
+
+      <!-- Add Task Button -->
+      <button onclick="switchTab('tasks',document.querySelectorAll('.nav-tab')[1])" style="background: linear-gradient(135deg, #FF8A4D, #FF5A1F); border: none; border-radius: 999px; padding: 14px 32px; margin-top: 24px; color: #111; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; cursor: pointer; transition: all 0.3s; box-shadow: 0 8px 24px rgba(255,90,31,0.4); position: relative; z-index: 1;">
+        ⚡ ADD TASK
+      </button>
+
+      <!-- HIDDEN OLD ELEMENTS TO PREVENT JS ERRORS -->
+      <div style="display:none;">
+        <circle id="scoreArcBlue"></circle><circle id="scoreArc"></circle>
+        <span id="scoreTierLbl"></span>
+        <span id="scoreDisp">0</span>
+        <span id="dashHabitTxt"></span><div id="dashHabitBar"></div>
+        <span id="dashTaskTxt"></span><div id="dashTaskBar"></div>
       </div>
-      <div class="prog-bar"><div class="prog-fill" id="dashTaskBar" style="width:0%;"></div></div>
     </div>
 
     <div class="card">
@@ -1560,7 +1592,7 @@
         <span class="nexus-quick" onclick="quickSensei('Give me a 7-day challenge to level up fast')">⚡ 7-Day Challenge</span>
         <span class="nexus-quick" onclick="quickSensei('What should I prioritize to hit 100 score?')">🎯 Hit 100 Score</span>
         <span class="nexus-quick" onclick="quickSensei('Why am I not reaching my goals? Be completely honest.')">💀 Why Am I Failing?</span>
-        <span class="nexus-quick" onclick="quickSensei('What habits are elite performers doing that I'm missing?')">🧠 Elite Habits</span>
+        <span class="nexus-quick" onclick="quickSensei('What habits are elite performers doing that I am missing?')">🧠 Elite Habits</span>
       </div>
     </div>
 
@@ -1658,6 +1690,78 @@
   </div>
 </section>
 
+<!-- APPEARANCE TAB -->
+<section id="tab-appearance" class="page-section">
+  <div class="grid-2">
+    <div class="card" style="grid-column: 1/-1;">
+      <div class="card-title"><span class="dot"></span>Motion Backgrounds</div>
+      <div style="font-size:0.88rem;color:var(--text-muted);margin-bottom:20px;line-height:1.6;">
+        Select a 4K quality interactive background motion for your command center. Live preview on click.
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;">
+        <!-- Option 1: Solid Clean (None) -->
+        <div onclick="setBg('none')" style="background:linear-gradient(180deg, var(--bg-mid), var(--bg-deep)); border:2px solid var(--line); border-radius:16px; padding:20px; cursor:pointer; transition:all 0.3s; text-align:center;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">
+          <i class="fas fa-circle" style="font-size:2rem;color:var(--text-muted);margin-bottom:10px;"></i>
+          <div style="font-family:'Big Shoulders Display',sans-serif;font-size:1.2rem;font-weight:800;color:var(--text-main);">Minimal Clean</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Zero distractions.</div>
+        </div>
+        <!-- Option 2: Liquid Aura (Matrix replaced) -->
+        <div onclick="setBg('matrix')" style="background:radial-gradient(circle at center, #FF5A1F 0%, #111 100%); border:2px solid var(--line); border-radius:16px; padding:20px; cursor:pointer; transition:all 0.3s; text-align:center;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">
+          <i class="fas fa-wave-square" style="font-size:2rem;color:#fff;margin-bottom:10px;"></i>
+          <div style="font-family:'Big Shoulders Display',sans-serif;font-size:1.2rem;font-weight:800;color:#fff;">Liquid Aura</div>
+          <div style="font-size:0.75rem;color:rgba(255,255,255,0.7);margin-top:4px;">Smooth flowing energy.</div>
+        </div>
+        <!-- Option 3: Quantum Particles (Nebula replaced) -->
+        <div onclick="setBg('nebula')" style="background:radial-gradient(circle at center, #3C96FF 0%, #000 100%); border:2px solid var(--line); border-radius:16px; padding:20px; cursor:pointer; transition:all 0.3s; text-align:center;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">
+          <i class="fas fa-atom" style="font-size:2rem;color:#fff;margin-bottom:10px;"></i>
+          <div style="font-family:'Big Shoulders Display',sans-serif;font-size:1.2rem;font-weight:800;color:#fff;">Quantum Stars</div>
+          <div style="font-size:0.75rem;color:rgba(255,255,255,0.7);margin-top:4px;">Deep space particles.</div>
+        </div>
+        <!-- Option 4: Pure Glass (Cosmic replaced) -->
+        <div onclick="setBg('cosmic')" style="background:linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.1)); backdrop-filter:blur(10px); border:2px solid var(--line); border-radius:16px; padding:20px; cursor:pointer; transition:all 0.3s; text-align:center;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">
+          <i class="fas fa-gem" style="font-size:2rem;color:var(--accent);margin-bottom:10px;"></i>
+          <div style="font-family:'Big Shoulders Display',sans-serif;font-size:1.2rem;font-weight:800;color:var(--text-main);">Premium Glass</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Bright, blurred glassmorphism.</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Color Theme</div>
+      <div style="display:flex;gap:12px;margin-top:10px;">
+        <button onclick="setTheme('light')" style="flex:1;padding:14px;border-radius:12px;background:#fff;border:1px solid #ccc;color:#111;font-weight:800;cursor:pointer;">Bright White (Premium)</button>
+        <button onclick="setTheme('dark')" style="flex:1;padding:14px;border-radius:12px;background:#111;border:1px solid #333;color:#fff;font-weight:800;cursor:pointer;">Deep Dark</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // UI Sync for new dashboard elements
+  setInterval(function() {
+    try {
+      var st = document.getElementById('stStreak');
+      var dtt = document.getElementById('dashTaskTxt');
+      var sd = document.getElementById('scoreDisp');
+      var tier = document.getElementById('scoreTierLbl');
+
+      var myStreak = document.getElementById('dashStreakTxt');
+      var myTasks = document.getElementById('dashTaskTxt2');
+      var myScore = document.getElementById('scoreDispMini');
+      var myTier = document.getElementById('dashTierTxt');
+      var mainScore = document.getElementById('scoreDispMain');
+      
+      if(st && myStreak) myStreak.innerText = st.innerText;
+      if(dtt && myTasks) myTasks.innerText = dtt.innerText;
+      if(sd && myScore && mainScore) {
+         var scoreVal = sd.innerText.padStart(2, '0');
+         mainScore.innerText = scoreVal;
+         myScore.innerText = scoreVal;
+      }
+      if(tier && myTier) myTier.innerText = tier.innerText;
+    } catch(e) {}
+  }, 1000);
+</script>
+
 </main>
 </div><!-- /appScreen -->
 
@@ -1729,12 +1833,12 @@
         </select>
       </div>
       <div style="display:flex;gap:12px;">
-        <div class="checkbox-row" id="editNNToggle" onclick="var cb=document.getElementById(\'editTaskNN\');cb.checked=!cb.checked;this.classList.toggle(\'on\',cb.checked)" style="flex:1;">
+        <div class="checkbox-row" id="editNNToggle" onclick="var cb=document.getElementById('editTaskNN');cb.checked=!cb.checked;this.classList.toggle('on',cb.checked)" style="flex:1;">
           <input type="checkbox" id="editTaskNN" style="display:none;">
           <div class="checkbox-box"></div>
           <div style="font-size:0.85rem;font-weight:600;">Non-Negotiable</div>
         </div>
-        <div class="checkbox-row" id="editAlarmToggle" onclick="var cb=document.getElementById(\'editTaskAlarm\');cb.checked=!cb.checked;this.classList.toggle(\'on\',cb.checked)" style="flex:1;">
+        <div class="checkbox-row" id="editAlarmToggle" onclick="var cb=document.getElementById('editTaskAlarm');cb.checked=!cb.checked;this.classList.toggle('on',cb.checked)" style="flex:1;">
           <input type="checkbox" id="editTaskAlarm" style="display:none;">
           <div class="checkbox-box"></div>
           <div style="font-size:0.85rem;font-weight:600;">Alarm</div>
@@ -6043,7 +6147,7 @@ function renderMustDo() {
       el.style.cssText = 'display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--depth-1);border:1px solid var(--line);border-radius:12px;transition:all .2s;';
       el.innerHTML = '<div onclick="toggleMustDo('+idx+')" style="width:22px;height:22px;border-radius:7px;border:2px solid '+(isDone?'var(--accent)':'var(--line)')+';background:'+(isDone?'var(--accent)':'transparent')+';display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:0.7rem;color:#fff;transition:all .2s;">'+(isDone?'✓':'')+'</div>'
         +'<span style="flex:1;font-size:0.9rem;color:var(--text-main);'+(isDone?'text-decoration:line-through;opacity:0.5;':'')+'">'+escHtml(item.text)+'</span>'
-        +'<div onclick="deleteMustDo('+idx+')" style="cursor:pointer;color:var(--text-dim);font-size:0.75rem;padding:4px;transition:color .2s;" onmouseover="this.style.color='var(--error)'" onmouseout="this.style.color='var(--text-dim)'">✕</div>';
+        +'<div onclick="deleteMustDo('+idx+')" style="cursor:pointer;color:var(--text-dim);font-size:0.75rem;padding:4px;transition:color .2s;" onmouseover="this.style.color=\'var(--error)\'" onmouseout="this.style.color=\'var(--text-dim)\'">✕</div>';
       list.appendChild(el);
     });
     const pct = mustDoItems.length ? Math.round(done / mustDoItems.length * 100) : 0;
@@ -6088,7 +6192,7 @@ function renderIdeas() {
       el.className = 'idea-item';
       el.style.cssText = 'display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--depth-1);border:1px solid var(--line);border-radius:10px;';
       el.innerHTML = '<span style="font-size:0.85rem;color:var(--text-main);flex:1;">💡 '+escHtml(idea)+'</span>'
-        +'<div onclick="deleteIdea('+idx+')" style="cursor:pointer;color:var(--text-dim);font-size:0.7rem;" onmouseover="this.style.color='var(--error)'" onmouseout="this.style.color='var(--text-dim)'">✕</div>';
+        +'<div onclick="deleteIdea('+idx+')" style="cursor:pointer;color:var(--text-dim);font-size:0.7rem;" onmouseover="this.style.color=\'var(--error)\'" onmouseout="this.style.color=\'var(--text-dim)\'">✕</div>';
       list.appendChild(el);
     });
   }
