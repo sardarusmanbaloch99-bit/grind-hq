@@ -14,8 +14,67 @@
       --accent:#ff5a1f;--accent2:#ff8a4d;--accent3:#ffb347;
       --dark:#0d0b08;--dark2:#151209;--dark3:#1e1810;
       --text-muted:rgba(241,232,215,0.6);--card-border:rgba(255,255,255,0.08);
+      --bg-body:#0d0b08;--bg-card:rgba(255,255,255,.04);
+      --text-main:#ffffff;--text-secondary:rgba(255,255,255,0.75);
+      --header-bg:rgba(13,11,8,0.9);
     }
-    body{font-family:'Bricolage Grotesque',system-ui,sans-serif;background:var(--dark);color:#fff;overflow-x:hidden;line-height:1.6}
+    body.light-theme{
+      --dark:#f8f8f6;--dark2:#f0efed;--dark3:#e8e6e2;
+      --text-muted:rgba(60,50,40,0.6);--card-border:rgba(0,0,0,0.09);
+      --bg-body:#f8f8f6;--bg-card:rgba(255,255,255,0.85);
+      --text-main:#111111;--text-secondary:rgba(30,25,20,0.78);
+      --header-bg:rgba(248,248,246,0.92);
+      color:#111;
+    }
+    body.light-theme header{background:var(--header-bg)!important;border-bottom:1px solid rgba(0,0,0,.08)!important}
+    body.light-theme header.scrolled{background:var(--header-bg)!important}
+    body.light-theme .hcard{background:rgba(255,255,255,.85);border-color:rgba(0,0,0,.1);color:#111}
+    body.light-theme .hcard-val{color:var(--accent)}
+    body.light-theme .hcard-label{color:rgba(0,0,0,.55)}
+    body.light-theme .brand-strip{background:rgba(0,0,0,.02);border-color:rgba(0,0,0,.08)}
+    body.light-theme .brand-pill{background:#fff;border-color:rgba(0,0,0,.1);color:rgba(0,0,0,.6)}
+    body.light-theme .brand-text{color:rgba(0,0,0,.35)}
+    body.light-theme .tasks-card,.body.light-theme .analytics-card,.body.light-theme .skills-card{background:#fff;border-color:rgba(0,0,0,.08);box-shadow:0 20px 50px rgba(0,0,0,.08)}
+    body.light-theme .tasks-card{background:#fff;border-color:rgba(0,0,0,.08)}
+    body.light-theme .analytics-card{background:#fff;border-color:rgba(0,0,0,.08)}
+    body.light-theme .skills-card{background:#fff;border-color:rgba(0,0,0,.08)}
+    body.light-theme .tm-task{background:rgba(0,0,0,.02);border-color:rgba(0,0,0,.06)}
+    body.light-theme .tm-task:hover{background:rgba(255,90,31,.05)}
+    body.light-theme .tm-name{color:rgba(0,0,0,.8)}
+    body.light-theme .tc-date{color:#111}
+    body.light-theme .tc-head{color:rgba(0,0,0,.45)}
+    body.light-theme .tcard{background:#fff;border-color:rgba(0,0,0,.07)}
+    body.light-theme .tcard:hover{background:rgba(255,90,31,.04)}
+    body.light-theme .tcard-quote{color:rgba(0,0,0,.75)}
+    body.light-theme .tcard-name{color:#111}
+    body.light-theme .section-desc,body.light-theme .feat-desc,body.light-theme p{color:rgba(0,0,0,.65)}
+    body.light-theme .feat-bullets li{color:#333}
+    body.light-theme .am{background:#f5f4f2;border-color:rgba(0,0,0,.07)}
+    body.light-theme .am-l{color:rgba(0,0,0,.4)}
+    body.light-theme .skill-bar{background:rgba(0,0,0,.07)}
+    body.light-theme .skill-name{color:rgba(0,0,0,.8)}
+    body.light-theme .d-sidebar{background:#f0efed;border-right-color:rgba(0,0,0,.07)}
+    body.light-theme .d-nav{color:rgba(0,0,0,.45)}
+    body.light-theme .d-nav.active{background:rgba(255,90,31,.1);color:var(--accent)}
+    body.light-theme .laptop-screen{background:#e8e6e2}
+    body.light-theme .d-main{background:#f0efed}
+    body.light-theme .d-card{background:rgba(255,255,255,.9);border-color:rgba(0,0,0,.07)}
+    body.light-theme .d-task{background:rgba(0,0,0,.03)}
+    body.light-theme .ttxt{color:rgba(0,0,0,.7)}
+    body.light-theme .stats-strip{background:linear-gradient(135deg,rgba(255,90,31,.1),rgba(255,138,77,.06))}
+    body.light-theme nav a{color:rgba(0,0,0,.65)}
+    body.light-theme nav a:hover{color:#111}
+    body.light-theme .btn-ghost{border-color:rgba(0,0,0,.2);color:#333}
+    body.light-theme .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+    body.light-theme footer{border-top-color:rgba(0,0,0,.08)}
+    body.light-theme footer p{color:rgba(0,0,0,.45)}
+    body.light-theme .ai-card{background:linear-gradient(135deg,#fff,#fff8f5);border-color:rgba(255,90,31,.15)}
+    body.light-theme .ai-msg.us{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.07);color:rgba(0,0,0,.75)}
+    body.light-theme #appearPanel{background:#fff;border-color:rgba(255,90,31,.2)}
+    body.light-theme #appearPanel div,body.light-theme #appearPanel button{color:#333!important}
+    body.light-theme #bgCanvas{opacity:0.2}
+    body{font-family:'Bricolage Grotesque',system-ui,sans-serif;background:var(--dark);color:#fff;overflow-x:hidden;line-height:1.6;position:relative}
+    header,section,div.brand-strip,div.stats-strip,footer{position:relative;z-index:1}
 
     /* SCROLL REVEAL */
     .reveal{opacity:0;transform:translateY(70px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)}
@@ -257,6 +316,37 @@
   </style>
 </head>
 <body>
+
+<!-- BACKGROUND CANVAS -->
+<canvas id="bgCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.55"></canvas>
+
+<!-- APPEARANCE PANEL TOGGLE BUTTON -->
+<button id="appearBtn" onclick="toggleAppear()" title="Appearance Settings" style="position:fixed;bottom:30px;right:30px;z-index:9999;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#ff5a1f,#ff8a4d);border:none;cursor:pointer;box-shadow:0 8px 25px rgba(255,90,31,.45);display:flex;align-items:center;justify-content:center;font-size:1.3rem;transition:all .3s ease">🎨</button>
+
+<!-- APPEARANCE PANEL -->
+<div id="appearPanel" style="position:fixed;bottom:95px;right:30px;z-index:9998;background:#111;border:1px solid rgba(255,90,31,.25);border-radius:20px;padding:22px 20px;width:240px;box-shadow:0 20px 60px rgba(0,0,0,.7);display:none;backdrop-filter:blur(20px)">
+  <div style="font-family:'Big Shoulders Display',sans-serif;font-weight:900;font-size:1rem;color:#fff;margin-bottom:18px;letter-spacing:1px">APPEARANCE</div>
+
+  <!-- THEME -->
+  <div style="margin-bottom:18px">
+    <div style="font-size:.72rem;color:rgba(255,255,255,.45);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px">Theme</div>
+    <div style="display:flex;gap:8px">
+      <button onclick="setTheme('dark')" id="btn-dark" style="flex:1;padding:8px;border-radius:10px;border:1.5px solid rgba(255,90,31,.5);background:rgba(255,90,31,.12);color:#fff;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s">🌑 Dark</button>
+      <button onclick="setTheme('light')" id="btn-light" style="flex:1;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.6);font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s">☀️ Light</button>
+    </div>
+  </div>
+
+  <!-- BACKGROUND -->
+  <div>
+    <div style="font-size:.72rem;color:rgba(255,255,255,.45);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px">Background Motion</div>
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <button onclick="setBg('none')" id="bg-none" style="padding:9px 12px;border-radius:10px;border:1.5px solid rgba(255,90,31,.5);background:rgba(255,90,31,.12);color:#fff;font-size:.82rem;font-weight:600;cursor:pointer;text-align:left;transition:all .2s">✦ Clean — No Motion</button>
+      <button onclick="setBg('matrix')" id="bg-matrix" style="padding:9px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:transparent;color:rgba(255,255,255,.6);font-size:.82rem;font-weight:600;cursor:pointer;text-align:left;transition:all .2s">⌨️ Matrix — Code Rain</button>
+      <button onclick="setBg('cosmic')" id="bg-cosmic" style="padding:9px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:transparent;color:rgba(255,255,255,.6);font-size:.82rem;font-weight:600;cursor:pointer;text-align:left;transition:all .2s">✦ Cosmic — Light Streams</button>
+      <button onclick="setBg('code')" id="bg-code" style="padding:9px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:transparent;color:rgba(255,255,255,.6);font-size:.82rem;font-weight:600;cursor:pointer;text-align:left;transition:all .2s">{ } Code Overlay</button>
+    </div>
+  </div>
+</div>
 
 <div id="scrollLine"></div>
 
@@ -548,7 +638,7 @@
 </footer>
 
 <script>
-  // Scroll progress line
+  // ─── SCROLL PROGRESS ───────────────────────────────────────────────────────
   window.addEventListener('scroll', () => {
     const st = document.documentElement.scrollTop;
     const sh = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -557,12 +647,224 @@
     st > 50 ? hdr.classList.add('scrolled') : hdr.classList.remove('scrolled');
   });
 
-  // Scroll reveal via IntersectionObserver
+  // ─── SCROLL REVEAL ─────────────────────────────────────────────────────────
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
   }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
-
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // ─── APPEARANCE PANEL ──────────────────────────────────────────────────────
+  function toggleAppear() {
+    const p = document.getElementById('appearPanel');
+    p.style.display = p.style.display === 'none' ? 'block' : 'none';
+  }
+  document.addEventListener('click', (e) => {
+    const panel = document.getElementById('appearPanel');
+    const btn = document.getElementById('appearBtn');
+    if (!panel.contains(e.target) && !btn.contains(e.target)) panel.style.display = 'none';
+  });
+
+  // ─── THEME ─────────────────────────────────────────────────────────────────
+  function setTheme(t) {
+    document.body.classList.toggle('light-theme', t === 'light');
+    localStorage.setItem('grind-theme', t);
+    document.getElementById('btn-dark').style.cssText = t === 'dark'
+      ? 'flex:1;padding:8px;border-radius:10px;border:1.5px solid rgba(255,90,31,.6);background:rgba(255,90,31,.18);color:#fff;font-size:.8rem;font-weight:700;cursor:pointer'
+      : 'flex:1;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.6);font-size:.8rem;font-weight:700;cursor:pointer';
+    document.getElementById('btn-light').style.cssText = t === 'light'
+      ? 'flex:1;padding:8px;border-radius:10px;border:1.5px solid rgba(255,90,31,.6);background:rgba(255,90,31,.18);color:#ff5a1f;font-size:.8rem;font-weight:700;cursor:pointer'
+      : 'flex:1;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.6);font-size:.8rem;font-weight:700;cursor:pointer';
+  }
+
+  // ─── BACKGROUND CANVAS ENGINE ──────────────────────────────────────────────
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  let animFrame = null;
+  let currentBg = 'none';
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  // ── MATRIX ──
+  const matrixChars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ0110'.split('');
+  let matrixCols = [], matrixDrops = [];
+  function initMatrix() {
+    matrixCols = Math.floor(canvas.width / 18);
+    matrixDrops = Array(matrixCols).fill(1);
+  }
+  function drawMatrix() {
+    ctx.fillStyle = 'rgba(13,11,8,0.07)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.font = '14px "Orbitron", monospace';
+    for (let i = 0; i < matrixDrops.length; i++) {
+      const ch = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+      const brightness = Math.random();
+      ctx.fillStyle = brightness > 0.93 ? '#ffffff' : brightness > 0.7 ? '#ff8a4d' : '#ff5a1f';
+      ctx.globalAlpha = brightness > 0.7 ? 1 : 0.5;
+      ctx.fillText(ch, i * 18, matrixDrops[i] * 18);
+      ctx.globalAlpha = 1;
+      if (matrixDrops[i] * 18 > canvas.height && Math.random() > 0.975) matrixDrops[i] = 0;
+      matrixDrops[i]++;
+    }
+  }
+
+  // ── COSMIC ──
+  let cosmicStreams = [];
+  let cosmicStars = [];
+  function initCosmic() {
+    cosmicStreams = Array.from({length: 12}, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      len: 80 + Math.random() * 200,
+      speed: 0.3 + Math.random() * 0.8,
+      angle: Math.random() * Math.PI * 2,
+      width: 1 + Math.random() * 3,
+      hue: Math.random() > 0.5 ? '#ff8a4d' : (Math.random() > 0.5 ? '#60a5fa' : '#a78bfa'),
+      alpha: 0.2 + Math.random() * 0.5,
+      life: 0, maxLife: 200 + Math.random() * 300
+    }));
+    cosmicStars = Array.from({length: 160}, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.8,
+      alpha: Math.random(),
+      twinkle: Math.random() * 0.02
+    }));
+  }
+  function drawCosmic() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // stars
+    cosmicStars.forEach(s => {
+      s.alpha += s.twinkle * (Math.random() > 0.5 ? 1 : -1);
+      s.alpha = Math.max(0.05, Math.min(0.9, s.alpha));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${s.alpha})`;
+      ctx.fill();
+    });
+    // streams
+    cosmicStreams.forEach(s => {
+      s.life++;
+      if (s.life > s.maxLife) {
+        Object.assign(s, {
+          x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+          len: 80 + Math.random() * 200, speed: 0.3 + Math.random() * 0.8,
+          angle: Math.random() * Math.PI * 2, width: 1 + Math.random() * 3,
+          hue: Math.random() > 0.5 ? '#ff8a4d' : (Math.random() > 0.5 ? '#60a5fa' : '#a78bfa'),
+          alpha: 0.2 + Math.random() * 0.5, life: 0, maxLife: 200 + Math.random() * 300
+        });
+      }
+      const fade = Math.sin((s.life / s.maxLife) * Math.PI);
+      const grad = ctx.createLinearGradient(
+        s.x, s.y,
+        s.x + Math.cos(s.angle) * s.len,
+        s.y + Math.sin(s.angle) * s.len
+      );
+      grad.addColorStop(0, 'transparent');
+      grad.addColorStop(0.5, s.hue);
+      grad.addColorStop(1, 'transparent');
+      ctx.beginPath();
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = s.width;
+      ctx.globalAlpha = s.alpha * fade;
+      ctx.moveTo(s.x, s.y);
+      ctx.lineTo(s.x + Math.cos(s.angle) * s.len, s.y + Math.sin(s.angle) * s.len);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      s.x += Math.cos(s.angle) * s.speed;
+      s.y += Math.sin(s.angle) * s.speed;
+    });
+  }
+
+  // ── CODE OVERLAY ──
+  const codeSnippets = [
+    'def grind():','  if discipline >= 100:','    return results()',
+    'while alive:','  improve(+1)','streak += 1',
+    'class Winner:','  def __init__(self):','    self.excuses = 0',
+    'for day in life:','  if hard_work:','    success = True',
+    'import discipline','from self import growth',
+    'if lazy: del lazy','score = effort * focus',
+    '{consistency}','[no_excuses]','// GRIND MODE ON',
+    'push(limits)','commit("today")','merge(goals)',
+    'const win = grind()','let fear = null','var excuse = undefined'
+  ];
+  let codeParticles = [];
+  function initCode() {
+    codeParticles = Array.from({length: 35}, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      text: codeSnippets[Math.floor(Math.random() * codeSnippets.length)],
+      speed: 0.15 + Math.random() * 0.35,
+      alpha: 0.06 + Math.random() * 0.18,
+      size: 10 + Math.random() * 6,
+      color: Math.random() > 0.6 ? '#ff5a1f' : (Math.random() > 0.5 ? '#60a5fa' : '#4cff91'),
+      drift: (Math.random() - 0.5) * 0.3
+    }));
+  }
+  function drawCode() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    codeParticles.forEach(p => {
+      ctx.font = `${p.size}px "Courier New", monospace`;
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.alpha;
+      ctx.fillText(p.text, p.x, p.y);
+      ctx.globalAlpha = 1;
+      p.y -= p.speed;
+      p.x += p.drift;
+      if (p.y < -30) {
+        p.y = canvas.height + 20;
+        p.x = Math.random() * canvas.width;
+        p.text = codeSnippets[Math.floor(Math.random() * codeSnippets.length)];
+      }
+      if (p.x < -200 || p.x > canvas.width + 200) p.x = Math.random() * canvas.width;
+    });
+  }
+
+  // ── ANIMATION LOOP ──
+  function animate() {
+    if (currentBg === 'matrix') drawMatrix();
+    else if (currentBg === 'cosmic') drawCosmic();
+    else if (currentBg === 'code') drawCode();
+    animFrame = requestAnimationFrame(animate);
+  }
+
+  function setBg(type) {
+    currentBg = type;
+    localStorage.setItem('grind-bg', type);
+    if (animFrame) cancelAnimationFrame(animFrame);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Update button styles
+    ['none','matrix','cosmic','code'].forEach(id => {
+      const b = document.getElementById('bg-' + id);
+      if (!b) return;
+      if (id === type) {
+        b.style.border = '1.5px solid rgba(255,90,31,.6)';
+        b.style.background = 'rgba(255,90,31,.18)';
+        b.style.color = '#fff';
+      } else {
+        b.style.border = '1px solid rgba(255,255,255,.1)';
+        b.style.background = 'transparent';
+        b.style.color = 'rgba(255,255,255,.6)';
+      }
+    });
+
+    if (type === 'matrix') { initMatrix(); animate(); }
+    else if (type === 'cosmic') { initCosmic(); animate(); }
+    else if (type === 'code') { initCode(); animate(); }
+  }
+
+  // ─── LOAD SAVED PREFERENCES ────────────────────────────────────────────────
+  (function init() {
+    const savedTheme = localStorage.getItem('grind-theme') || 'dark';
+    const savedBg = localStorage.getItem('grind-bg') || 'none';
+    setTheme(savedTheme);
+    setBg(savedBg);
+  })();
 </script>
 </body>
 </html>
