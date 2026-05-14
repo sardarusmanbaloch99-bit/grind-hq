@@ -40,7 +40,7 @@
 
   /* ===== FORGE PRO DESIGN SYSTEM ===== */
   :root {
-    --bg-deep:       #f7f7f7;
+    --bg-deep:       #f4f4f4;
     --bg-mid:        #ffffff;
     --bg-elev:       #ffffff;
     --bg-card:       #ffffff;
@@ -92,7 +92,7 @@
   /* ===== BACKGROUND ===== */
   .bg-stage {
     position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
-    background: radial-gradient(ellipse at 20% 0%, #f5f5f5, #f7f7f7 50%, #efefef);
+    background: radial-gradient(ellipse at 20% 0%, #f0f0f0, #f7f7f7 50%, #eeeeee);
     transition: background 0.5s ease, opacity 0.5s ease;
   }
   .bg-stage::before {
@@ -222,7 +222,7 @@
   [data-bg="matrix"] .bg-stage,
   [data-bg="cosmic"] .bg-stage,
   [data-bg="nebula"] .bg-stage,
-  [data-bg="code"] .bg-stage { opacity:0.25 !important; }
+  [data-bg="code"] .bg-stage { opacity:0.18 !important; }
   [data-bg="matrix"] #bgCanvas,
   [data-bg="cosmic"] #bgCanvas,
   [data-bg="nebula"] #bgCanvas,
@@ -231,7 +231,7 @@
 
   /* ===== CONTROLS PANEL ===== */
   .ctrl-fab {
-    position:fixed; top:18px; right:24px; z-index:500;
+    position:fixed; bottom:24px; left:24px; z-index:9999;
     height:36px; border-radius:50px;
     background:linear-gradient(135deg, var(--accent), var(--accent-soft));
     border:none; cursor:pointer; color:#fff; font-size:0.78rem;
@@ -242,11 +242,11 @@
   }
   .ctrl-fab:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(255,90,31,0.5); }
   .ctrl-panel {
-    position:fixed; top:70px; right:24px; z-index:500;
+    position:fixed; bottom:76px; left:24px; z-index:9999;
     background:var(--bg-card); border:1px solid var(--line);
     border-radius:20px; padding:20px; width:260px;
     box-shadow:0 20px 60px rgba(0,0,0,0.2);
-    opacity:0; transform:translateY(20px) scale(0.95);
+    opacity:0; transform:translateY(10px) scale(0.95);
     pointer-events:none; transition:all .3s cubic-bezier(.16,1,.3,1);
   }
   .ctrl-panel.open { opacity:1; transform:translateY(0) scale(1); pointer-events:all; }
@@ -615,8 +615,15 @@
   .ghost-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-faint); }
 
   /* ===== MISC ===== */
-  .page-section { display: none; }
-  .page-section.active { display: block; animation: fadeInUp 0.42s ease-out; }
+  .page-section { display: none; opacity: 0; }
+  .page-section.active { display: block; animation: tabEnter 0.38s cubic-bezier(.16,1,.3,1) forwards; }
+  @keyframes tabEnter { 
+    from { opacity:0; transform:translateY(18px) scale(0.99); }
+    to   { opacity:1; transform:translateY(0)    scale(1);    }
+  }
+  .nav-tab { transition: all 0.22s cubic-bezier(.16,1,.3,1); }
+  .nav-tab.active { animation: tabPop 0.25s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes tabPop { from{transform:scale(0.93)} to{transform:scale(1)} }
   @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
   @keyframes fadeInUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
   .prog-bar { height: 8px; background: rgba(21,16,10,0.06); border-radius: 999px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(21,16,10,0.08); }
@@ -767,14 +774,49 @@
     #skillsGrid{grid-template-columns:1fr !important}
   }
 
+  
+  /* ===== 7-DAY WEEKLY GRID ===== */
+  .week-day-col {
+    padding: 14px 10px;
+    border-right: 1px solid var(--line);
+    text-align: center;
+    transition: background 0.2s;
+    animation: fadeInUp 0.4s ease both;
+  }
+  .week-day-col:last-child { border-right: none; }
+  .week-day-col:hover { background: var(--depth-2); }
+  .week-day-name { font-size: 0.6rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+  .week-day-date { font-size: 0.65rem; color: var(--text-dim); margin-bottom: 10px; }
+  .week-day-ring { width: 52px; height: 52px; border-radius: 50%; border: 3px solid var(--line); margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-family: 'Big Shoulders Display', sans-serif; font-size: 1rem; font-weight: 900; position: relative; transition: all 0.3s; }
+  .week-day-ring.legend { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 14px rgba(255,90,31,0.3); }
+  .week-day-ring.great { border-color: #ff8a4d; color: #ff8a4d; }
+  .week-day-ring.avg { border-color: #a8aeba; color: #a8aeba; }
+  .week-day-ring.weak { border-color: #5a6273; color: #5a6273; }
+  .week-day-ring.empty { border-style: dashed; color: var(--text-dim); }
+  .week-task-item { font-size: 0.58rem; color: var(--text-soft); padding: 3px 0; border-bottom: 1px solid var(--line); text-align: left; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px; }
+  .week-task-item.done-task::before { content: "✓"; color: var(--accent); font-size: 0.55rem; flex-shrink: 0; }
+  .week-task-item.todo-task::before { content: "○"; color: var(--text-dim); font-size: 0.55rem; flex-shrink: 0; }
+  .week-completed-count { font-size: 0.6rem; color: var(--text-muted); margin-top: 6px; }
+  .week-completed-count strong { color: var(--accent); }
+
+  /* ===== CARD ENTRANCE ANIMATIONS ===== */
+  .card { animation: cardEnter 0.4s cubic-bezier(.16,1,.3,1) both; }
+  @keyframes cardEnter { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  .stat-chip { transition: transform 0.2s, box-shadow 0.2s; }
+  .stat-chip:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(255,90,31,0.15); }
+
+  /* ===== NAV TAB RIPPLE ===== */
+  .nav-tab { position: relative; overflow: hidden; }
+  .nav-tab::after { content:''; position:absolute; inset:0; background:rgba(255,90,31,0.08); opacity:0; transition:opacity 0.2s; border-radius: inherit; }
+  .nav-tab:hover::after { opacity:1; }
+
   </style>
 <script>
-// Apply saved theme IMMEDIATELY before render to prevent flash
 (function(){
-  var t = localStorage.getItem('grind-theme') || 'light';
-  var b = localStorage.getItem('grind-bg') || 'none';
-  document.documentElement.setAttribute('data-theme', t);
-  document.documentElement.setAttribute('data-bg', b);
+  var t=localStorage.getItem('grind-theme')||'light';
+  var b=localStorage.getItem('grind-bg')||'none';
+  document.documentElement.setAttribute('data-theme',t);
+  document.documentElement.setAttribute('data-bg',b);
 })();
 </script>
 </head>
@@ -1415,18 +1457,37 @@
 
 <!-- ANALYTICS -->
 <section id="tab-analytics" class="page-section">
+  <!-- 7-DAY WEEKLY OVERVIEW (competitor-style) -->
+  <div id="weeklyOverview" style="margin-bottom:20px;">
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="padding:18px 20px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;">
+        <div class="card-title" style="margin-bottom:0;"><span class="dot"></span>Weekly Overview — Last 7 Days</div>
+        <div id="weekOverallScore" style="font-family:'Big Shoulders Display',sans-serif;font-size:1.4rem;font-weight:900;color:var(--accent);">—</div>
+      </div>
+      <!-- Week day columns -->
+      <div id="weeklyGrid7" style="display:grid;grid-template-columns:repeat(7,1fr);gap:0;"></div>
+      <!-- Summary strip -->
+      <div style="padding:14px 20px;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);gap:12px;background:var(--depth-1);">
+        <div style="text-align:center;"><div style="font-family:'Big Shoulders Display',sans-serif;font-size:1.5rem;font-weight:900;color:var(--accent);" id="w7Completed">0</div><div style="font-size:0.65rem;color:var(--text-muted);margin-top:2px;text-transform:uppercase;letter-spacing:1px;">Completed</div></div>
+        <div style="text-align:center;"><div style="font-family:'Big Shoulders Display',sans-serif;font-size:1.5rem;font-weight:900;color:var(--accent);" id="w7Avg">0</div><div style="font-size:0.65rem;color:var(--text-muted);margin-top:2px;text-transform:uppercase;letter-spacing:1px;">Avg Score</div></div>
+        <div style="text-align:center;"><div style="font-family:'Big Shoulders Display',sans-serif;font-size:1.5rem;font-weight:900;color:var(--accent);" id="w7Best">0</div><div style="font-size:0.65rem;color:var(--text-muted);margin-top:2px;text-transform:uppercase;letter-spacing:1px;">Best Day</div></div>
+        <div style="text-align:center;"><div style="font-family:'Big Shoulders Display',sans-serif;font-size:1.5rem;font-weight:900;color:var(--accent);" id="w7Consistency">0%</div><div style="font-size:0.65rem;color:var(--text-muted);margin-top:2px;text-transform:uppercase;letter-spacing:1px;">Consistency</div></div>
+      </div>
+    </div>
+  </div>
+
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
     <div class="card" style="grid-column:1/-1;">
       <div class="card-title"><span class="dot"></span>Score History — Last 14 Days</div>
-      <div style="height:280px;"><canvas id="histChart"></canvas></div>
+      <div style="height:260px;"><canvas id="histChart"></canvas></div>
     </div>
     <div class="card">
       <div class="card-title"><span class="dot"></span>Skill Time This Week</div>
-      <div style="height:260px;"><canvas id="skillRadar"></canvas></div>
+      <div style="height:240px;"><canvas id="skillRadar"></canvas></div>
     </div>
     <div class="card">
       <div class="card-title"><span class="dot"></span>Day Tier Distribution</div>
-      <div style="height:260px;"><canvas id="tierChart"></canvas></div>
+      <div style="height:240px;"><canvas id="tierChart"></canvas></div>
     </div>
     <div class="card" style="grid-column:1/-1;">
       <div class="card-title"><span class="dot"></span>Progress Heat Grid — Last 21 Days</div>
@@ -2975,6 +3036,77 @@ function initWeeklyChart(){
   grad.addColorStop(0,'rgba(255,107,44,0.55)');grad.addColorStop(1,'rgba(255,107,44,0.02)');
   wChart=new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{data:scores,borderColor:'#FF6B2C',backgroundColor:grad,fill:true,tension:0.45,borderWidth:2.2,pointBackgroundColor:'#FF6B2C',pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:5,pointHoverRadius:7}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(15,18,24,0.95)',borderColor:'rgba(255,107,44,0.5)',borderWidth:1,titleFont:{family:'Space Grotesk',weight:'600'},bodyFont:{family:'Orbitron'},padding:12,cornerRadius:8,displayColors:false}},scales:commonScales()}});
 }
+
+// ===== 7-DAY WEEKLY GRID =====
+function buildWeeklyGrid7() {
+  var grid = document.getElementById('weeklyGrid7');
+  if (!grid) return;
+  grid.innerHTML = '';
+  var days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  var totalScore = 0, activeDays = 0, bestScore = 0;
+  var totalTasksDone = 0;
+
+  for (var i = 6; i >= 0; i--) {
+    var d = new Date();
+    d.setDate(d.getDate() - i);
+    var key = d.toISOString().slice(0, 10);
+    var dayName = days[d.getDay()];
+    var dayNum = d.getDate();
+    var monthNum = d.getMonth() + 1;
+    var score = calcScore ? calcScore(key) : 0;
+    var isToday = (i === 0);
+
+    // Get tasks for this day
+    var dayTasks = [];
+    if (window.S && S.tasks && S.tasks[key]) {
+      S.tasks[key].forEach(function(t) {
+        dayTasks.push({ name: t.name || t.text || 'Task', done: t.done || false });
+      });
+    }
+
+    if (score > 0) { totalScore += score; activeDays++; if (score > bestScore) bestScore = score; }
+    var doneCount = dayTasks.filter(function(t){ return t.done; }).length;
+    totalTasksDone += doneCount;
+
+    var ringClass = 'empty';
+    if (score >= 90) ringClass = 'legend';
+    else if (score >= 75) ringClass = 'great';
+    else if (score >= 50) ringClass = 'avg';
+    else if (score > 0) ringClass = 'weak';
+
+    var tasksHtml = '';
+    var showTasks = dayTasks.slice(0, 4);
+    showTasks.forEach(function(t) {
+      tasksHtml += '<div class="week-task-item ' + (t.done ? 'done-task' : 'todo-task') + '">' + escHtml((t.name||'').slice(0, 18)) + '</div>';
+    });
+    if (dayTasks.length === 0) {
+      tasksHtml = '<div style="font-size:0.6rem;color:var(--text-dim);text-align:center;padding:8px 0;">No tasks</div>';
+    }
+
+    var col = document.createElement('div');
+    col.className = 'week-day-col';
+    col.style.animationDelay = ((6 - i) * 0.05) + 's';
+    if (isToday) col.style.background = 'rgba(255,90,31,0.04)';
+    col.innerHTML =
+      '<div class="week-day-name">' + dayName + (isToday ? ' <span style="color:var(--accent)">•</span>' : '') + '</div>' +
+      '<div class="week-day-date">' + dayNum + '/' + monthNum + '</div>' +
+      '<div class="week-day-ring ' + ringClass + '">' + (score > 0 ? score : '–') + '</div>' +
+      tasksHtml +
+      '<div class="week-completed-count"><strong>' + doneCount + '</strong>/' + dayTasks.length + ' done</div>';
+    grid.appendChild(col);
+  }
+
+  // Update summary
+  var avgScore = activeDays > 0 ? Math.round(totalScore / activeDays) : 0;
+  var consistency = Math.round((activeDays / 7) * 100);
+  var el;
+  el = document.getElementById('w7Completed'); if(el) el.textContent = totalTasksDone;
+  el = document.getElementById('w7Avg'); if(el) el.textContent = avgScore;
+  el = document.getElementById('w7Best'); if(el) el.textContent = bestScore;
+  el = document.getElementById('w7Consistency'); if(el) el.textContent = consistency + '%';
+  el = document.getElementById('weekOverallScore'); if(el) el.textContent = avgScore > 0 ? avgScore + ' avg' : '—';
+}
+
 function initHistChart(){
   var ctx=document.getElementById('histChart');if(!ctx)return;if(hChart)hChart.destroy();
   var data=last14();
@@ -3027,7 +3159,7 @@ function switchTab(name,el){
   document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active');});
   var sec=document.getElementById('tab-'+name);if(sec)sec.classList.add('active');
   if(el)el.classList.add('active');
-  if(name==='analytics'){loadChartJs(function(){setTimeout(function(){initHistChart();initSkillRadar();initTierChart();buildGrid();},80);});}
+  if(name==='analytics'){loadChartJs(function(){setTimeout(function(){buildWeeklyGrid7();initHistChart();initSkillRadar();initTierChart();buildGrid();},80);});}
   if(name==='dashboard'){loadChartJs(function(){setTimeout(initWeeklyChart,80);});}
   if(name==='tasks'){renderTaskList();renderTaskTimeline();}
   if(name==='schedule'){renderScheduleTimeline();}
@@ -5509,7 +5641,7 @@ document.addEventListener('DOMContentLoaded', function(){
     <button class="bg-btn" id="bg-matrix" onclick="setBg('matrix')">⌨️ Matrix</button>
     <button class="bg-btn" id="bg-cosmic" onclick="setBg('cosmic')">✦ Cosmic</button>
     <button class="bg-btn" id="bg-nebula" onclick="setBg('nebula')">🌌 Nebula</button>
-    <button class="bg-btn" id="bg-code" onclick="setBg('code')" style="grid-column:1/-1">{ } Code Overlay</button>
+    <button class="bg-btn" id="bg-code" onclick="setBg('code')" style="grid-column:1/-1">{ } Code Rain</button>
   </div>
 </div>
 
@@ -5543,37 +5675,37 @@ function setBg(type) {
   else if (type === 'code') startCode(canvas, ctx);
 }
 
-// ── CODE OVERLAY ────────────────────────────────────────────────────────
 function startCode(canvas, ctx) {
-  const snippets = [
+  var snippets = [
     'def grind():','  if discipline >= 100:','    return results()',
     'while alive:','  improve(+1)','streak += 1',
-    'class Winner:','  def __init__(self):','    self.excuses = 0',
-    'for day in life:','  if hard_work:','    success = True',
-    'import discipline','from self import growth',
-    'if lazy: del lazy','score = effort * focus',
+    'class Winner:','  self.excuses = 0','for day in life:',
+    'if hard_work: succeed()','import discipline',
+    'from self import growth','score = effort * focus',
     '{consistency}','[no_excuses]','// GRIND MODE ON',
-    'push(limits)','commit("today")','merge(goals)',
-    'const win = grind()','let fear = null','var excuse = undefined',
-    'git commit -m "show up"','npm run grind','python discipline.py'
+    'push(limits)','commit("today")','const win = grind()',
+    'let fear = null','git commit -m "show up"','npm run grind'
   ];
-  const particles = Array.from({length: 30}, () => ({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    text: snippets[Math.floor(Math.random() * snippets.length)],
-    speed: 0.12 + Math.random() * 0.28,
-    alpha: 0.05 + Math.random() * 0.15,
-    size: 11 + Math.random() * 5,
-    color: Math.random() > 0.55 ? '#ff5a1f' : (Math.random() > 0.5 ? '#3b82f6' : '#10b981'),
-    drift: (Math.random() - 0.5) * 0.25
-  }));
+  var particles = [];
+  for (var i = 0; i < 32; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      text: snippets[Math.floor(Math.random() * snippets.length)],
+      speed: 0.1 + Math.random() * 0.25,
+      alpha: 0.06 + Math.random() * 0.14,
+      size: 11 + Math.random() * 5,
+      color: Math.random() > 0.55 ? '#ff5a1f' : (Math.random() > 0.5 ? '#3b82f6' : '#10b981'),
+      drift: (Math.random() - 0.5) * 0.2
+    });
+  }
   function draw() {
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particles.forEach(p => {
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    particles.forEach(function(p) {
       ctx.font = p.size + 'px "JetBrains Mono", monospace';
       ctx.fillStyle = p.color;
-      ctx.globalAlpha = isDark ? p.alpha * 1.8 : p.alpha;
+      ctx.globalAlpha = isDark ? p.alpha * 2 : p.alpha;
       ctx.fillText(p.text, p.x, p.y);
       ctx.globalAlpha = 1;
       p.y -= p.speed;
@@ -5743,6 +5875,8 @@ window.addEventListener('resize', function() {
 
 // ===== NEW TAB FUNCTIONS =====
 // ===== SHARED NEXUS API HELPER (used by both Dashboard and Sensei tab) =====
+var senseiConversationHistory = [];
+
 async function callNexusAPI(userMessage) {
   var messages = nexusConversationHistory.slice(-6).map(function(m) {
     return { role: m.role, content: m.content };
@@ -5807,14 +5941,36 @@ function sendToSensei() {
   chat.appendChild(typing);
   chat.scrollTop = chat.scrollHeight;
   // Reuse NEXUS sendToNexus mechanism — call API directly
-  callNexusAPI(msg).then(reply => {
-    const t = document.getElementById('senseiTyping');
-    if (t) t.remove();
-    addSenseiMsg('agent', reply);
-  }).catch(() => {
-    const t = document.getElementById('senseiTyping');
-    if (t) t.remove();
-    addSenseiMsg('agent', 'Sensei had a moment. Try again.');
+  // Use own sensei history
+  var senseiMsgs = senseiConversationHistory.slice(-8).map(function(m){return{role:m.role,content:m.content};});
+  while(senseiMsgs.length && senseiMsgs[senseiMsgs.length-1].role==='assistant') senseiMsgs.pop();
+  senseiMsgs.push({role:'user', content:msg});
+  fetch('/api/nexus', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model:'claude-haiku-4-5-20251001',
+      max_tokens:500,
+      system: getNexusSystemPrompt(),
+      messages: senseiMsgs
+    })
+  }).then(function(r){return r.json();}).then(function(data){
+    var text='';
+    if(data.content && Array.isArray(data.content)){
+      data.content.forEach(function(b){if(b.type==='text')text+=b.text;});
+    }
+    if(data.error) text='Sensei error: '+(data.error.message||'Try again.');
+    text = text || 'Sensei is thinking. Try again in a moment.';
+    senseiConversationHistory.push({role:'user',content:msg});
+    senseiConversationHistory.push({role:'assistant',content:text});
+    if(senseiConversationHistory.length>20) senseiConversationHistory=senseiConversationHistory.slice(-20);
+    var t=document.getElementById('senseiTyping');
+    if(t)t.remove();
+    addSenseiMsg('agent', text);
+  }).catch(function(){
+    var t=document.getElementById('senseiTyping');
+    if(t)t.remove();
+    addSenseiMsg('agent','Sensei had a moment. Check your connection and try again.');
   });
 }
 var senseiRecognition = null;
